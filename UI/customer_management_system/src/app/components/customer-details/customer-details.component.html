@@ -1,0 +1,45 @@
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="card my-5">
+                <div *ngIf="this.customer.gender == 2; then femaleAvatar else maleAvatar"></div>
+                <ng-template #femaleAvatar><img src="../../../assets/avatar_female.jpg" class="card-img-top"
+                        alt="avatar_female"></ng-template>
+                <ng-template #maleAvatar><img src="../../../assets/avatar_male.jpg" class="card-img-top"
+                        alt="avatar_male"></ng-template>
+                <div class="card-body">
+                    <div class="card-text">
+                        <p>First name: {{ this.customer.firstName }}</p>
+                        <p>Last name: {{ this.customer.lastName}}</p>
+                        <p>Gender: {{ this.customerGender }}</p>
+                        <p>Birthdate: {{ this.customer.birthdate}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card my-5">
+                <div class="card-body">
+                    <h5 class="card-title">Contact</h5>
+                    <div class="card-text">
+                        <p>Email: {{ this.customer.email}}</p>
+                        <p>Phone: {{ this.customer.msisdn}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card my-5">
+                <div class="card-body">
+                    <h5 class="card-title">Address</h5>
+                    <div class="card-text">
+                        <p>Country: {{ this.customer.address.country }}</p>
+                        <p>County: {{ this.customer.address.county}}</p>
+                        <p>Town: {{ this.customer.address.town}}</p>
+                        <p>Street: {{ this.customer.address.street}}</p>
+                        <p>Number: {{ this.customer.address.number}}</p>
+                        <p>ZIP: {{ this.customer.address.zip}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

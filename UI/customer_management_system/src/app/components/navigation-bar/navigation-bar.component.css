@@ -1,0 +1,74 @@
+.gradient-custom{
+    /* Chrome 10-25, Safari 5.1-6 */
+  background: -webkit-linear-gradient(to right, var(--spectrumColor1), var(--spectrumColor2), var(--spectrumColor3), var(--spectrumColor4));
+
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: linear-gradient(to right, var(--spectrumColor1), var(--spectrumColor2), var(--spectrumColor3), var(--spectrumColor4));
+}
+
+/* LARGE SCREENS: */
+@media only screen and (min-width: 768px) {
+    .nav-link {
+        font-size: 30px;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    #navbarBrand {
+        width: 60px;
+    }
+}
+
+/* SMALL SCREENS: */
+@media only screen and (max-width: 768px) and (min-width: 576px) {
+    .nav-link {
+        font-size: 25px;
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+
+    #navbarBrand {
+        width: 60px;
+    }
+}
+
+/* VERY SMALL SCREENS: */
+@media only screen and (max-width: 576px) {
+    #navbarBrand {
+        width: 60px;
+    }
+}
+
+.hoverBrand {
+    display: inline-block;
+    transition: transform .2s;
+    transform-origin: 50% 50%;
+}
+
+.hoverBrand:hover {
+    transform: scale(1.2);
+}
+
+.nav-link {
+    font-size: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.hoveritem {
+    display: inline-block;
+    transition: transform .2s;
+    transform-origin: 50% 50%;
+}
+
+.hoveritem:hover {
+    transform: scale(1.2);
+}
+
+.nav-link-brand {
+    
+    font-size: 25px;
+    margin-left: 2px !important;
+    margin-right: 2px !important;
+    padding-left: 2px !important;
+    padding-right: 20px !important;
+}

@@ -1,0 +1,70 @@
+/* You can add global styles to this file, and also import other style files */
+:root {
+    --spectrumColor1: #e8a49c;
+    --spectrumColor2: #3c4cad;
+    --spectrumColor3: #240e8b;
+    --spectrumColor4: #f04393;
+}
+
+.btn-primary,
+.btn-primary:active,
+.btn-primary:visited {
+    background-color: var(--spectrumColor2) !important;
+    outline: none !important;
+    box-shadow: none;
+    border-color: var(--spectrumColor2);
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    filter: brightness(90%);
+}
+
+.btn-secondary,
+.btn-secondary:active,
+.btn-secondary:visited {
+    background-color: var(--spectrumColor3) !important;
+    outline: none !important;
+    box-shadow: none;
+    border-color: var(--spectrumColor3);
+    transition: all 0.3s;
+}
+
+.btn-secondary:hover {
+    filter: brightness(90%);
+}
+
+.btn-danger,
+.btn-danger:active,
+.btn-danger:visited {
+    background-color: var(--spectrumColor4) !important;
+    outline: none !important;
+    box-shadow: none;
+    border-color: var(--spectrumColor4);
+    transition: all 0.3s;
+}
+
+.btn-danger:hover {
+    filter: brightness(90%);
+}
+
+.hoverItem {
+    display: inline-block;
+    transition: transform .3s;
+    transform-origin: 50% 50%;
+}
+
+.hoverItem:hover {
+    transform: scale(1.06);
+    cursor: pointer;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
