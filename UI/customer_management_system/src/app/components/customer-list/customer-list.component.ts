@@ -13,18 +13,26 @@ import { Router } from '@angular/router';
 })
 export class CustomerListComponent {
 
-  constructor(private getCustomersService: GetCustomersService, private router: Router) {
-  }
   getCustomerListResponse!: GetCustomerListResponse;
   customerList!: Customer[];
+  loadCompleted: boolean = false;
+
+  constructor(private getCustomersService: GetCustomersService, private router: Router) {
+  }
 
   ngOnInit(): void {
+    this.loadCompleted = false;
     this.getCustomersService.refreshTable().subscribe({
       next: response => {
         this.getCustomerListResponse = response;
         this.customerList = this.getCustomerListResponse.customerList;
+        this.loadCompleted = true;
       },
-      error: error => console.log(error)
+      error: error => {
+        if (error.error.responseCode == 403) {
+          this.router.navigate(['']);
+        }
+      }
     })
   }
 

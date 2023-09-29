@@ -40,15 +40,18 @@ namespace Customer_Management_System_Library.DataAccess
                     sqlCommand.Parameters.Add(new SqlParameter("@var_Gender", customer.Gender));
                     sqlCommand.Parameters.Add(new SqlParameter("@var_Birthdate", customer.Birthdate));
 
-                    AddressModel address = customer.Address;
-                    if (address is not null)
+                    if (customer.Address is not null)
                     {
-                        sqlCommand.Parameters.Add(new SqlParameter("@var_Country", address.Country));
-                        sqlCommand.Parameters.Add(new SqlParameter("@var_County", address.County));
-                        sqlCommand.Parameters.Add(new SqlParameter("@var_Town", address.Town));
-                        sqlCommand.Parameters.Add(new SqlParameter("@var_ZIP", address.ZIP));
-                        sqlCommand.Parameters.Add(new SqlParameter("@var_Street", address.Street));
-                        sqlCommand.Parameters.Add(new SqlParameter("@var_Number", address.Number));
+                        AddressModel address = customer.Address;
+                        if (address is not null)
+                        {
+                            sqlCommand.Parameters.Add(new SqlParameter("@var_Country", address.Country));
+                            sqlCommand.Parameters.Add(new SqlParameter("@var_County", address.County));
+                            sqlCommand.Parameters.Add(new SqlParameter("@var_Town", address.Town));
+                            sqlCommand.Parameters.Add(new SqlParameter("@var_ZIP", address.ZIP));
+                            sqlCommand.Parameters.Add(new SqlParameter("@var_Street", address.Street));
+                            sqlCommand.Parameters.Add(new SqlParameter("@var_Number", address.Number));
+                        }
                     }
 
                     var sqlDataReader = sqlCommand.ExecuteReader();
@@ -56,8 +59,8 @@ namespace Customer_Management_System_Library.DataAccess
                     {
                         try
                         {
-                            returnValue = Int32.Parse(sqlDataReader["ReturnValue"].ToString());
-
+                            Int32.TryParse(sqlDataReader["ReturnValue"].ToString(), out int parsedInt);
+                            returnValue = parsedInt;
                         }
                         catch
                         {
@@ -143,7 +146,8 @@ namespace Customer_Management_System_Library.DataAccess
                         catch { }
                         try
                         {
-                            customerModel.Gender = Int32.Parse(sqlDataReader["gender"].ToString());
+                            Int32.TryParse(sqlDataReader["gender"].ToString(), out int parsedInt);
+                            customerModel.Gender = parsedInt;
                         }
                         catch { }
                         try
@@ -153,7 +157,8 @@ namespace Customer_Management_System_Library.DataAccess
                         catch { }
                         try
                         {
-                            customerModel.CustomerStatus = Int32.Parse(sqlDataReader["customer_Status"].ToString());
+                            Int32.TryParse(sqlDataReader["customer_Status"].ToString(), out int parsedCustomerStatus);
+                            customerModel.CustomerStatus = parsedCustomerStatus;
                         }
                         catch { }
                         try
@@ -233,7 +238,8 @@ namespace Customer_Management_System_Library.DataAccess
                     {
                         try
                         {
-                            if (Int32.Parse(sqlDataReader["customer_Status"].ToString()) == 1903)
+                            Int32.TryParse(sqlDataReader["customer_Status"].ToString(), out int customerStatusInt);
+                            if (customerStatusInt == 1903)
                             {
                                 responseModel.ResponseCode = 200;
                                 responseModel.ResponseMessage = "Customer deactivated successfully!";
@@ -286,7 +292,8 @@ namespace Customer_Management_System_Library.DataAccess
                     {
                         try
                         {
-                            if (Int32.Parse(sqlDataReader["customer_Status"].ToString()) == 1903)
+                            Int32.TryParse(sqlDataReader["customer_Status"].ToString(), out int customerStatusInt);
+                            if (customerStatusInt == 1903)
                             {
                                 responseModel.ResponseCode = 200;
                                 responseModel.ResponseMessage = "Customer deactivated successfully!";
@@ -368,7 +375,8 @@ namespace Customer_Management_System_Library.DataAccess
                         catch { }
                         try
                         {
-                            customerModel.Gender = Int32.Parse(sqlDataReader["gender"].ToString());
+                            Int32.TryParse(sqlDataReader["gender"].ToString(), out int parsedGender);
+                            customerModel.Gender = parsedGender;
                         }
                         catch { }
                         try
@@ -378,7 +386,8 @@ namespace Customer_Management_System_Library.DataAccess
                         catch { }
                         try
                         {
-                            customerModel.CustomerStatus = Int32.Parse(sqlDataReader["customer_Status"].ToString());
+                            Int32.TryParse(sqlDataReader["customer_Status"].ToString(), out int parsedCustomerStatus);
+                            customerModel.CustomerStatus = parsedCustomerStatus;
                         }
                         catch { }
                         try
@@ -452,7 +461,11 @@ namespace Customer_Management_System_Library.DataAccess
                     {
                         try
                         {
-                            if (Int32.Parse(sqlDataReader["merchant_role"].ToString()) == 1801)
+                            if (sqlDataReader["merchant_role"] is null)
+                            {
+                            }
+                            Int32.TryParse(sqlDataReader["merchant_role"].ToString(), out int merchantRoleInt);
+                            if (merchantRoleInt == 1801)
                             {
                                 isValid = true;
                             }

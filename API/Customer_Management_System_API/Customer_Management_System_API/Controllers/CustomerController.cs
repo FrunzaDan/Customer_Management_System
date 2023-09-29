@@ -1,16 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Customer_Management_System_Library.DataAccess;
 using Customer_Management_System_Library.Models;
 using Customer_Management_System_Library.Configuration;
 using Customer_Management_System_Library.Auth;
 using Customer_Management_System_Library.Functions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 using Customer_Management_System_Library;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Customer_Management_System_API.Controllers
 {

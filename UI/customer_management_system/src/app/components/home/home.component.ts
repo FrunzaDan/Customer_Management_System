@@ -10,8 +10,7 @@ export class HomeComponent {
   constructor(private router: Router) {
   }
 
-  addCustomer() : void{
+  addCustomer(): void {
     this.router.navigate(['/addCustomer']);
   }
-
 }

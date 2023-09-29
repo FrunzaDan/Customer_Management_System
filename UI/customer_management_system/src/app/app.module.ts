@@ -14,10 +14,11 @@ import { UserLoginComponent } from './components/user-login/user-login.component
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
 import { HomeComponent } from './components/home/home.component';
 import { CustomerListComponent } from './components/customer-list/customer-list.component';
-import { CustomerOverviewComponent } from './components/customer-overview/customer-overview.component';
 import { EditCustomerComponent } from './components/edit-customer/edit-customer.component';
 import { AddCustomerComponent } from './components/add-customer/add-customer.component';
 import { CustomerDetailsComponent } from './components/customer-details/customer-details.component';
+import { FeaturesComponent } from './components/features/features.component';
+import { AboutComponent } from './components/about/about.component';
 
 @NgModule({
   declarations: [
@@ -28,10 +29,11 @@ import { CustomerDetailsComponent } from './components/customer-details/customer
     PageNotFoundComponent,
     HomeComponent,
     CustomerListComponent,
-    CustomerOverviewComponent,
     EditCustomerComponent,
     AddCustomerComponent,
-    CustomerDetailsComponent
+    CustomerDetailsComponent,
+    FeaturesComponent,
+    AboutComponent
   ],
   imports: [
     BrowserModule,

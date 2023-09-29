@@ -4,6 +4,7 @@ import { UserLoginService } from 'src/app/services/user-login.service';
 import { NavbarService } from 'src/app/services/navbar.service';
 import { FooterService } from 'src/app/services/footer.service';
 import { UserLoginRequest } from 'src/app/interfaces/user-login-request';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-user-login',
@@ -28,17 +29,17 @@ export class UserLoginComponent implements OnInit, OnDestroy {
       .errorSubject
       .subscribe(errorMessage => {
         this.error = errorMessage;
-        console.log(this.error);
       });
     this.navbarService.hideNavbar();
     this.footerService.hideFooter();
   }
 
   validateEmail(): void {
-    const pattern = RegExp(/^[a-zA-z0-9\ ]*$/);
+    const pattern = RegExp(environment.UserName);
     if (pattern.test(this.username)) {
       this.isEmailValid = true;
-    } else {
+    }
+    else {
       this.isEmailValid = false;
     }
   }
@@ -62,7 +63,7 @@ export class UserLoginComponent implements OnInit, OnDestroy {
           next: response => {
             this.userLoginSerivce.checkcredentials(response);
           },
-          error: () => this.userLoginSerivce.errorSubject.next('Our servers are down!')
+          error: error => this.userLoginSerivce.errorSubject.next(error.error.responseMessage)
         });
     }
   }

@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpParamsOptions } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { UserLoginResponse } from 'src/app/interfaces/user-login-response';
 import { UserLoginRequest } from 'src/app/interfaces/user-login-request';
-import { BehaviorSubject } from 'rxjs';
+import { GenericResponse } from 'src/app/interfaces/generic-response';
+import { BehaviorSubject, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -36,12 +36,15 @@ export class UserLoginService {
     );
   };
 
-  checkcredentials(response: UserLoginResponse) {
+  checkcredentials(response: UserLoginResponse): void {
     if (response.responseCode == '200' && response.responseMessage == 'You Have Access Rights!') {
       sessionStorage.setItem('accessToken', response.accessToken)
       this.router.navigateByUrl('customers');
     }
     else if (response.responseCode == '403') {
+      this.errorSubject.next(response.responseMessage);
+    }
+    else if (response.responseCode == '404') {
       this.errorSubject.next(response.responseMessage);
     }
     else {

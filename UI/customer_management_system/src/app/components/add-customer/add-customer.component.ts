@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { AddCustomerService } from 'src/app/services/add-customer.service';
 import { Customer, Address } from 'src/app/interfaces/get-customer-list-response';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-add-customer',
@@ -15,6 +16,10 @@ export class AddCustomerComponent implements OnInit {
   genderDropdown: any = ['unknown', 'male', 'female'];
   loading = false;
   submitted = false;
+  customer = {} as Customer;
+  customerAddress = {} as Address;
+
+  get f() { return this.form.controls; }
 
   constructor(
     private formBuilder: FormBuilder,
@@ -23,17 +28,12 @@ export class AddCustomerComponent implements OnInit {
     private addCustomerService: AddCustomerService
   ) { }
 
-  get f() { return this.form.controls; }
-
-  customer = {} as Customer;
-  customerAddress = {} as Address;
-
   ngOnInit() {
     this.form = this.formBuilder.group({
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.pattern("^\\S+@\\S+\\.\\S+$")]],
-      msisdn: ['', [Validators.required, Validators.pattern("^[0-9]{9,12}$")]],
+      email: ['', [Validators.required, Validators.pattern(environment.EmailRegex)]],
+      msisdn: ['', [Validators.required, Validators.pattern(environment.PhoneRegex)]],
       gender: ['', Validators.required],
       birthYear: ['', Validators.required],
       birthMonth: ['', Validators.required],
@@ -80,10 +80,12 @@ export class AddCustomerComponent implements OnInit {
       .pipe(first())
       .subscribe({
         next: () => {
-          this.router.navigate(['../login'], { relativeTo: this.route });
+          this.router.navigate(['../customers'], { relativeTo: this.route });
         },
         error: error => {
-          console.log(error);
+          if (error.error.responseCode == 403) {
+            this.router.navigate(['']);
+          }
           this.loading = false;
         }
       });

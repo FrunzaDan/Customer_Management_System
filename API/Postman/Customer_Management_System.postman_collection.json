@@ -1,0 +1,568 @@
+{
+	"info": {
+		"_postman_id": "25b6a625-67b0-40de-9d69-a4d40c0cbbe5",
+		"name": "Customer_Management_System",
+		"description": "Customer Management System API Testing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24088222"
+	},
+	"item": [
+		{
+			"name": "RegisterCustomer",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({",
+							"    url: \"https://localhost:7145/Authentication/GetAccessToken\",",
+							"    method: 'POST',",
+							"    header: {'Content-Type': 'application/json',},",
+							"    body: {",
+							"        mode: 'raw',",
+							"        raw: JSON.stringify({\"merchantID\":\"TestMerchantID\",",
+							"                             \"merchantPassword\":\"Merchant123\"})",
+							"                            }",
+							"}, ",
+							"function (err, response) {",
+							"    var responseJson = response.json();",
+							"    pm.environment.set('ACCESS_TOKEN', responseJson['accessToken']);",
+							"    console.log('Inserted Token: ' + responseJson['accessToken']);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"Marian2\",\n    \"lastName\": \"Solomon2\",\n    \"msisdn\": \"077300507\",\n    \"email\": \"mariansolomon5@gmail.com\",\n    \"gender\": \"1\",\n    \"birthdate\": \"qwdefsdvbg\",\n    \"address\": {\n        \"country\": \"Romania\",\n        \"county\": \"Sibiu\",\n        \"town\": \"Sibiu\",\n        \"zip\": \"550331\",\n        \"street\": \"Gutuilor\",\n        \"number\": \"2/25\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7145/Customer/RegisterCustomer",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7145",
+					"path": [
+						"Customer",
+						"RegisterCustomer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "EditCustomer",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({",
+							"    url: \"https://localhost:7145/Authentication/GetAccessToken\",",
+							"    method: 'POST',",
+							"    header: {'Content-Type': 'application/json',},",
+							"    body: {",
+							"        mode: 'raw',",
+							"        raw: JSON.stringify({\"merchantID\":\"TestMerchantID\",",
+							"                             \"merchantPassword\":\"Merchant123\"})",
+							"                            }",
+							"}, ",
+							"function (err, response) {",
+							"    var responseJson = response.json();",
+							"    pm.environment.set('ACCESS_TOKEN', responseJson['accessToken']);",
+							"    console.log('Inserted Token: ' + responseJson['accessToken']);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"guid\": \"3eaa296a-88ad-4a68-a9b7-a14aa93dd2be\",\n    \"firstName\": \"Maria\",\n    \"lastName\": \"Solomon\",\n    \"msisdn\": \"0773000007\",\n    \"email\": \"mariasolomon20@gmail.com\",\n    \"address\": {\n        \"country\": \"Romania\",\n        \"county\": \"Sibiu\",\n        \"town\": \"Sibiu\",\n        \"zip\": \"550331\",\n        \"street\": \"Gutuilor\",\n        \"number\": \"2/25\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7145/Customer/EditCustomer",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7145",
+					"path": [
+						"Customer",
+						"EditCustomer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeactivateCustomer",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({",
+							"    url: \"https://localhost:7145/Authentication/GetAccessToken\",",
+							"    method: 'POST',",
+							"    header: {'Content-Type': 'application/json',},",
+							"    body: {",
+							"        mode: 'raw',",
+							"        raw: JSON.stringify({\"merchantID\":\"TestMerchantID\",",
+							"                             \"merchantPassword\":\"Merchant123\"})",
+							"                            }",
+							"}, ",
+							"function (err, response) {",
+							"    var responseJson = response.json();",
+							"    pm.environment.set('ACCESS_TOKEN', responseJson['accessToken']);",
+							"    console.log('Inserted Token: ' + responseJson['accessToken']);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7145/Customer/DeactivateCustomer?customerGUID=3eaa296a-88ad-4a68-a9b7-a14aa93dd2be",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7145",
+					"path": [
+						"Customer",
+						"DeactivateCustomer"
+					],
+					"query": [
+						{
+							"key": "customerGUID",
+							"value": "3eaa296a-88ad-4a68-a9b7-a14aa93dd2be"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteCustomer",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({",
+							"    url: \"https://localhost:7145/Authentication/GetAccessToken\",",
+							"    method: 'POST',",
+							"    header: {'Content-Type': 'application/json',},",
+							"    body: {",
+							"        mode: 'raw',",
+							"        raw: JSON.stringify({\"merchantID\":\"TestMerchantID\",",
+							"                             \"merchantPassword\":\"Merchant123\"})",
+							"                            }",
+							"}, ",
+							"function (err, response) {",
+							"    var responseJson = response.json();",
+							"    pm.environment.set('ACCESS_TOKEN', responseJson['accessToken']);",
+							"    console.log('Inserted Token: ' + responseJson['accessToken']);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"Maria\",\n    \"lastName\": \"Solomon\",\n    \"msisdn\": \"0773000007\",\n    \"email\": \"mariasolomon20@gmail.com\",\n    \"address\": {\n        \"country\": \"Romania\",\n        \"county\": \"Sibiu\",\n        \"town\": \"Sibiu\",\n        \"zip\": \"550331\",\n        \"street\": \"Gutuilor\",\n        \"number\": \"2/25\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7145/Customer/DeleteCustomer",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7145",
+					"path": [
+						"Customer",
+						"DeleteCustomer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetCustomer",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({",
+							"    url: \"https://localhost:7145/Authentication/GetAccessToken\",",
+							"    method: 'POST',",
+							"    header: {'Content-Type': 'application/json',},",
+							"    body: {",
+							"        mode: 'raw',",
+							"        raw: JSON.stringify({\"merchantID\":\"TestMerchantID\",",
+							"                             \"merchantPassword\":\"Merchant123\"})",
+							"                            }",
+							"}, ",
+							"function (err, response) {",
+							"    var responseJson = response.json();",
+							"    pm.environment.set('ACCESS_TOKEN', responseJson['accessToken']);",
+							"    console.log('Inserted Token: ' + responseJson['accessToken']);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7145/Customer/GetCustomer?searchVariable=ef0e8818-3e0c-4c5f-acb1-66ecf7bfc4be",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7145",
+					"path": [
+						"Customer",
+						"GetCustomer"
+					],
+					"query": [
+						{
+							"key": "searchVariable",
+							"value": "ef0e8818-3e0c-4c5f-acb1-66ecf7bfc4be"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "GetCustomer",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7145/Customer/GetCustomer?searchVariable=0773000007",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7145",
+							"path": [
+								"Customer",
+								"GetCustomer"
+							],
+							"query": [
+								{
+									"key": "searchVariable",
+									"value": "0773000007"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Length",
+							"value": "294"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 09 Aug 2023 21:02:10 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "Kestrel"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"firstName\": \"dorel\",\n    \"lastName\": \"posa\",\n    \"msisdn\": \"071265312632\",\n    \"email\": \"dodo237ry23rhheiwufe@gmail.com\",\n    \"address\": {\n        \"country\": \"Romania\",\n        \"county\": \"Sibiu\",\n        \"town\": \"ygyuigbiu\",\n        \"zip\": \"550331\",\n        \"street\": \"Blvd. G. Milea\",\n        \"number\": \"5/33\"\n    },\n    \"responseCode\": 200,\n    \"responseMessage\": \"Customer found in the DB!\"\n}"
+				}
+			]
+		},
+		{
+			"name": "GetCustomers",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({",
+							"    url: \"https://localhost:7145/Authentication/GetAccessToken\",",
+							"    method: 'POST',",
+							"    header: {'Content-Type': 'application/json',},",
+							"    body: {",
+							"        mode: 'raw',",
+							"        raw: JSON.stringify({\"merchantID\":\"TestMerchantID\",",
+							"                             \"merchantPassword\":\"Merchant123\"})",
+							"                            }",
+							"}, ",
+							"function (err, response) {",
+							"    var responseJson = response.json();",
+							"    pm.environment.set('ACCESS_TOKEN', responseJson['accessToken']);",
+							"    console.log('Inserted Token: ' + responseJson['accessToken']);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true,
+				"followAuthorizationHeader": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7145/Customer/GetCustomers",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7145",
+					"path": [
+						"Customer",
+						"GetCustomers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAccessToken",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"MerchantID\": \"TestMerchantID\",\n  \"MerchantPassword\": \"Merchant123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7145/Authentication/GetAccessToken",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7145",
+					"path": [
+						"Authentication",
+						"GetAccessToken"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "VerifyToken",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7145/Authentication/VerifyToken?searchVariable=cb6bbfa9-ca27-461b-b510-72971ea65bbc",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7145",
+					"path": [
+						"Authentication",
+						"VerifyToken"
+					],
+					"query": [
+						{
+							"key": "searchVariable",
+							"value": "cb6bbfa9-ca27-461b-b510-72971ea65bbc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"merchantID\": \"TestMerchantID\",\n  \"merchantPassword\": \"Merchant123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7145/Authentication/MerchantLogin",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7145",
+					"path": [
+						"Authentication",
+						"MerchantLogin"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

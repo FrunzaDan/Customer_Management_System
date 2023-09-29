@@ -1,4 +1,4 @@
-<div class="container">
+<div *ngIf="loadCompleted" class="container">
     <div class="row">
         <div class="col">
             <div class="card my-5">
@@ -8,19 +8,21 @@
                 <ng-template #maleAvatar><img src="../../../assets/avatar_male.jpg" class="card-img-top"
                         alt="avatar_male"></ng-template>
                 <div class="card-body">
+                    <h5 class="card-title">Basic info:</h5>
                     <div class="card-text">
                         <p>First name: {{ this.customer.firstName }}</p>
                         <p>Last name: {{ this.customer.lastName}}</p>
                         <p>Gender: {{ this.customerGender }}</p>
                         <p>Birthdate: {{ this.customer.birthdate}}</p>
+                        <p>Internal GUID: {{ this.customer.guid}}</p>
                     </div>
                 </div>
             </div>
             <div class="card my-5">
                 <div class="card-body">
-                    <h5 class="card-title">Contact</h5>
+                    <h5 class="card-title">Contact:</h5>
                     <div class="card-text">
-                        <p>Email: {{ this.customer.email}}</p>
+                        <p>E-mail: {{ this.customer.email}}</p>
                         <p>Phone: {{ this.customer.msisdn}}</p>
                     </div>
                 </div>
@@ -29,7 +31,7 @@
         <div class="col">
             <div class="card my-5">
                 <div class="card-body">
-                    <h5 class="card-title">Address</h5>
+                    <h5 class="card-title">Address:</h5>
                     <div class="card-text">
                         <p>Country: {{ this.customer.address.country }}</p>
                         <p>County: {{ this.customer.address.county}}</p>

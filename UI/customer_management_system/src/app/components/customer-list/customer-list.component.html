@@ -1,4 +1,4 @@
-<table class="table table-responsive-sm table-striped table-hover">
+<table *ngIf="loadCompleted" class="table table-responsive-sm table-striped table-hover">
     <caption class="container-fluid">
         This table gets real time API data.
     </caption>
@@ -14,14 +14,16 @@
     <tbody>
         <tr *ngFor="let customer of this.customerList">
             <th class="text-center" scope="row">
-                <a (click)="onGuidClick(customer)" class="plain-Links hoverItem" target = "_blank">{{ customer.guid }}</a>
+                <a (click)="onGuidClick(customer)" class="plain-Links hoverItem" target="_blank">{{ customer.guid }}</a>
             </th>
             <td class="text-center">{{ customer.firstName + " " + customer.lastName}}</td>
             <td class="text-center">{{ customer.email }}</td>
             <td class="text-center">{{ customer.msisdn }}</td>
             <td class="text-center">
-                <button (click)="onEditClick(customer)" type="button" class="btn btn-primary shadow-none mx-1 my-1 px-2">Edit</button>
-                <button (click)="onDeactivateClick(customer)" type="button" class="btn btn-danger mx-1 my-1 px-2">Deactivate</button>
+                <button (click)="onEditClick(customer)" type="button"
+                    class="btn btn-primary shadow-none mx-1 my-1 px-2">Edit</button>
+                <button (click)="onDeactivateClick(customer)" type="button"
+                    class="btn btn-danger mx-1 my-1 px-2">Deactivate</button>
             </td>
         </tr>
     </tbody>

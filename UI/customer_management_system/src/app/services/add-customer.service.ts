@@ -23,8 +23,6 @@ export class AddCustomerService {
   constructor(private http: HttpClient) { }
 
   addCustomer(customer: Customer): Observable<GenericResponse> {
-    console.log("addCustomerService entered:");
-    console.log(customer);
     return this.http.post<GenericResponse>(
       this.APIURL,
       customer,
