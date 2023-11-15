@@ -9,12 +9,11 @@ namespace Customer_Management_System_Library.Functions
 {
     public class CustomerGetting
     {
+        private readonly IDBUtils _dbUtils; 
 
-        private readonly ICMSConfig _configuration;
-
-        public CustomerGetting(ICMSConfig configuration)
+        public CustomerGetting(IDBUtils dBUtils)
         {
-            _configuration = configuration;
+            _dbUtils = dBUtils;
         }
 
         public CustomerModel GetCustomerFunction(GetCustomerRequest getCustomerRqst)
@@ -44,8 +43,7 @@ namespace Customer_Management_System_Library.Functions
             }
             try
             {
-                DBUtils dBUtils = new DBUtils(_configuration);
-                response = dBUtils.GetCustomer(getCustomerRqst);
+                response = _dbUtils.GetCustomer(getCustomerRqst);
             }
             catch (Exception ex)
             {
@@ -62,8 +60,7 @@ namespace Customer_Management_System_Library.Functions
 
             try
             {
-                DBUtils dBUtils = new DBUtils(_configuration);
-                response = dBUtils.GetCustomers();
+                response = _dbUtils.GetCustomers();
             }
             catch (Exception)
             {

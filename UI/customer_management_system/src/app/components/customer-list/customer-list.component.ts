@@ -9,52 +9,53 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-customer-list',
   templateUrl: './customer-list.component.html',
-  styleUrls: ['./customer-list.component.css']
+  styleUrls: ['./customer-list.component.css'],
 })
 export class CustomerListComponent {
-
   getCustomerListResponse!: GetCustomerListResponse;
   customerList!: Customer[];
   loadCompleted: boolean = false;
 
-  constructor(private getCustomersService: GetCustomersService, private router: Router) {
-  }
+  constructor(
+    private getCustomersService: GetCustomersService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadCompleted = false;
     this.getCustomersService.refreshTable().subscribe({
-      next: response => {
+      next: (response) => {
         this.getCustomerListResponse = response;
         this.customerList = this.getCustomerListResponse.customerList;
         this.loadCompleted = true;
       },
-      error: error => {
-        if (error.error.responseCode == 403) {
+      error: (error) => {
+        let errorStatusCode = error.status;
+        if (errorStatusCode == 403) {
           this.router.navigate(['']);
+        } else if (errorStatusCode == 404) {
+          this.loadCompleted = true;
         }
-      }
-    })
+      },
+      complete: () => {},
+    });
   }
 
   onGuidClick(customer: Customer) {
-    this.router.navigate(
-      ['/customerDetails'],
-      { queryParams: { id: customer.guid } }
-    );
+    this.router.navigate(['/customerDetails'], {
+      queryParams: { id: customer.guid },
+    });
   }
 
   onEditClick(customer: Customer) {
-    this.router.navigate(
-      ['/editCustomer'],
-      { queryParams: { id: customer.guid } }
-    );
+    this.router.navigate(['/editCustomer'], {
+      queryParams: { id: customer.guid },
+    });
   }
 
   onDeactivateClick(customer: Customer) {
-    this.router.navigate(
-      ['/deactivateCustomer'],
-      { queryParams: { id: customer.guid } }
-    );
+    this.router.navigate(['/deactivateCustomer'], {
+      queryParams: { id: customer.guid },
+    });
   }
-
 }

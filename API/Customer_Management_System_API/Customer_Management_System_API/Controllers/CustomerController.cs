@@ -12,10 +12,12 @@ namespace Customer_Management_System_API.Controllers
     public class CustomerController : ControllerBase
     {
         private readonly ICMSConfig _configuration;
+        private readonly IDBUtils _dbUtils;
 
-        public CustomerController(ICMSConfig configuration)
+        public CustomerController(ICMSConfig configuration, IDBUtils dBUtils)
         {
             _configuration = configuration;
+            _dbUtils = dBUtils;
         }
 
         [Route("[action]")]
@@ -26,9 +28,9 @@ namespace Customer_Management_System_API.Controllers
             HttpContext httpContext = HttpContext;
             MerchantCredentials clientDetails = new MerchantCredentials();
             JWTValidation jwtValidation = new JWTValidation(_configuration);
-            if (jwtValidation.Authorization(httpContext, null))
+            if (jwtValidation.Authorize(httpContext, null))
             {
-                CustomerRegistration customerRegistration = new CustomerRegistration(_configuration);
+                CustomerRegistration customerRegistration = new CustomerRegistration(_dbUtils);
                 response = customerRegistration.RegisterCustomerFunction(customerRqst);
             }
             else
@@ -52,9 +54,9 @@ namespace Customer_Management_System_API.Controllers
             HttpContext httpContext = HttpContext;
             MerchantCredentials clientDetails = new MerchantCredentials();
             JWTValidation jwtValidation = new JWTValidation(_configuration);
-            if (jwtValidation.Authorization(httpContext, null))
+            if (jwtValidation.Authorize(httpContext, null))
             {
-                CustomerGetting customerGetting = new CustomerGetting(_configuration);
+                CustomerGetting customerGetting = new CustomerGetting(_dbUtils);
                 GetCustomerRequest getCustomerRqst = new GetCustomerRequest();
                 getCustomerRqst.searchVariable = searchVariable;
                 response = customerGetting.GetCustomerFunction(getCustomerRqst);
@@ -80,9 +82,9 @@ namespace Customer_Management_System_API.Controllers
             HttpContext httpContext = HttpContext;
             MerchantCredentials clientDetails = new MerchantCredentials();
             JWTValidation jwtValidation = new JWTValidation(_configuration);
-            if (jwtValidation.Authorization(httpContext, null))
+            if (jwtValidation.Authorize(httpContext, null))
             {
-                CustomerGetting customerGetting = new CustomerGetting(_configuration);
+                CustomerGetting customerGetting = new CustomerGetting(_dbUtils);
                 GetCustomerRequest getCustomerRqst = new GetCustomerRequest();
                 response = customerGetting.GetCustomersFunction();
             }
@@ -100,18 +102,18 @@ namespace Customer_Management_System_API.Controllers
 
         [Route("[action]")]
         [HttpPatch]
-        public CustomerListModel EditCustomer()
+        public ResponseModel EditCustomer(CustomerModel editCustomerRqst)
         {
-            CustomerListModel response = new CustomerListModel();
+            ResponseModel response = new ResponseModel();
 
             HttpContext httpContext = HttpContext;
             MerchantCredentials clientDetails = new MerchantCredentials();
             JWTValidation jwtValidation = new JWTValidation(_configuration);
-            if (jwtValidation.Authorization(httpContext, null))
+            if (jwtValidation.Authorize(httpContext, null))
             {
-                CustomerEditing customerEditing = new CustomerEditing(_configuration);
+                CustomerEditing customerEditing = new CustomerEditing(_dbUtils);
                 GetCustomerRequest getCustomerRqst = new GetCustomerRequest();
-                customerEditing.EditCustomerFunction();
+                response = customerEditing.EditCustomerFunction(editCustomerRqst);
             }
             else
             {
@@ -134,9 +136,9 @@ namespace Customer_Management_System_API.Controllers
             HttpContext httpContext = HttpContext;
             MerchantCredentials clientDetails = new MerchantCredentials();
             JWTValidation jwtValidation = new JWTValidation(_configuration);
-            if (jwtValidation.Authorization(httpContext, null))
+            if (jwtValidation.Authorize(httpContext, null))
             {
-                CustomerDeactivation customerDeactivation = new CustomerDeactivation(_configuration);
+                CustomerDeactivation customerDeactivation = new CustomerDeactivation(_dbUtils);
                 response = customerDeactivation.DeactivateCustomer(customerGUID);
             }
             else
@@ -153,18 +155,18 @@ namespace Customer_Management_System_API.Controllers
 
         [Route("[action]")]
         [HttpDelete]
-        public CustomerListModel DeleteCustomer()
+        public CustomerListModel DeleteCustomer(string customerGUID)
         {
             CustomerListModel response = new CustomerListModel();
 
             HttpContext httpContext = HttpContext;
             MerchantCredentials clientDetails = new MerchantCredentials();
             JWTValidation jwtValidation = new JWTValidation(_configuration);
-            if (jwtValidation.Authorization(httpContext, null))
+            if (jwtValidation.Authorize(httpContext, null))
             {
-                CustomerEditing customerEditing = new CustomerEditing(_configuration);
+                CustomerDeletion customerDeletion = new CustomerDeletion(_dbUtils);
                 GetCustomerRequest getCustomerRqst = new GetCustomerRequest();
-                customerEditing.EditCustomerFunction();
+                customerDeletion.DeleteCustomer(customerGUID);
             }
             else
             {

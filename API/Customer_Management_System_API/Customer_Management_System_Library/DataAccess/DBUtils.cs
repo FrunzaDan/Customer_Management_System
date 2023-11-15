@@ -6,7 +6,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Customer_Management_System_Library.DataAccess
 {
-    public class DBUtils
+    public class DBUtils : IDBUtils
     {
         public readonly ICMSConfig _configuration;
 
@@ -26,6 +26,7 @@ namespace Customer_Management_System_Library.DataAccess
                 SqlConnection sqlConnection = new SqlConnection();
                 sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB;
                 sqlConnection.Open();
+
                 using (SqlCommand sqlCommand = new SqlCommand())
                 {
                     sqlCommand.Connection = sqlConnection;
@@ -55,7 +56,7 @@ namespace Customer_Management_System_Library.DataAccess
                     }
 
                     var sqlDataReader = sqlCommand.ExecuteReader();
-                    while (sqlDataReader.Read())
+                    while (sqlDataReader.Read() == true)
                     {
                         try
                         {
@@ -95,13 +96,18 @@ namespace Customer_Management_System_Library.DataAccess
                 response.ResponseMessage = ex.ToString();
             }
 
+            if (response.ResponseCode == null)
+            {
+                response.ResponseCode = 500;
+                response.ResponseMessage = "Couldn't read ResponseCode";
+            }
+
             return response;
         }
-
-        public CustomerModel GetCustomer(GetCustomerRequest getCustomerRqst)
+        public CustomerModel GetCustomer(GetCustomerRequest customer)
         {
-            CustomerModel customerModel = new CustomerModel();
-            customerModel.Address = new AddressModel();
+            CustomerModel customerResponse = new CustomerModel();
+            customerResponse.Address = new AddressModel();
 
             try
             {
@@ -114,95 +120,96 @@ namespace Customer_Management_System_Library.DataAccess
                     sqlCommand.Connection = sqlConnection;
                     sqlCommand.CommandText = "dbo.usp_getCustomer";
                     sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.Add(new SqlParameter("@var_SearchOption", getCustomerRqst.searchOption));
-                    sqlCommand.Parameters.Add(new SqlParameter("@var_SearchVariable", getCustomerRqst.searchVariable));
+                    sqlCommand.Parameters.Add(new SqlParameter("@var_SearchOption", customer.searchOption));
+                    sqlCommand.Parameters.Add(new SqlParameter("@var_SearchVariable", customer.searchVariable));
+
                     var sqlDataReader = sqlCommand.ExecuteReader();
-                    while (sqlDataReader.Read())
+                    while (sqlDataReader.Read() == true)
                     {
                         try
                         {
-                            customerModel.Guid = sqlDataReader["PK_customer_guid"].ToString();
+                            customerResponse.Guid = sqlDataReader["PK_customer_guid"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.FirstName = sqlDataReader["first_name"].ToString();
+                            customerResponse.FirstName = sqlDataReader["first_name"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.LastName = sqlDataReader["last_name"].ToString();
+                            customerResponse.LastName = sqlDataReader["last_name"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.Email = sqlDataReader["email"].ToString();
+                            customerResponse.Email = sqlDataReader["email"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.MSISDN = sqlDataReader["msisdn"].ToString();
+                            customerResponse.MSISDN = sqlDataReader["msisdn"].ToString();
                         }
                         catch { }
                         try
                         {
                             Int32.TryParse(sqlDataReader["gender"].ToString(), out int parsedInt);
-                            customerModel.Gender = parsedInt;
+                            customerResponse.Gender = parsedInt;
                         }
                         catch { }
                         try
                         {
-                            customerModel.Birthdate = sqlDataReader["birthDate"].ToString();
+                            customerResponse.Birthdate = sqlDataReader["birthDate"].ToString();
                         }
                         catch { }
                         try
                         {
                             Int32.TryParse(sqlDataReader["customer_Status"].ToString(), out int parsedCustomerStatus);
-                            customerModel.CustomerStatus = parsedCustomerStatus;
+                            customerResponse.CustomerStatus = parsedCustomerStatus;
                         }
                         catch { }
                         try
                         {
-                            customerModel.Address.Country = sqlDataReader["country"].ToString();
+                            customerResponse.Address.Country = sqlDataReader["country"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.Address.County = sqlDataReader["county"].ToString();
+                            customerResponse.Address.County = sqlDataReader["county"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.Address.ZIP = sqlDataReader["zip_code"].ToString();
+                            customerResponse.Address.ZIP = sqlDataReader["zip_code"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.Address.Town = sqlDataReader["town"].ToString();
+                            customerResponse.Address.Town = sqlDataReader["town"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.Address.Street = sqlDataReader["street"].ToString();
+                            customerResponse.Address.Street = sqlDataReader["street"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.Address.Number = sqlDataReader["number"].ToString();
+                            customerResponse.Address.Number = sqlDataReader["number"].ToString();
                         }
                         catch { }
                     }
                     sqlDataReader.Close();
                     sqlConnection.Close();
-                    if (!String.IsNullOrEmpty(customerModel.Guid))
+                    if (!String.IsNullOrEmpty(customerResponse.Guid))
                     {
-                        customerModel.ResponseCode = 200;
-                        customerModel.ResponseMessage = "Customer found in the DB!";
+                        customerResponse.ResponseCode = 200;
+                        customerResponse.ResponseMessage = "Customer found in the DB!";
                     }
                     else
                     {
-                        customerModel.ResponseCode = 404;
-                        customerModel.ResponseMessage = "Customer was not found in the DB!";
+                        customerResponse.ResponseCode = 404;
+                        customerResponse.ResponseMessage = "Customer was not found in the DB!";
                     }
 
                 }
@@ -210,121 +217,18 @@ namespace Customer_Management_System_Library.DataAccess
             }
             catch (Exception ex)
             {
-                customerModel.ResponseCode = 500;
-                customerModel.ResponseMessage = ex.ToString();
+                customerResponse.ResponseCode = 500;
+                customerResponse.ResponseMessage = ex.ToString();
             }
 
-            return customerModel;
+            if (customerResponse.ResponseCode == null)
+            {
+                customerResponse.ResponseCode = 500;
+                customerResponse.ResponseMessage = "Couldn't read ResponseCode";
+            }
+
+            return customerResponse;
         }
-
-        public ResponseModel DeactivateCustomer(string customerGUID)
-        {
-            ResponseModel responseModel = new ResponseModel();
-
-            try
-            {
-                SqlConnection sqlConnection = new SqlConnection();
-                sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB;
-                sqlConnection.Open();
-
-                using (SqlCommand sqlCommand = new SqlCommand())
-                {
-                    sqlCommand.Connection = sqlConnection;
-                    sqlCommand.CommandText = "dbo.usp_deactivateCustomer";
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.Add(new SqlParameter("@var_Guid", customerGUID));
-                    var sqlDataReader = sqlCommand.ExecuteReader();
-                    while (sqlDataReader.Read())
-                    {
-                        try
-                        {
-                            Int32.TryParse(sqlDataReader["customer_Status"].ToString(), out int customerStatusInt);
-                            if (customerStatusInt == 1903)
-                            {
-                                responseModel.ResponseCode = 200;
-                                responseModel.ResponseMessage = "Customer deactivated successfully!";
-                            }
-                            else
-                            {
-                                responseModel.ResponseCode = 500;
-                                responseModel.ResponseMessage = "Could not read customer status code!";
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            responseModel.ResponseCode = 500;
-                            responseModel.ResponseMessage = ex.ToString();
-                        }
-
-                    }
-                    sqlDataReader.Close();
-                    sqlConnection.Close();
-                }
-
-            }
-            catch (Exception ex)
-            {
-                responseModel.ResponseCode = 500;
-                responseModel.ResponseMessage = ex.ToString();
-            }
-
-            return responseModel;
-        }
-
-        public ResponseModel DeleteCustomer(string customerGUID)
-        {
-            ResponseModel responseModel = new ResponseModel();
-
-            try
-            {
-                SqlConnection sqlConnection = new SqlConnection();
-                sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB;
-                sqlConnection.Open();
-
-                using (SqlCommand sqlCommand = new SqlCommand())
-                {
-                    sqlCommand.Connection = sqlConnection;
-                    sqlCommand.CommandText = "dbo.usp_deleteCustomer";
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.Add(new SqlParameter("@var_Guid", customerGUID));
-                    var sqlDataReader = sqlCommand.ExecuteReader();
-                    while (sqlDataReader.Read())
-                    {
-                        try
-                        {
-                            Int32.TryParse(sqlDataReader["customer_Status"].ToString(), out int customerStatusInt);
-                            if (customerStatusInt == 1903)
-                            {
-                                responseModel.ResponseCode = 200;
-                                responseModel.ResponseMessage = "Customer deactivated successfully!";
-                            }
-                            else
-                            {
-                                responseModel.ResponseCode = 500;
-                                responseModel.ResponseMessage = "Could not read customer status code!";
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            responseModel.ResponseCode = 500;
-                            responseModel.ResponseMessage = ex.ToString();
-                        }
-
-                    }
-                    sqlDataReader.Close();
-                    sqlConnection.Close();
-                }
-
-            }
-            catch (Exception ex)
-            {
-                responseModel.ResponseCode = 500;
-                responseModel.ResponseMessage = ex.ToString();
-            }
-
-            return responseModel;
-        }
-
         public CustomerListModel GetCustomers()
         {
 
@@ -342,86 +246,87 @@ namespace Customer_Management_System_Library.DataAccess
                     sqlCommand.Connection = sqlConnection;
                     sqlCommand.CommandText = "dbo.usp_getCustomers";
                     sqlCommand.CommandType = CommandType.StoredProcedure;
+
                     var sqlDataReader = sqlCommand.ExecuteReader();
-                    while (sqlDataReader.Read())
+                    while (sqlDataReader.Read() == true)
                     {
-                        CustomerModel customerModel = new CustomerModel();
-                        customerModel.Address = new AddressModel();
+                        CustomerModel customer = new CustomerModel();
+                        customer.Address = new AddressModel();
 
                         try
                         {
-                            customerModel.Guid = sqlDataReader["PK_customer_guid"].ToString();
+                            customer.Guid = sqlDataReader["PK_customer_guid"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.FirstName = sqlDataReader["first_name"].ToString();
+                            customer.FirstName = sqlDataReader["first_name"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.LastName = sqlDataReader["last_name"].ToString();
+                            customer.LastName = sqlDataReader["last_name"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.Email = sqlDataReader["email"].ToString();
+                            customer.Email = sqlDataReader["email"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.MSISDN = sqlDataReader["msisdn"].ToString();
+                            customer.MSISDN = sqlDataReader["msisdn"].ToString();
                         }
                         catch { }
                         try
                         {
                             Int32.TryParse(sqlDataReader["gender"].ToString(), out int parsedGender);
-                            customerModel.Gender = parsedGender;
+                            customer.Gender = parsedGender;
                         }
                         catch { }
                         try
                         {
-                            customerModel.Birthdate = sqlDataReader["birthDate"].ToString();
+                            customer.Birthdate = sqlDataReader["birthDate"].ToString();
                         }
                         catch { }
                         try
                         {
                             Int32.TryParse(sqlDataReader["customer_Status"].ToString(), out int parsedCustomerStatus);
-                            customerModel.CustomerStatus = parsedCustomerStatus;
+                            customer.CustomerStatus = parsedCustomerStatus;
                         }
                         catch { }
                         try
                         {
-                            customerModel.Address.Country = sqlDataReader["country"].ToString();
+                            customer.Address.Country = sqlDataReader["country"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.Address.County = sqlDataReader["county"].ToString();
+                            customer.Address.County = sqlDataReader["county"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.Address.ZIP = sqlDataReader["zip_code"].ToString();
+                            customer.Address.ZIP = sqlDataReader["zip_code"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.Address.Town = sqlDataReader["town"].ToString();
+                            customer.Address.Town = sqlDataReader["town"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.Address.Street = sqlDataReader["street"].ToString();
+                            customer.Address.Street = sqlDataReader["street"].ToString();
                         }
                         catch { }
                         try
                         {
-                            customerModel.Address.Number = sqlDataReader["number"].ToString();
+                            customer.Address.Number = sqlDataReader["number"].ToString();
                         }
                         catch { }
 
-                        customerList.Add(customerModel);
+                        customerList.Add(customer);
                     }
                     sqlDataReader.Close();
                     sqlConnection.Close();
@@ -437,9 +342,219 @@ namespace Customer_Management_System_Library.DataAccess
                 customerListResponse.ResponseMessage = ex.ToString();
             }
 
+            if (customerListResponse.ResponseCode == null)
+            {
+                customerListResponse.ResponseCode = 500;
+                customerListResponse.ResponseMessage = "Couldn't read ResponseCode";
+            }
+
             return customerListResponse;
         }
+        public ResponseModel EditCustomer(CustomerModel customer)
+        {
+            ResponseModel response = new ResponseModel();
 
+            try
+            {
+                SqlConnection sqlConnection = new SqlConnection();
+                sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB;
+                sqlConnection.Open();
+
+                using (SqlCommand sqlCommand = new SqlCommand())
+                {
+                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.CommandText = "dbo.usp_editCustomer";
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+
+                    sqlCommand.Parameters.Add(new SqlParameter("@var_Guid", customer.Guid));
+                    sqlCommand.Parameters.Add(new SqlParameter("@var_FirstName", customer.FirstName));
+                    sqlCommand.Parameters.Add(new SqlParameter("@var_LastName", customer.LastName));
+                    sqlCommand.Parameters.Add(new SqlParameter("@var_Email", customer.Email));
+                    sqlCommand.Parameters.Add(new SqlParameter("@var_MSISDN", customer.MSISDN));
+                    sqlCommand.Parameters.Add(new SqlParameter("@var_Gender", customer.Gender));
+                    sqlCommand.Parameters.Add(new SqlParameter("@var_Birthdate", customer.Birthdate));
+
+                    if (customer.Address is not null)
+                    {
+                        AddressModel address = customer.Address;
+                        if (address is not null)
+                        {
+                            sqlCommand.Parameters.Add(new SqlParameter("@var_Country", address.Country));
+                            sqlCommand.Parameters.Add(new SqlParameter("@var_County", address.County));
+                            sqlCommand.Parameters.Add(new SqlParameter("@var_Town", address.Town));
+                            sqlCommand.Parameters.Add(new SqlParameter("@var_ZIP", address.ZIP));
+                            sqlCommand.Parameters.Add(new SqlParameter("@var_Street", address.Street));
+                            sqlCommand.Parameters.Add(new SqlParameter("@var_Number", address.Number));
+                        }
+                    }
+                    var sqlDataReader = sqlCommand.ExecuteReader();
+                    while (sqlDataReader.Read() == true)
+                    {
+                        try
+                        {
+                            Int32.TryParse(sqlDataReader["customer_Status"].ToString(), out int customerStatusInt);
+                            if (customerStatusInt == 1901)
+                            {
+                                response.ResponseCode = 200;
+                                response.ResponseMessage = "Customer edited successfully!";
+                            }
+                            else if (customerStatusInt == 1903)
+                            {
+                                response.ResponseCode = 200;
+                                response.ResponseMessage = "Customer edited successfully!";
+                            }
+                            else
+                            {
+                                response.ResponseCode = 500;
+                                response.ResponseMessage = "Could not read customer status code!";
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            response.ResponseCode = 500;
+                            response.ResponseMessage = ex.ToString();
+                        }
+                    }
+                    sqlDataReader.Close();
+                    sqlConnection.Close();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                response.ResponseCode = 500;
+                response.ResponseMessage = ex.ToString();
+            }
+
+            if (response.ResponseCode == null)
+            {
+                response.ResponseCode = 500;
+                response.ResponseMessage = "Couldn't read ResponseCode";
+            }
+
+            return response;
+        }
+        public ResponseModel DeactivateCustomer(string customerGUID)
+        {
+            ResponseModel response = new ResponseModel();
+
+            try
+            {
+                SqlConnection sqlConnection = new SqlConnection();
+                sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB;
+                sqlConnection.Open();
+
+                using (SqlCommand sqlCommand = new SqlCommand())
+                {
+                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.CommandText = "dbo.usp_deactivateCustomer";
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+
+                    sqlCommand.Parameters.Add(new SqlParameter("@var_Guid", customerGUID));
+
+                    var sqlDataReader = sqlCommand.ExecuteReader();
+                    while (sqlDataReader.Read() == true)
+                    {
+                        try
+                        {
+                            Int32.TryParse(sqlDataReader["customer_Status"].ToString(), out int customerStatusInt);
+                            if (customerStatusInt == 1903)
+                            {
+                                response.ResponseCode = 200;
+                                response.ResponseMessage = "Customer deactivated successfully!";
+                            }
+                            else
+                            {
+                                response.ResponseCode = 500;
+                                response.ResponseMessage = "Could not read customer status code!";
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            response.ResponseCode = 500;
+                            response.ResponseMessage = ex.ToString();
+                        }
+
+                    }
+                    sqlDataReader.Close();
+                    sqlConnection.Close();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                response.ResponseCode = 500;
+                response.ResponseMessage = ex.ToString();
+            }
+
+            if (response.ResponseCode == null)
+            {
+                response.ResponseCode = 500;
+                response.ResponseMessage = "Couldn't read ResponseCode";
+            }
+
+            return response;
+        }
+        public ResponseModel DeleteCustomer(string customerGUID)
+        {
+            ResponseModel response = new ResponseModel();
+
+            try
+            {
+                SqlConnection sqlConnection = new SqlConnection();
+                sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB;
+                sqlConnection.Open();
+
+                using (SqlCommand sqlCommand = new SqlCommand())
+                {
+                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.CommandText = "dbo.usp_deleteCustomer";
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.Add(new SqlParameter("@var_Guid", customerGUID));
+
+                    var sqlDataReader = sqlCommand.ExecuteReader();
+                    while (sqlDataReader.Read() == true)
+                    {
+                        try
+                        {
+                            Int32.TryParse(sqlDataReader["customer_Status"].ToString(), out int customerStatusInt);
+                            if (customerStatusInt == 1903)
+                            {
+                                response.ResponseCode = 200;
+                                response.ResponseMessage = "Customer deactivated successfully!";
+                            }
+                            else
+                            {
+                                response.ResponseCode = 500;
+                                response.ResponseMessage = "Could not read customer status code!";
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            response.ResponseCode = 500;
+                            response.ResponseMessage = ex.ToString();
+                        }
+
+                    }
+                    sqlDataReader.Close();
+                    sqlConnection.Close();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                response.ResponseCode = 500;
+                response.ResponseMessage = ex.ToString();
+            }
+
+            if (response.ResponseCode == null)
+            {
+                response.ResponseCode = 500;
+                response.ResponseMessage = "Couldn't read ResponseCode";
+            }
+
+            return response;
+        }
         public bool CheckMerchantCredentialsFromDB(MerchantCredentials merchantCredentials)
         {
             bool isValid = false;
@@ -456,8 +571,9 @@ namespace Customer_Management_System_Library.DataAccess
                     sqlCommand.CommandType = CommandType.StoredProcedure;
                     sqlCommand.Parameters.Add(new SqlParameter("@var_MerchantID", merchantCredentials.MerchantID));
                     sqlCommand.Parameters.Add(new SqlParameter("@var_MerchantPassword", merchantCredentials.MerchantPassword));
+
                     var sqlDataReader = sqlCommand.ExecuteReader();
-                    while (sqlDataReader.Read())
+                    while (sqlDataReader.Read() == true)
                     {
                         try
                         {
@@ -480,9 +596,8 @@ namespace Customer_Management_System_Library.DataAccess
                 }
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine(ex.ToString());
                 isValid = false;
             }
 

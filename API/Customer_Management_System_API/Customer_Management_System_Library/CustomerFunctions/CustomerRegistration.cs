@@ -10,11 +10,11 @@ namespace Customer_Management_System_Library.Functions
 {
     public class CustomerRegistration
     {
-        private readonly ICMSConfig _configuration;
+        private readonly IDBUtils _dbUtils; 
 
-        public CustomerRegistration(ICMSConfig configuration)
+        public CustomerRegistration(IDBUtils dBUtils)
         {
-            _configuration = configuration;
+            _dbUtils = dBUtils;
         }
 
         public ResponseModel RegisterCustomerFunction(CustomerModel customerRqst)
@@ -38,8 +38,7 @@ namespace Customer_Management_System_Library.Functions
 
             try
             {
-                DBUtils dBUtils = new DBUtils(_configuration);
-                response = dBUtils.RegisterCustomer(customerRqst);
+                response = _dbUtils.RegisterCustomer(customerRqst);
             }
             catch (Exception ex)
             {

@@ -1,23 +1,23 @@
 .gradient-custom-2 {
-  /* fallback for old browsers */
-  background: #fccb90;
-
-  /* Chrome 10-25, Safari 5.1-6 */
-  background: -webkit-linear-gradient(to right, #e8a49c, #3c4cad, #240e8b, #f04393);
-
-  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-  background: linear-gradient(to right, #e8a49c, #3c4cad, #240e8b, #f04393);
+  background: var(--spectrumColor1);
+  background: -webkit-linear-gradient(to right, var(--spectrumColor1), var(--spectrumColor2), var(--spectrumColor3), var(--spectrumColor4));
+  background: linear-gradient(to right, var(--spectrumColor1), var(--spectrumColor2), var(--spectrumColor3), var(--spectrumColor4));
 }
 
-@media (min-width: 768px) {
+@media only screen and (min-width: 768px) {
   .gradient-form {
     height: 120vh !important;
   }
-}
 
-@media (min-width: 769px) {
   .gradient-custom-2 {
     border-top-right-radius: .3rem;
+    border-bottom-right-radius: .3rem;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .gradient-custom-2 {
+    border-bottom-left-radius: .3rem;
     border-bottom-right-radius: .3rem;
   }
 }

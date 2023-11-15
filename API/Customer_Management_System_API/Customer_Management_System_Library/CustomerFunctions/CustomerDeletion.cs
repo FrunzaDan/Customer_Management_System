@@ -2,22 +2,22 @@
 using Customer_Management_System_Library.Configuration;
 using Customer_Management_System_Library.DataAccess;
 using Customer_Management_System_Library.Models;
-public class CustomerDeactivation
+
+public class CustomerDeletion
 {
-    private readonly ICMSConfig _configuration;
+    private readonly IDBUtils _dbUtils; 
 
-    public CustomerDeactivation(ICMSConfig configuration)
-    {
-        _configuration = configuration;
-    }
+        public CustomerDeletion(IDBUtils dBUtils)
+        {
+            _dbUtils = dBUtils;
+        }
 
-    public ResponseModel DeactivateCustomer(string customerGUID)
+    public ResponseModel DeleteCustomer(string customerGUID)
     {
         ResponseModel response = new ResponseModel();
         try
         {
-            DBUtils dBUtils = new DBUtils(_configuration);
-            response = dBUtils.DeactivateCustomer(customerGUID);
+            response = _dbUtils.DeleteCustomer(customerGUID);
         }
         catch (Exception ex)
         {
@@ -27,4 +27,5 @@ public class CustomerDeactivation
 
         return response;
     }
+
 }

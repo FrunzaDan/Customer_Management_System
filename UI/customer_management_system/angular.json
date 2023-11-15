@@ -63,10 +63,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "customer_management_system:build:production"
+              "buildTarget": "customer_management_system:build:production"
             },
             "development": {
-              "browserTarget": "customer_management_system:build:development"
+              "buildTarget": "customer_management_system:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -74,7 +74,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "customer_management_system:build"
+            "buildTarget": "customer_management_system:build"
           }
         },
         "test": {

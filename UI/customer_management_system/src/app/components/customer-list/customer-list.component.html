@@ -13,13 +13,14 @@
     </thead>
     <tbody>
         <tr *ngFor="let customer of this.customerList">
-            <th class="text-center" scope="row">
+            <th class="align-middle text-center" scope="row">
                 <a (click)="onGuidClick(customer)" class="plain-Links hoverItem" target="_blank">{{ customer.guid }}</a>
             </th>
-            <td class="text-center">{{ customer.firstName + " " + customer.lastName}}</td>
-            <td class="text-center">{{ customer.email }}</td>
-            <td class="text-center">{{ customer.msisdn }}</td>
-            <td class="text-center">
+            <td class="align-middle text-center">{{ customer.firstName + " " +
+                customer.lastName}}</td>
+            <td class="align-middle text-center">{{ customer.email }}</td>
+            <td class="align-middle text-center">{{ customer.msisdn }}</td>
+            <td class="align-middle text-center">
                 <button (click)="onEditClick(customer)" type="button"
                     class="btn btn-primary shadow-none mx-1 my-1 px-2">Edit</button>
                 <button (click)="onDeactivateClick(customer)" type="button"

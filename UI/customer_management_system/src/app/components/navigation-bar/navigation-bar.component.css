@@ -1,9 +1,9 @@
-.gradient-custom{
+.gradient-custom {
     /* Chrome 10-25, Safari 5.1-6 */
-  background: -webkit-linear-gradient(to right, var(--spectrumColor1), var(--spectrumColor2), var(--spectrumColor3), var(--spectrumColor4));
+    background: -webkit-linear-gradient(to right, var(--spectrumColor1), var(--spectrumColor2), var(--spectrumColor3), var(--spectrumColor4));
 
-  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-  background: linear-gradient(to right, var(--spectrumColor1), var(--spectrumColor2), var(--spectrumColor3), var(--spectrumColor4));
+    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    background: linear-gradient(to right, var(--spectrumColor1), var(--spectrumColor2), var(--spectrumColor3), var(--spectrumColor4));
 }
 
 /* LARGE SCREENS: */
@@ -51,7 +51,7 @@
 
 .nav-link {
     font-size: 20px;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--regularFont);
 }
 
 .hoveritem {
@@ -65,7 +65,7 @@
 }
 
 .nav-link-brand {
-    
+
     font-size: 25px;
     margin-left: 2px !important;
     margin-right: 2px !important;

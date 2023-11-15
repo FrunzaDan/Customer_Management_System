@@ -1,24 +1,22 @@
 ﻿namespace Customer_Management_System_Library;
 using Customer_Management_System_Library.Configuration;
-using Customer_Management_System_Library.DataAccess;
 using Customer_Management_System_Library.Models;
 
-public class CustomerDeletion
+public class CustomerEditing
 {
-    private readonly ICMSConfig _configuration;
+    private readonly IDBUtils _dbUtils;
 
-    public CustomerDeletion(ICMSConfig configuration)
+    public CustomerEditing(IDBUtils dBUtils)
     {
-        _configuration = configuration;
+        _dbUtils = dBUtils;
     }
 
-    public ResponseModel DeleteCustomer(string customerGUID)
+    public ResponseModel EditCustomerFunction(CustomerModel editCustomerRqst)
     {
         ResponseModel response = new ResponseModel();
         try
         {
-            DBUtils dBUtils = new DBUtils(_configuration);
-            response = dBUtils.DeleteCustomer(customerGUID);
+            response = _dbUtils.EditCustomer(editCustomerRqst);
         }
         catch (Exception ex)
         {
@@ -27,6 +25,8 @@ public class CustomerDeletion
         }
 
         return response;
+
     }
+
 
 }

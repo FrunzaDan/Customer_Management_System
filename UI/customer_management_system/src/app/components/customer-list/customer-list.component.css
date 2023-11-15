@@ -1,21 +1,20 @@
 .table-striped>tbody>tr:nth-child(odd)>td,
 .table-striped>tbody>tr:nth-child(odd)>th {
-    background-color: #e8a49c;
-    
+    background-color: var(--spectrumColor4);
+
 }
 
 .btn-primary,
 .btn-primary:hover,
 .btn-primary:active,
 .btn-primary:visited {
-    background-color: #3c4cad !important;
+    background-color: var(--spectrumColor1) !important;
     outline: none !important;
     box-shadow: none;
-    border-color: #3c4cad;
+    border-color: var(--spectrumColor1);
 }
 
-.plain-Links{
+.plain-Links {
     text-decoration: none;
     color: black;
 }
-

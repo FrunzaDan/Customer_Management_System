@@ -3,48 +3,45 @@ using Customer_Management_System_Library.Configuration;
 using Customer_Management_System_Library.Models;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
-using Customer_Management_System_Library.DataAccess;
-using NuGet.Protocol.Plugins;
 
 namespace Customer_Management_System_Library.Auth
 {
     public class JWTCreation
     {
         private string JWTKey;
+        private string JWTIssuer;
+        private string JWTAudience;
+        private readonly ICMSConfig _configuration;
+        private readonly IDBUtils _dbUtils;
 
-        public readonly ICMSConfig _configuration;
-
-        public JWTCreation(ICMSConfig configuration)
+        public JWTCreation(ICMSConfig configuration, IDBUtils dbUtils)
         {
+            _dbUtils = dbUtils;
             _configuration = configuration;
             JWTKey = _configuration.SecureJWTKey;
+            JWTIssuer = _configuration.JWTIssuer;
+            JWTAudience = _configuration.JWTAudience;
         }
 
         public AccessTokenResponse GenerateBearerJWT(string merchantID, string merchantPassword)
         {
             AccessTokenResponse accessTokenRsp = new AccessTokenResponse();
-
             MerchantCredentials merchantCredentials = new MerchantCredentials();
 
             merchantCredentials.MerchantID = merchantID;
             merchantCredentials.MerchantPassword = merchantPassword;
 
-            var dbUtils = new DBUtils(_configuration);
-            bool isValid = dbUtils.CheckMerchantCredentialsFromDB(merchantCredentials);
+            bool credentialsAreValid = _dbUtils.CheckMerchantCredentialsFromDB(merchantCredentials);
 
-            if (isValid)
+            if (credentialsAreValid)
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = System.Text.Encoding.ASCII.GetBytes(JWTKey);
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(new[] { new Claim("id", merchantID) }),
-                    Expires = DateTime.UtcNow.AddMinutes(Double.Parse(_configuration.AccessTokenTimeout)),
-                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-                };
-                var token = tokenHandler.CreateToken(tokenDescriptor);
-                var accessToken = tokenHandler.WriteToken(token);
-                accessTokenRsp.AccessToken = accessToken;
+
+                var tokenDescriptor = AddClaims(merchantID);
+
+                var accessToken = tokenHandler.CreateToken(tokenDescriptor);
+                var accessTokenString = tokenHandler.WriteToken(accessToken);
+                accessTokenRsp.AccessToken = accessTokenString;
                 accessTokenRsp.ValidUntil = DateTime.Now.AddMinutes(Convert.ToDouble(_configuration.AccessTokenTimeout)).ToString();
                 accessTokenRsp.ResponseCode = StatusCodes.Status200OK;
                 accessTokenRsp.ResponseMessage = "Success!";
@@ -58,6 +55,24 @@ namespace Customer_Management_System_Library.Auth
             }
 
             return accessTokenRsp;
+        }
+
+        private SecurityTokenDescriptor AddClaims(string merchantID)
+        {
+            var key = System.Text.Encoding.ASCII.GetBytes(JWTKey);
+            var claims = new List<Claim> {
+                    new(ClaimTypes.Sid, merchantID)
+                };
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(Double.Parse(_configuration.AccessTokenTimeout)),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Issuer = JWTIssuer,
+                Audience = JWTAudience
+            };
+
+            return tokenDescriptor;
         }
 
     }

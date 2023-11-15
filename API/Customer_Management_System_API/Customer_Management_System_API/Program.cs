@@ -3,6 +3,8 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Newtonsoft.Json;
 using System.Net;
+using Customer_Management_System_Library;
+using Customer_Management_System_Library.DataAccess;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +41,7 @@ builder.Services.AddSwaggerGen(setup =>
 });
 
 builder.Services.AddSingleton<ICMSConfig, CMSConfig>();
+builder.Services.AddSingleton<IDBUtils, DBUtils>();
 
 builder.Services.AddHttpClient();
 

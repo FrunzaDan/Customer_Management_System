@@ -3,6 +3,7 @@ using Customer_Management_System_Library.Models;
 using Customer_Management_System_Library.Configuration;
 using Customer_Management_System_Library.Auth;
 using Microsoft.AspNetCore.Mvc;
+using Customer_Management_System_Library;
 
 namespace Customer_Management_System_API.Controllers
 {
@@ -11,13 +12,13 @@ namespace Customer_Management_System_API.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly ICMSConfig _configuration;
-
         private readonly IHttpClientFactory _httpClientFactory;
-
-        public AuthenticationController(ICMSConfig configuration, IHttpClientFactory httpClientFactory)
+        private readonly IDBUtils _dbUtils;
+        public AuthenticationController(ICMSConfig configuration, IHttpClientFactory httpClientFactory, IDBUtils dbUtils)
         {
             _configuration = configuration;
             _httpClientFactory = httpClientFactory;
+            _dbUtils = dbUtils;
         }
 
         [Route("[action]")]
@@ -27,7 +28,7 @@ namespace Customer_Management_System_API.Controllers
             AccessTokenResponse accessTokenRsp = new AccessTokenResponse();
             try
             {
-                JWTCreation jwtCreation = new(_configuration);
+                JWTCreation jwtCreation = new(_configuration, _dbUtils);
 
                 if (merchantCredentials.MerchantID is not null && merchantCredentials.MerchantPassword is not null)
                 {
@@ -58,7 +59,7 @@ namespace Customer_Management_System_API.Controllers
             AccessTokenResponse accessTokenRsp = new AccessTokenResponse();
             try
             {
-                JWTCreation jwtCreation = new(_configuration);
+                JWTCreation jwtCreation = new(_configuration, _dbUtils);
                 if (merchantCredentials.MerchantID is not null && merchantCredentials.MerchantPassword is not null)
                 {
                     accessTokenRsp = jwtCreation.GenerateBearerJWT(merchantCredentials.MerchantID, merchantCredentials.MerchantPassword);
@@ -68,7 +69,7 @@ namespace Customer_Management_System_API.Controllers
                 HttpContext httpContext = HttpContext;
                 MerchantCredentials clientDetails = new MerchantCredentials();
                 JWTValidation jwtValidation = new JWTValidation(_configuration);
-                if (jwtValidation.Authorization(httpContext, accessTokenRsp.AccessToken))
+                if (jwtValidation.Authorize(httpContext, accessTokenRsp.AccessToken))
                 {
                     accessTokenRsp.ResponseCode = StatusCodes.Status200OK;
                     accessTokenRsp.ResponseMessage = "You Have Access Rights!";
@@ -100,7 +101,7 @@ namespace Customer_Management_System_API.Controllers
                 HttpContext httpContext = HttpContext;
                 MerchantCredentials clientDetails = new MerchantCredentials();
                 JWTValidation jwtValidation = new JWTValidation(_configuration);
-                if (jwtValidation.Authorization(httpContext, accessToken))
+                if (jwtValidation.Authorize(httpContext, accessToken))
                 {
                     verifyTokenRsp.ResponseCode = StatusCodes.Status200OK;
                     verifyTokenRsp.ResponseMessage = "You Have Access Rights!";
