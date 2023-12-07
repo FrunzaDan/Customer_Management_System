@@ -569,8 +569,8 @@ namespace Customer_Management_System_Library.DataAccess
                     sqlCommand.Connection = sqlConnection;
                     sqlCommand.CommandText = "dbo.usp_checkMerchantCredentials";
                     sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.Add(new SqlParameter("@var_MerchantID", merchantCredentials.MerchantID));
-                    sqlCommand.Parameters.Add(new SqlParameter("@var_MerchantPassword", merchantCredentials.MerchantPassword));
+                    sqlCommand.Parameters.Add(new SqlParameter("@var_MerchantID", merchantCredentials.merchantID));
+                    sqlCommand.Parameters.Add(new SqlParameter("@var_MerchantPassword", merchantCredentials.merchantPassword));
 
                     var sqlDataReader = sqlCommand.ExecuteReader();
                     while (sqlDataReader.Read() == true)

@@ -1,6 +1,6 @@
-export interface UserLoginResponse {
-    accessToken: string;
-    validUntil: string;
-    responseCode: string;
-    responseMessage: string;
+import { GenericResponse } from './generic-response';
+
+export interface UserLoginResponse extends GenericResponse {
+  accessToken: string;
+  validUntil: string;
 }

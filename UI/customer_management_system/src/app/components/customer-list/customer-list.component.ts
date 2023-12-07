@@ -53,9 +53,7 @@ export class CustomerListComponent {
     });
   }
 
-  onDeactivateClick(customer: Customer) {
-    this.router.navigate(['/deactivateCustomer'], {
-      queryParams: { id: customer.guid },
-    });
-  }
+  onDeactivateClick(customer: Customer) {}
+
+  onReactivateClick(customer: Customer) {}
 }

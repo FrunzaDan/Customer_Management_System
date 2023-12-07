@@ -23,8 +23,10 @@
             <td class="align-middle text-center">
                 <button (click)="onEditClick(customer)" type="button"
                     class="btn btn-primary shadow-none mx-1 my-1 px-2">Edit</button>
-                <button (click)="onDeactivateClick(customer)" type="button"
+                <button *ngIf="customer.customerStatus == 1901" (click)="onDeactivateClick(customer)" type="button"
                     class="btn btn-danger mx-1 my-1 px-2">Deactivate</button>
+                <button *ngIf="customer.customerStatus == 1903" (click)="onReactivateClick(customer)" type="button"
+                    class="btn btn-secondary mx-1 my-1 px-2">Reactivate</button>
             </td>
         </tr>
     </tbody>

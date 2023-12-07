@@ -9,7 +9,7 @@ import { environment } from '../../../environments/environment';
 @Component({
   selector: 'app-user-login',
   templateUrl: './user-login.component.html',
-  styleUrls: ['./user-login.component.css']
+  styleUrls: ['./user-login.component.css'],
 })
 export class UserLoginComponent implements OnInit, OnDestroy {
   userLoginRequest = {} as UserLoginRequest;
@@ -18,18 +18,20 @@ export class UserLoginComponent implements OnInit, OnDestroy {
   isEmailValid: boolean = true;
   error: null = null;
 
-  constructor(private builder: FormBuilder, private userLoginSerivce: UserLoginService,
-    private navbarService: NavbarService, private footerService: FooterService) {
+  constructor(
+    private builder: FormBuilder,
+    private userLoginSerivce: UserLoginService,
+    private navbarService: NavbarService,
+    private footerService: FooterService
+  ) {
     sessionStorage.clear();
   }
 
   ngOnInit(): void {
     sessionStorage.clear();
-    this.userLoginSerivce
-      .errorSubject
-      .subscribe(errorMessage => {
-        this.error = errorMessage;
-      });
+    this.userLoginSerivce.errorSubject.subscribe((errorMessage) => {
+      this.error = errorMessage;
+    });
     this.navbarService.hideNavbar();
     this.footerService.hideFooter();
   }
@@ -38,8 +40,7 @@ export class UserLoginComponent implements OnInit, OnDestroy {
     const pattern = RegExp(environment.UserName);
     if (pattern.test(this.username)) {
       this.isEmailValid = true;
-    }
-    else {
+    } else {
       this.isEmailValid = false;
     }
   }
@@ -48,8 +49,7 @@ export class UserLoginComponent implements OnInit, OnDestroy {
     if (type === 'username') {
       this.username = event.target.value;
       this.validateEmail();
-    }
-    else if (type === 'password') {
+    } else if (type === 'password') {
       this.password = event.target.value;
     }
   }
@@ -58,24 +58,30 @@ export class UserLoginComponent implements OnInit, OnDestroy {
     if (this.isEmailValid) {
       this.userLoginRequest.merchantID = this.username;
       this.userLoginRequest.merchantPassword = this.password;
-      this.userLoginSerivce
-        .login(this.userLoginRequest).subscribe({
-          next: response => {
-            this.userLoginSerivce.checkcredentials(response);
-          },
-          error: error => this.userLoginSerivce.errorSubject.next(error.error.responseMessage)
-        });
+      this.userLoginSerivce.login(this.userLoginRequest).subscribe({
+        next: (response) => {
+          this.userLoginSerivce.checkcredentials(response);
+        },
+        error: (error) => {
+          let errorStatusCode = error.status;
+          if (errorStatusCode == 403) {
+          } else if (errorStatusCode == 404) {
+            this.userLoginSerivce.errorSubject.next('Endpoint is down!');
+          } else {
+            this.userLoginSerivce.errorSubject.next('Server is down!');
+          }
+        },
+      });
     }
   }
 
   loginform = this.builder.group({
     id: this.builder.control('', Validators.required),
-    password: this.builder.control('', Validators.required)
+    password: this.builder.control('', Validators.required),
   });
 
   ngOnDestroy(): void {
     this.navbarService.displayNavbar();
     this.footerService.displayFooter();
   }
-
 }

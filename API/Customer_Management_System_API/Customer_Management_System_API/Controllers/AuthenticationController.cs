@@ -30,9 +30,9 @@ namespace Customer_Management_System_API.Controllers
             {
                 JWTCreation jwtCreation = new(_configuration, _dbUtils);
 
-                if (merchantCredentials.MerchantID is not null && merchantCredentials.MerchantPassword is not null)
+                if (merchantCredentials.merchantID is not null && merchantCredentials.merchantPassword is not null)
                 {
-                    accessTokenRsp = jwtCreation.GenerateBearerJWT(merchantCredentials.MerchantID, merchantCredentials.MerchantPassword);
+                    accessTokenRsp = jwtCreation.GenerateBearerJWT(merchantCredentials.merchantID, merchantCredentials.merchantPassword);
                     if (accessTokenRsp.ResponseCode == StatusCodes.Status200OK && !string.IsNullOrEmpty(accessTokenRsp.AccessToken))
                     {
                         var httpClient = _httpClientFactory.CreateClient();
@@ -49,43 +49,6 @@ namespace Customer_Management_System_API.Controllers
             {
                 Response.StatusCode = (int)accessTokenRsp.ResponseCode;
             }
-            return accessTokenRsp;
-        }
-
-        [Route("[action]")]
-        [HttpPost]
-        public AccessTokenResponse MerchantLogin(MerchantCredentials merchantCredentials)
-        {
-            AccessTokenResponse accessTokenRsp = new AccessTokenResponse();
-            try
-            {
-                JWTCreation jwtCreation = new(_configuration, _dbUtils);
-                if (merchantCredentials.MerchantID is not null && merchantCredentials.MerchantPassword is not null)
-                {
-                    accessTokenRsp = jwtCreation.GenerateBearerJWT(merchantCredentials.MerchantID, merchantCredentials.MerchantPassword);
-                }
-
-                ResponseModel response = new ResponseModel();
-                HttpContext httpContext = HttpContext;
-                MerchantCredentials clientDetails = new MerchantCredentials();
-                JWTValidation jwtValidation = new JWTValidation(_configuration);
-                if (jwtValidation.Authorize(httpContext, accessTokenRsp.AccessToken))
-                {
-                    accessTokenRsp.ResponseCode = StatusCodes.Status200OK;
-                    accessTokenRsp.ResponseMessage = "You Have Access Rights!";
-                }
-                else
-                {
-                    accessTokenRsp.ResponseCode = StatusCodes.Status403Forbidden;
-                    accessTokenRsp.ResponseMessage = "No Access Rights!";
-                }
-            }
-            catch (Exception ex)
-            {
-                accessTokenRsp.ResponseCode = StatusCodes.Status500InternalServerError;
-                accessTokenRsp.ResponseMessage = ex.ToString();
-            }
-            Response.StatusCode = (int)accessTokenRsp.ResponseCode;
             return accessTokenRsp;
         }
 

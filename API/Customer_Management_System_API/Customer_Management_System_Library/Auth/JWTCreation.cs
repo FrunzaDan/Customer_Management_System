@@ -28,8 +28,8 @@ namespace Customer_Management_System_Library.Auth
             AccessTokenResponse accessTokenRsp = new AccessTokenResponse();
             MerchantCredentials merchantCredentials = new MerchantCredentials();
 
-            merchantCredentials.MerchantID = merchantID;
-            merchantCredentials.MerchantPassword = merchantPassword;
+            merchantCredentials.merchantID = merchantID;
+            merchantCredentials.merchantPassword = merchantPassword;
 
             bool credentialsAreValid = _dbUtils.CheckMerchantCredentialsFromDB(merchantCredentials);
 
