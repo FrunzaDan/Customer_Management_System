@@ -23,8 +23,8 @@ namespace Customer_Management_System_Library.DataAccess
             try
             {
                 string newGuid = Guid.NewGuid().ToString();
-                SqlConnection sqlConnection = new SqlConnection();
-                sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB;
+                CurrentSQLConnection currentSQLConnection = new CurrentSQLConnection(_configuration);
+                SqlConnection sqlConnection = currentSQLConnection.CreateCurrentSqlConnection();
                 sqlConnection.Open();
 
                 using (SqlCommand sqlCommand = new SqlCommand())
@@ -111,8 +111,8 @@ namespace Customer_Management_System_Library.DataAccess
 
             try
             {
-                SqlConnection sqlConnection = new SqlConnection();
-                sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB;
+                CurrentSQLConnection currentSQLConnection = new CurrentSQLConnection(_configuration);
+                SqlConnection sqlConnection = currentSQLConnection.CreateCurrentSqlConnection();
                 sqlConnection.Open();
 
                 using (SqlCommand sqlCommand = new SqlCommand())
@@ -237,8 +237,8 @@ namespace Customer_Management_System_Library.DataAccess
 
             try
             {
-                SqlConnection sqlConnection = new SqlConnection();
-                sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB;
+                CurrentSQLConnection currentSQLConnection = new CurrentSQLConnection(_configuration);
+                SqlConnection sqlConnection = currentSQLConnection.CreateCurrentSqlConnection();
                 sqlConnection.Open();
 
                 using (SqlCommand sqlCommand = new SqlCommand())
@@ -356,8 +356,8 @@ namespace Customer_Management_System_Library.DataAccess
 
             try
             {
-                SqlConnection sqlConnection = new SqlConnection();
-                sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB;
+                CurrentSQLConnection currentSQLConnection = new CurrentSQLConnection(_configuration);
+                SqlConnection sqlConnection = currentSQLConnection.CreateCurrentSqlConnection();
                 sqlConnection.Open();
 
                 using (SqlCommand sqlCommand = new SqlCommand())
@@ -440,8 +440,8 @@ namespace Customer_Management_System_Library.DataAccess
 
             try
             {
-                SqlConnection sqlConnection = new SqlConnection();
-                sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB;
+                CurrentSQLConnection currentSQLConnection = new CurrentSQLConnection(_configuration);
+                SqlConnection sqlConnection = currentSQLConnection.CreateCurrentSqlConnection();
                 sqlConnection.Open();
 
                 using (SqlCommand sqlCommand = new SqlCommand())
@@ -501,8 +501,8 @@ namespace Customer_Management_System_Library.DataAccess
 
             try
             {
-                SqlConnection sqlConnection = new SqlConnection();
-                sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB;
+                CurrentSQLConnection currentSQLConnection = new CurrentSQLConnection(_configuration);
+                SqlConnection sqlConnection = currentSQLConnection.CreateCurrentSqlConnection();
                 sqlConnection.Open();
 
                 using (SqlCommand sqlCommand = new SqlCommand())
@@ -561,8 +561,8 @@ namespace Customer_Management_System_Library.DataAccess
 
             try
             {
-                SqlConnection sqlConnection = new SqlConnection();
-                sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB;
+                CurrentSQLConnection currentSQLConnection = new CurrentSQLConnection(_configuration);
+                SqlConnection sqlConnection = currentSQLConnection.CreateCurrentSqlConnection();
                 sqlConnection.Open();
                 using (SqlCommand sqlCommand = new SqlCommand())
                 {

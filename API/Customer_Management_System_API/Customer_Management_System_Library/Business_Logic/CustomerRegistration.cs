@@ -1,10 +1,5 @@
-﻿using System;
-using Azure;
-using Customer_Management_System_Library.Configuration;
-using Customer_Management_System_Library.DataAccess;
-using Customer_Management_System_Library.Models;
+﻿using Customer_Management_System_Library.Models;
 using Customer_Management_System_Library.Validations;
-using Microsoft.Extensions.Configuration;
 
 namespace Customer_Management_System_Library.Functions
 {
