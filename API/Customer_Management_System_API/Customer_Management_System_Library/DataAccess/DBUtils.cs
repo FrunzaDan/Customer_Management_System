@@ -10,9 +10,15 @@ namespace Customer_Management_System_Library.DataAccess
     {
         public readonly ICMSConfig _configuration;
 
+        public SqlConnection _sqlConnection;
+
         public DBUtils(ICMSConfig configuration)
         {
             _configuration = configuration;
+
+            CurrentSQLConnection currentSQLConnection = new CurrentSQLConnection(_configuration);
+            _sqlConnection = currentSQLConnection.CreateCurrentSqlConnection();
+
         }
 
         public ResponseModel RegisterCustomer(CustomerModel customer)
@@ -23,13 +29,11 @@ namespace Customer_Management_System_Library.DataAccess
             try
             {
                 string newGuid = Guid.NewGuid().ToString();
-                CurrentSQLConnection currentSQLConnection = new CurrentSQLConnection(_configuration);
-                SqlConnection sqlConnection = currentSQLConnection.CreateCurrentSqlConnection();
-                sqlConnection.Open();
+                _sqlConnection.Open();
 
                 using (SqlCommand sqlCommand = new SqlCommand())
                 {
-                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.Connection = _sqlConnection;
                     sqlCommand.CommandText = "dbo.usp_createCustomer";
                     sqlCommand.CommandType = CommandType.StoredProcedure;
 
@@ -87,7 +91,7 @@ namespace Customer_Management_System_Library.DataAccess
                     }
 
                     sqlDataReader.Close();
-                    sqlConnection.Close();
+                    _sqlConnection.Close();
                 }
             }
             catch (Exception ex)
@@ -111,13 +115,11 @@ namespace Customer_Management_System_Library.DataAccess
 
             try
             {
-                CurrentSQLConnection currentSQLConnection = new CurrentSQLConnection(_configuration);
-                SqlConnection sqlConnection = currentSQLConnection.CreateCurrentSqlConnection();
-                sqlConnection.Open();
+                _sqlConnection.Open();
 
                 using (SqlCommand sqlCommand = new SqlCommand())
                 {
-                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.Connection = _sqlConnection;
                     sqlCommand.CommandText = "dbo.usp_getCustomer";
                     sqlCommand.CommandType = CommandType.StoredProcedure;
                     sqlCommand.Parameters.Add(new SqlParameter("@var_SearchOption", customer.searchOption));
@@ -200,7 +202,7 @@ namespace Customer_Management_System_Library.DataAccess
                         catch { }
                     }
                     sqlDataReader.Close();
-                    sqlConnection.Close();
+                    _sqlConnection.Close();
                     if (!String.IsNullOrEmpty(customerResponse.Guid))
                     {
                         customerResponse.ResponseCode = 200;
@@ -237,13 +239,11 @@ namespace Customer_Management_System_Library.DataAccess
 
             try
             {
-                CurrentSQLConnection currentSQLConnection = new CurrentSQLConnection(_configuration);
-                SqlConnection sqlConnection = currentSQLConnection.CreateCurrentSqlConnection();
-                sqlConnection.Open();
+                _sqlConnection.Open();
 
                 using (SqlCommand sqlCommand = new SqlCommand())
                 {
-                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.Connection = _sqlConnection;
                     sqlCommand.CommandText = "dbo.usp_getCustomers";
                     sqlCommand.CommandType = CommandType.StoredProcedure;
 
@@ -329,7 +329,7 @@ namespace Customer_Management_System_Library.DataAccess
                         customerList.Add(customer);
                     }
                     sqlDataReader.Close();
-                    sqlConnection.Close();
+                    _sqlConnection.Close();
                     customerListResponse.ResponseCode = 200;
                     customerListResponse.ResponseMessage = "Customers found in DB!";
                     customerListResponse.customerList = customerList;
@@ -356,13 +356,11 @@ namespace Customer_Management_System_Library.DataAccess
 
             try
             {
-                CurrentSQLConnection currentSQLConnection = new CurrentSQLConnection(_configuration);
-                SqlConnection sqlConnection = currentSQLConnection.CreateCurrentSqlConnection();
-                sqlConnection.Open();
+                _sqlConnection.Open();
 
                 using (SqlCommand sqlCommand = new SqlCommand())
                 {
-                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.Connection = _sqlConnection;
                     sqlCommand.CommandText = "dbo.usp_editCustomer";
                     sqlCommand.CommandType = CommandType.StoredProcedure;
 
@@ -416,7 +414,8 @@ namespace Customer_Management_System_Library.DataAccess
                         }
                     }
                     sqlDataReader.Close();
-                    sqlConnection.Close();
+                    _sqlConnection.Close();
+                    _sqlConnection.Close();
                 }
 
             }
@@ -440,13 +439,11 @@ namespace Customer_Management_System_Library.DataAccess
 
             try
             {
-                CurrentSQLConnection currentSQLConnection = new CurrentSQLConnection(_configuration);
-                SqlConnection sqlConnection = currentSQLConnection.CreateCurrentSqlConnection();
-                sqlConnection.Open();
+                _sqlConnection.Open();
 
                 using (SqlCommand sqlCommand = new SqlCommand())
                 {
-                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.Connection = _sqlConnection;
                     sqlCommand.CommandText = "dbo.usp_deactivateCustomer";
                     sqlCommand.CommandType = CommandType.StoredProcedure;
 
@@ -477,7 +474,7 @@ namespace Customer_Management_System_Library.DataAccess
 
                     }
                     sqlDataReader.Close();
-                    sqlConnection.Close();
+                    _sqlConnection.Close();
                 }
 
             }
@@ -501,13 +498,11 @@ namespace Customer_Management_System_Library.DataAccess
 
             try
             {
-                CurrentSQLConnection currentSQLConnection = new CurrentSQLConnection(_configuration);
-                SqlConnection sqlConnection = currentSQLConnection.CreateCurrentSqlConnection();
-                sqlConnection.Open();
+                _sqlConnection.Open();
 
                 using (SqlCommand sqlCommand = new SqlCommand())
                 {
-                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.Connection = _sqlConnection;
                     sqlCommand.CommandText = "dbo.usp_deleteCustomer";
                     sqlCommand.CommandType = CommandType.StoredProcedure;
                     sqlCommand.Parameters.Add(new SqlParameter("@var_Guid", customerGUID));
@@ -537,7 +532,7 @@ namespace Customer_Management_System_Library.DataAccess
 
                     }
                     sqlDataReader.Close();
-                    sqlConnection.Close();
+                    _sqlConnection.Close();
                 }
 
             }
@@ -561,12 +556,10 @@ namespace Customer_Management_System_Library.DataAccess
 
             try
             {
-                CurrentSQLConnection currentSQLConnection = new CurrentSQLConnection(_configuration);
-                SqlConnection sqlConnection = currentSQLConnection.CreateCurrentSqlConnection();
-                sqlConnection.Open();
+                _sqlConnection.Open();
                 using (SqlCommand sqlCommand = new SqlCommand())
                 {
-                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.Connection = _sqlConnection;
                     sqlCommand.CommandText = "dbo.usp_checkMerchantCredentials";
                     sqlCommand.CommandType = CommandType.StoredProcedure;
                     sqlCommand.Parameters.Add(new SqlParameter("@var_MerchantID", merchantCredentials.merchantID));
@@ -592,7 +585,7 @@ namespace Customer_Management_System_Library.DataAccess
                         }
                     }
                     sqlDataReader.Close();
-                    sqlConnection.Close();
+                    _sqlConnection.Close();
                 }
 
             }
