@@ -1,7 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.Configuration;
-
-namespace Customer_Management_System_Library.Configuration
+﻿namespace Customer_Management_System_Library.Configuration
 {
     public class CMSConfig : ICMSConfig
     {
@@ -18,7 +15,5 @@ namespace Customer_Management_System_Library.Configuration
         public string JWTIssuer => _configuration["Auth:JWTIssuer"] ?? "Error";
         public string JWTAudience => _configuration["Auth:JWTAudience"] ?? "Error";
         public string AccessTokenTimeout => _configuration["Auth:AccessTokenTimeout"] ?? "Error";
-
     }
 }
-

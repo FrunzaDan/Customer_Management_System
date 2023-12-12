@@ -1,8 +1,8 @@
-﻿using System.Security.Claims;
-using Customer_Management_System_Library.Configuration;
+﻿using Customer_Management_System_Library.Configuration;
 using Customer_Management_System_Library.Models;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Customer_Management_System_Library.Auth
 {
@@ -74,7 +74,5 @@ namespace Customer_Management_System_Library.Auth
 
             return tokenDescriptor;
         }
-
     }
 }
-

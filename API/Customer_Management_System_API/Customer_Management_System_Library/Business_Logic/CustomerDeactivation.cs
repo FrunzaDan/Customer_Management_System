@@ -1,30 +1,30 @@
 ﻿using Customer_Management_System_Library.Models;
 
-namespace Customer_Management_System_Library{
-public class CustomerDeactivation
+namespace Customer_Management_System_Library
 {
-    private readonly IDBUtils _dbUtils;
-
-    public CustomerDeactivation(IDBUtils dBUtils)
+    public class CustomerDeactivation
     {
-        _dbUtils = dBUtils;
-    }
+        private readonly IDBUtils _dbUtils;
 
-    public ResponseModel DeactivateCustomer(string customerGUID)
-    {
-        ResponseModel response = new ResponseModel();
-        try
+        public CustomerDeactivation(IDBUtils dBUtils)
         {
-            response = _dbUtils.DeactivateCustomer(customerGUID);
-        }
-        catch (Exception ex)
-        {
-            response.ResponseCode = 500;
-            response.ResponseMessage = ex.ToString();
+            _dbUtils = dBUtils;
         }
 
-        return response;
+        public ResponseModel DeactivateCustomer(string customerGUID)
+        {
+            ResponseModel response = new ResponseModel();
+            try
+            {
+                response = _dbUtils.DeactivateCustomer(customerGUID);
+            }
+            catch (Exception ex)
+            {
+                response.ResponseCode = 500;
+                response.ResponseMessage = ex.ToString();
+            }
+
+            return response;
+        }
     }
 }
-}
-

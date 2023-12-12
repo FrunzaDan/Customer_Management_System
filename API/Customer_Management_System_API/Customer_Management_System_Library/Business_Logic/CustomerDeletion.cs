@@ -1,6 +1,4 @@
 ﻿using Customer_Management_System_Library.Models;
-using Customer_Management_System_Library.Configuration;
-using Customer_Management_System_Library.DataAccess;
 
 namespace Customer_Management_System_Library
 {
@@ -28,6 +26,5 @@ namespace Customer_Management_System_Library
 
             return response;
         }
-
     }
 }

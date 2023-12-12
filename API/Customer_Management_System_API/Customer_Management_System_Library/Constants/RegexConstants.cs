@@ -7,4 +7,3 @@
         public const string EmailRegex = "^\\S+@\\S+\\.\\S+$";
     }
 }
-

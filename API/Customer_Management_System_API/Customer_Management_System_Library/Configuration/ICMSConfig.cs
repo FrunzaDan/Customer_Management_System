@@ -1,5 +1,4 @@
-﻿using System;
-namespace Customer_Management_System_Library.Configuration
+﻿namespace Customer_Management_System_Library.Configuration
 {
     public interface ICMSConfig
     {
@@ -11,4 +10,3 @@ namespace Customer_Management_System_Library.Configuration
         string AccessTokenTimeout { get; }
     }
 }
-

@@ -1,5 +1,4 @@
-﻿
-using Customer_Management_System_Library.Constants;
+﻿using Customer_Management_System_Library.Constants;
 using System.Text.RegularExpressions;
 
 namespace Customer_Management_System_Library.Validations
@@ -26,4 +25,3 @@ namespace Customer_Management_System_Library.Validations
         }
     }
 }
-

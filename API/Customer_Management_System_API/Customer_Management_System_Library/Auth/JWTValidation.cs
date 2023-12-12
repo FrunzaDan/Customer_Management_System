@@ -1,7 +1,7 @@
-﻿using System.Security.Claims;
-using Customer_Management_System_Library.Configuration;
-using System.IdentityModel.Tokens.Jwt;
+﻿using Customer_Management_System_Library.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Customer_Management_System_Library.Auth
 {
@@ -11,6 +11,7 @@ namespace Customer_Management_System_Library.Auth
         private string JWTIssuer;
         private string JWTAudience;
         public readonly ICMSConfig _configuration;
+
         public JWTValidation(ICMSConfig configuration)
         {
             _configuration = configuration;
@@ -18,6 +19,7 @@ namespace Customer_Management_System_Library.Auth
             JWTIssuer = _configuration.JWTIssuer;
             JWTAudience = _configuration.JWTAudience;
         }
+
         public bool Authorize(HttpContext httpContext, string? bearerToken)
         {
             string authHeader = String.Empty;
@@ -109,4 +111,3 @@ namespace Customer_Management_System_Library.Auth
         }
     }
 }
-

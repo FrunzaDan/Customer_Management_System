@@ -5,7 +5,7 @@ namespace Customer_Management_System_Library.Functions
 {
     public class CustomerRegistration
     {
-        private readonly IDBUtils _dbUtils; 
+        private readonly IDBUtils _dbUtils;
 
         public CustomerRegistration(IDBUtils dBUtils)
         {
@@ -41,8 +41,6 @@ namespace Customer_Management_System_Library.Functions
                 response.ResponseMessage = ex.ToString();
             }
             return response;
-
         }
     }
 }
-

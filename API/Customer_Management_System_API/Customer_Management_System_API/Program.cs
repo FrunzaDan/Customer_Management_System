@@ -1,10 +1,10 @@
-﻿using Customer_Management_System_Library.Configuration;
-using Microsoft.OpenApi.Models;
+﻿using Customer_Management_System_Library;
+using Customer_Management_System_Library.Configuration;
+using Customer_Management_System_Library.DataAccess;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using System.Net;
-using Customer_Management_System_Library;
-using Customer_Management_System_Library.DataAccess;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,4 +72,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-

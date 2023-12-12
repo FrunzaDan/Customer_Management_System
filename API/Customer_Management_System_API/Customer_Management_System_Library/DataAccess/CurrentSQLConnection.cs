@@ -16,7 +16,7 @@ namespace Customer_Management_System_Library.DataAccess
         {
             SqlConnection sqlConnection = new SqlConnection();
             sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB_Docker;
-            if(TestSQLConnection(sqlConnection) == false) 
+            if (TestSQLConnection(sqlConnection) == false)
             {
                 sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB_Windows;
             }
@@ -25,7 +25,7 @@ namespace Customer_Management_System_Library.DataAccess
 
         private bool TestSQLConnection(SqlConnection sqlConnection)
         {
-            bool isConnected  = false;
+            bool isConnected = false;
             try
             {
                 sqlConnection.Open();
@@ -37,7 +37,6 @@ namespace Customer_Management_System_Library.DataAccess
             {
                 return isConnected;
             }
-            
         }
     }
 }

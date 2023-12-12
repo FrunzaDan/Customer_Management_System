@@ -1,5 +1,4 @@
-﻿using System;
-namespace Customer_Management_System_Library.Models
+﻿namespace Customer_Management_System_Library.Models
 {
     public class ResponseModel
     {
@@ -7,4 +6,3 @@ namespace Customer_Management_System_Library.Models
         public string? ResponseMessage { get; set; }
     }
 }
-

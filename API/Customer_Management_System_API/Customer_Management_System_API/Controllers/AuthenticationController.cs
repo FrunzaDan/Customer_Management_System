@@ -1,9 +1,9 @@
-using System.Net.Http.Headers;
-using Customer_Management_System_Library.Models;
-using Customer_Management_System_Library.Configuration;
-using Customer_Management_System_Library.Auth;
-using Microsoft.AspNetCore.Mvc;
 using Customer_Management_System_Library;
+using Customer_Management_System_Library.Auth;
+using Customer_Management_System_Library.Configuration;
+using Customer_Management_System_Library.Models;
+using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Headers;
 
 namespace Customer_Management_System_API.Controllers
 {
@@ -14,6 +14,7 @@ namespace Customer_Management_System_API.Controllers
         private readonly ICMSConfig _configuration;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IDBUtils _dbUtils;
+
         public AuthenticationController(ICMSConfig configuration, IHttpClientFactory httpClientFactory, IDBUtils dbUtils)
         {
             _configuration = configuration;
@@ -59,7 +60,6 @@ namespace Customer_Management_System_API.Controllers
             AccessTokenResponse verifyTokenRsp = new AccessTokenResponse();
             try
             {
-
                 ResponseModel response = new ResponseModel();
                 HttpContext httpContext = HttpContext;
                 MerchantCredentials clientDetails = new MerchantCredentials();

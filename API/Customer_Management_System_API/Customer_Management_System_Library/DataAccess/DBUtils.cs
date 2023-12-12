@@ -1,8 +1,8 @@
-﻿using System.Data;
-using Customer_Management_System_Library.Configuration;
+﻿using Customer_Management_System_Library.Configuration;
 using Customer_Management_System_Library.Helpers;
 using Customer_Management_System_Library.Models;
 using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace Customer_Management_System_Library.DataAccess
 {
@@ -18,7 +18,6 @@ namespace Customer_Management_System_Library.DataAccess
 
             CurrentSQLConnection currentSQLConnection = new CurrentSQLConnection(_configuration);
             _sqlConnection = currentSQLConnection.CreateCurrentSqlConnection();
-
         }
 
         public ResponseModel RegisterCustomer(CustomerModel customer)
@@ -72,10 +71,8 @@ namespace Customer_Management_System_Library.DataAccess
                         }
                         if (returnValue != 0 && returnValue != 200)
                         {
-
                             response.ResponseCode = 409;
                             response.ResponseMessage = Mappings.SQLResponseDictionary[returnValue];
-
                         }
                         else if (returnValue == 200)
                         {
@@ -87,7 +84,6 @@ namespace Customer_Management_System_Library.DataAccess
                             response.ResponseCode = 500;
                             response.ResponseMessage = "Failed to connect to DB!";
                         }
-
                     }
 
                     sqlDataReader.Close();
@@ -108,6 +104,7 @@ namespace Customer_Management_System_Library.DataAccess
 
             return response;
         }
+
         public CustomerModel GetCustomer(GetCustomerRequest customer)
         {
             CustomerModel customerResponse = new CustomerModel();
@@ -213,9 +210,7 @@ namespace Customer_Management_System_Library.DataAccess
                         customerResponse.ResponseCode = 404;
                         customerResponse.ResponseMessage = "Customer was not found in the DB!";
                     }
-
                 }
-
             }
             catch (Exception ex)
             {
@@ -231,9 +226,9 @@ namespace Customer_Management_System_Library.DataAccess
 
             return customerResponse;
         }
+
         public CustomerListModel GetCustomers()
         {
-
             CustomerListModel customerListResponse = new CustomerListModel();
             List<CustomerModel> customerList = new List<CustomerModel>();
 
@@ -334,7 +329,6 @@ namespace Customer_Management_System_Library.DataAccess
                     customerListResponse.ResponseMessage = "Customers found in DB!";
                     customerListResponse.customerList = customerList;
                 }
-
             }
             catch (Exception ex)
             {
@@ -350,6 +344,7 @@ namespace Customer_Management_System_Library.DataAccess
 
             return customerListResponse;
         }
+
         public ResponseModel EditCustomer(CustomerModel customer)
         {
             ResponseModel response = new ResponseModel();
@@ -417,7 +412,6 @@ namespace Customer_Management_System_Library.DataAccess
                     _sqlConnection.Close();
                     _sqlConnection.Close();
                 }
-
             }
             catch (Exception ex)
             {
@@ -433,6 +427,7 @@ namespace Customer_Management_System_Library.DataAccess
 
             return response;
         }
+
         public ResponseModel DeactivateCustomer(string customerGUID)
         {
             ResponseModel response = new ResponseModel();
@@ -471,12 +466,10 @@ namespace Customer_Management_System_Library.DataAccess
                             response.ResponseCode = 500;
                             response.ResponseMessage = ex.ToString();
                         }
-
                     }
                     sqlDataReader.Close();
                     _sqlConnection.Close();
                 }
-
             }
             catch (Exception ex)
             {
@@ -492,6 +485,7 @@ namespace Customer_Management_System_Library.DataAccess
 
             return response;
         }
+
         public ResponseModel DeleteCustomer(string customerGUID)
         {
             ResponseModel response = new ResponseModel();
@@ -529,12 +523,10 @@ namespace Customer_Management_System_Library.DataAccess
                             response.ResponseCode = 500;
                             response.ResponseMessage = ex.ToString();
                         }
-
                     }
                     sqlDataReader.Close();
                     _sqlConnection.Close();
                 }
-
             }
             catch (Exception ex)
             {
@@ -550,6 +542,7 @@ namespace Customer_Management_System_Library.DataAccess
 
             return response;
         }
+
         public bool CheckMerchantCredentialsFromDB(MerchantCredentials merchantCredentials)
         {
             bool isValid = false;
@@ -587,7 +580,6 @@ namespace Customer_Management_System_Library.DataAccess
                     sqlDataReader.Close();
                     _sqlConnection.Close();
                 }
-
             }
             catch (Exception)
             {
@@ -598,4 +590,3 @@ namespace Customer_Management_System_Library.DataAccess
         }
     }
 }
-

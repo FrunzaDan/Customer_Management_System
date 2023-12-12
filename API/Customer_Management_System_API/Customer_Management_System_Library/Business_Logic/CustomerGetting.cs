@@ -5,7 +5,7 @@ namespace Customer_Management_System_Library.Functions
 {
     public class CustomerGetting
     {
-        private readonly IDBUtils _dbUtils; 
+        private readonly IDBUtils _dbUtils;
 
         public CustomerGetting(IDBUtils dBUtils)
         {
@@ -15,7 +15,7 @@ namespace Customer_Management_System_Library.Functions
         public CustomerModel GetCustomerFunction(GetCustomerRequest getCustomerRqst)
         {
             CustomerModel response = new CustomerModel();
-            if(getCustomerRqst.searchVariable is null)
+            if (getCustomerRqst.searchVariable is null)
             {
                 response.ResponseCode = 500;
                 return response;
@@ -47,7 +47,6 @@ namespace Customer_Management_System_Library.Functions
                 response.ResponseMessage = ex.ToString();
             }
             return response;
-
         }
 
         public CustomerListModel GetCustomersFunction()
@@ -62,8 +61,6 @@ namespace Customer_Management_System_Library.Functions
             {
             }
             return response;
-
         }
     }
 }
-

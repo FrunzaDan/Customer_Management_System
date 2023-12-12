@@ -1,9 +1,9 @@
-using Customer_Management_System_Library.Models;
-using Customer_Management_System_Library.Configuration;
-using Customer_Management_System_Library.Auth;
-using Customer_Management_System_Library.Functions;
-using Microsoft.AspNetCore.Mvc;
 using Customer_Management_System_Library;
+using Customer_Management_System_Library.Auth;
+using Customer_Management_System_Library.Configuration;
+using Customer_Management_System_Library.Functions;
+using Customer_Management_System_Library.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Customer_Management_System_API.Controllers
 {

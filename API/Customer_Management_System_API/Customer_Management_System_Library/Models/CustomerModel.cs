@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-namespace Customer_Management_System_Library.Models
+﻿namespace Customer_Management_System_Library.Models
 {
     public class CustomerModel : ResponseModel
     {
@@ -23,4 +21,3 @@ namespace Customer_Management_System_Library.Models
         public string? searchVariable { get; set; }
     }
 }
-
