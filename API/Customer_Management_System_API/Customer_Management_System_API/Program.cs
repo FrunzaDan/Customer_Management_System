@@ -1,6 +1,5 @@
-﻿using Customer_Management_System_Library;
-using Customer_Management_System_Library.Configuration;
-using Customer_Management_System_Library.DataAccess;
+﻿using CustomerManagementSystem.BusinessLogic;
+using CustomerManagementSystem.BusinessLogic.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
@@ -8,8 +7,13 @@ using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Read appsettings.json
+builder.Services.ProcessConfigFile(builder.Configuration);
 
+// Adds the Business Logic Layer
+builder.Services.AddBusinessLogic();
+
+// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddMvc().AddNewtonsoftJson(options => options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore);
 builder.Services.AddEndpointsApiExplorer();
@@ -41,7 +45,6 @@ builder.Services.AddSwaggerGen(setup =>
 });
 
 builder.Services.AddSingleton<ICMSConfig, CMSConfig>();
-builder.Services.AddSingleton<IDBUtils, DBUtils>();
 
 builder.Services.AddHttpClient();
 

@@ -1,9 +1,6 @@
-using Customer_Management_System_Library;
-using Customer_Management_System_Library.Auth;
-using Customer_Management_System_Library.Configuration;
-using Customer_Management_System_Library.Models;
+using CustomerManagementSystem.BusinessLogic.Services;
+using CustomerManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http.Headers;
 
 namespace Customer_Management_System_API.Controllers
 {
@@ -11,45 +8,27 @@ namespace Customer_Management_System_API.Controllers
     [Route("[controller]")]
     public class AuthenticationController : ControllerBase
     {
-        private readonly ICMSConfig _configuration;
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IDBUtils _dbUtils;
 
-        public AuthenticationController(ICMSConfig configuration, IHttpClientFactory httpClientFactory, IDBUtils dbUtils)
+        private readonly IAuthService _authService;
+
+        public AuthenticationController(IHttpClientFactory httpClientFactory, IAuthService authService)
         {
-            _configuration = configuration;
             _httpClientFactory = httpClientFactory;
-            _dbUtils = dbUtils;
+            _authService = authService;
         }
 
         [Route("[action]")]
         [HttpPost]
         public AccessTokenResponse GetAccessToken(MerchantCredentials merchantCredentials)
         {
-            AccessTokenResponse accessTokenRsp = new AccessTokenResponse();
-            try
-            {
-                JWTCreation jwtCreation = new(_configuration, _dbUtils);
-
-                if (merchantCredentials.merchantID is not null && merchantCredentials.merchantPassword is not null)
-                {
-                    accessTokenRsp = jwtCreation.GenerateBearerJWT(merchantCredentials.merchantID, merchantCredentials.merchantPassword);
-                    if (accessTokenRsp.ResponseCode == StatusCodes.Status200OK && !string.IsNullOrEmpty(accessTokenRsp.AccessToken))
-                    {
-                        var httpClient = _httpClientFactory.CreateClient();
-                        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessTokenRsp.AccessToken);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                accessTokenRsp.ResponseCode = StatusCodes.Status500InternalServerError;
-                accessTokenRsp.ResponseMessage = ex.ToString();
-            }
+            var httpClient = _httpClientFactory.CreateClient();
+            var accessTokenRsp = _authService.GetAccessToken(merchantCredentials, httpClient);
             if (accessTokenRsp.ResponseCode is not null)
             {
                 Response.StatusCode = (int)accessTokenRsp.ResponseCode;
             }
+
             return accessTokenRsp;
         }
 
@@ -57,30 +36,13 @@ namespace Customer_Management_System_API.Controllers
         [HttpGet]
         public AccessTokenResponse VerifyToken(string accessToken)
         {
-            AccessTokenResponse verifyTokenRsp = new AccessTokenResponse();
-            try
+            var httpContext = HttpContext;
+            var verifyTokenRsp = _authService.VerifyToken(accessToken, httpContext);
+
+            if (verifyTokenRsp.ResponseCode is not null)
             {
-                ResponseModel response = new ResponseModel();
-                HttpContext httpContext = HttpContext;
-                MerchantCredentials clientDetails = new MerchantCredentials();
-                JWTValidation jwtValidation = new JWTValidation(_configuration);
-                if (jwtValidation.Authorize(httpContext, accessToken))
-                {
-                    verifyTokenRsp.ResponseCode = StatusCodes.Status200OK;
-                    verifyTokenRsp.ResponseMessage = "You Have Access Rights!";
-                }
-                else
-                {
-                    verifyTokenRsp.ResponseCode = StatusCodes.Status403Forbidden;
-                    verifyTokenRsp.ResponseMessage = "No Access Rights!";
-                }
+                Response.StatusCode = (int)verifyTokenRsp.ResponseCode;
             }
-            catch (Exception ex)
-            {
-                verifyTokenRsp.ResponseCode = StatusCodes.Status500InternalServerError;
-                verifyTokenRsp.ResponseMessage = ex.ToString();
-            }
-            Response.StatusCode = (int)verifyTokenRsp.ResponseCode;
             return verifyTokenRsp;
         }
     }
