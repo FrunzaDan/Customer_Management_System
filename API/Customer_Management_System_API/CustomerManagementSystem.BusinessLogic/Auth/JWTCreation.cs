@@ -12,9 +12,9 @@ namespace CustomerManagementSystem.BusinessLogic.Auth
         private string JWTKey;
         private string JWTIssuer;
         private string JWTAudience;
-        private readonly ICMSConfig _configuration;
+        private readonly IBLLConfig _configuration;
 
-        public JWTCreation(ICMSConfig configuration)
+        public JWTCreation(IBLLConfig configuration)
         {
             _configuration = configuration;
             JWTKey = _configuration.SecureJWTKey;

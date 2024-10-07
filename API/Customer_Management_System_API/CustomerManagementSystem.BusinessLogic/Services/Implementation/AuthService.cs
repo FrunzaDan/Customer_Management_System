@@ -8,9 +8,9 @@ namespace CustomerManagementSystem.BusinessLogic.Services.Implementation
 {
     public class AuthService : IAuthService
     {
-        private readonly ICMSConfig _configuration;
+        private readonly IBLLConfig _configuration;
 
-        public AuthService(ICMSConfig configuration)
+        public AuthService(IBLLConfig configuration)
         {
             _configuration = configuration;
         }
