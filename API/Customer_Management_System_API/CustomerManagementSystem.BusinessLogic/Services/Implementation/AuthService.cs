@@ -1,5 +1,6 @@
-﻿using CustomerManagementSystem.BusinessLogic.Auth;
+﻿using CustomerManagementSystem.BusinessLogic.AuthFunctions;
 using CustomerManagementSystem.BusinessLogic.Configuration;
+using CustomerManagementSystem.DataAccess.DBConnection;
 using CustomerManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Http;
 using System.Net.Http.Headers;
@@ -8,12 +9,20 @@ namespace CustomerManagementSystem.BusinessLogic.Services.Implementation
 {
     public class AuthService : IAuthService
     {
+        private readonly IBLLConfig _configuration;
+        private readonly IDBUtils _dbUtils;
+
+        public AuthService()
+        {
+            _configuration = ServiceLocator.GetService<IBLLConfig>();
+            _dbUtils = ServiceLocator.GetService<IDBUtils>();
+        }
         public AccessTokenResponse GetAccessToken(MerchantCredentials merchantCredentials, HttpClient httpClient)
         {
             AccessTokenResponse accessTokenRsp = new AccessTokenResponse();
             try
             {
-                JWTCreation jwtCreation = new JWTCreation();
+                JWTCreation jwtCreation = new JWTCreation(_configuration, _dbUtils);
 
                 if (merchantCredentials.merchantID is not null && merchantCredentials.merchantPassword is not null)
                 {
@@ -40,7 +49,7 @@ namespace CustomerManagementSystem.BusinessLogic.Services.Implementation
                 ResponseModel response = new ResponseModel();
 
                 MerchantCredentials clientDetails = new MerchantCredentials();
-                JWTValidation jwtValidation = new JWTValidation();
+                JWTValidation jwtValidation = new JWTValidation(_configuration);
                 if (jwtValidation.Authorize(httpContext, accessToken))
                 {
                     verifyTokenRsp.ResponseCode = StatusCodes.Status200OK;

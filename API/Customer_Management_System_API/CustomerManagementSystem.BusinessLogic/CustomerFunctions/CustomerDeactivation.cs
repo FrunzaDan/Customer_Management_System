@@ -1,22 +1,23 @@
-﻿using Customer_Management_System_Library.Models;
+﻿using CustomerManagementSystem.Domain.Models;
+using CustomerManagementSystem.DataAccess.DBConnection;
 
-namespace Customer_Management_System_Library
+namespace CustomerManagementSystem.BusinessLogic.CustomerFunctions
 {
-    public class CustomerDeletion
+    public class CustomerDeactivation
     {
         private readonly IDBUtils _dbUtils;
 
-        public CustomerDeletion(IDBUtils dBUtils)
+        public CustomerDeactivation(IDBUtils dBUtils)
         {
             _dbUtils = dBUtils;
         }
 
-        public ResponseModel DeleteCustomer(string customerGUID)
+        public ResponseModel DeactivateCustomer(string customerGUID)
         {
             ResponseModel response = new ResponseModel();
             try
             {
-                response = _dbUtils.DeleteCustomer(customerGUID);
+                response = _dbUtils.DeactivateCustomer(customerGUID);
             }
             catch (Exception ex)
             {

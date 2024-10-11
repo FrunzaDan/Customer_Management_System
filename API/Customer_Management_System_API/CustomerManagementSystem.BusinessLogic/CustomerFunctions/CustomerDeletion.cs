@@ -1,22 +1,23 @@
-﻿using Customer_Management_System_Library.Models;
+﻿using CustomerManagementSystem.Domain.Models;
+using CustomerManagementSystem.DataAccess.DBConnection;
 
 namespace Customer_Management_System_Library
 {
-    public class CustomerEditing
+    public class CustomerDeletion
     {
         private readonly IDBUtils _dbUtils;
 
-        public CustomerEditing(IDBUtils dBUtils)
+        public CustomerDeletion(IDBUtils dBUtils)
         {
             _dbUtils = dBUtils;
         }
 
-        public ResponseModel EditCustomerFunction(CustomerModel editCustomerRqst)
+        public ResponseModel DeleteCustomer(string customerGUID)
         {
             ResponseModel response = new ResponseModel();
             try
             {
-                response = _dbUtils.EditCustomer(editCustomerRqst);
+                response = _dbUtils.DeleteCustomer(customerGUID);
             }
             catch (Exception ex)
             {

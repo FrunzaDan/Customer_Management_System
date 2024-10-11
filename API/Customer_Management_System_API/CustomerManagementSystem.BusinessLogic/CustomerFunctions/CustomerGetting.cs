@@ -1,5 +1,6 @@
-﻿using Customer_Management_System_Library.Models;
-using Customer_Management_System_Library.Validations;
+﻿using CustomerManagementSystem.Domain.Models;
+using CustomerManagementSystem.BusinessLogic.Validations;
+using CustomerManagementSystem.DataAccess.DBConnection;
 
 namespace Customer_Management_System_Library.Functions
 {

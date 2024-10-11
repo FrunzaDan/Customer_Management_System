@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace CustomerManagementSystem.BusinessLogic.Auth
+namespace CustomerManagementSystem.BusinessLogic.AuthFunctions
 {
     public class JWTCreation
     {
@@ -16,14 +16,14 @@ namespace CustomerManagementSystem.BusinessLogic.Auth
         private readonly IBLLConfig _configuration;
         private readonly IDBUtils _dbUtils;
 
-        public JWTCreation()
+        public JWTCreation(IBLLConfig configuration, IDBUtils dbUtils)
         {
-            _configuration = ServiceLocator.GetService<IBLLConfig>();
+            _configuration = configuration;
             JWTKey = _configuration.SecureJWTKey;
             JWTIssuer = _configuration.JWTIssuer;
             JWTAudience = _configuration.JWTAudience;
 
-            _dbUtils = ServiceLocator.GetService<IDBUtils>();
+            _dbUtils = dbUtils;
         }
 
         public AccessTokenResponse GenerateBearerJWT(string merchantID, string merchantPassword)

@@ -1,15 +1,16 @@
 using CustomerManagementSystem.BusinessLogic.Services;
 using CustomerManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
+using System.Threading.Tasks;
 
-namespace Customer_Management_System_API.Controllers
+namespace CustomerManagementSystem.WebAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     public class AuthenticationController : ControllerBase
     {
         private readonly IHttpClientFactory _httpClientFactory;
-
         private readonly IAuthService _authService;
 
         public AuthenticationController(IHttpClientFactory httpClientFactory, IAuthService authService)
@@ -20,16 +21,33 @@ namespace Customer_Management_System_API.Controllers
 
         [Route("[action]")]
         [HttpPost]
-        public AccessTokenResponse GetAccessToken(MerchantCredentials merchantCredentials)
+        public IActionResult GetAccessToken([FromBody] MerchantCredentials merchantCredentials)
         {
-            var httpClient = _httpClientFactory.CreateClient();
-            var accessTokenRsp = _authService.GetAccessToken(merchantCredentials, httpClient);
-            if (accessTokenRsp.ResponseCode is not null)
+            if (!ModelState.IsValid)
             {
-                Response.StatusCode = (int)accessTokenRsp.ResponseCode;
+                return BadRequest(ModelState);
             }
+            try
+            {
+                var httpClient = _httpClientFactory.CreateClient();
+                var accessTokenRsp = _authService.GetAccessToken(merchantCredentials, httpClient);
+                if (accessTokenRsp.ResponseCode.HasValue)
+                {
+                    Response.StatusCode = (int)accessTokenRsp.ResponseCode;
+                }
 
-            return accessTokenRsp;
+                return Ok(accessTokenRsp);
+            }
+            catch (HttpRequestException httpEx)
+            {
+                // Log error (use a logger service if needed)
+                return StatusCode(500, $"Error making HTTP request: {httpEx.Message}");
+            }
+            catch (Exception ex)
+            {
+                // Log error
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [Route("[action]")]

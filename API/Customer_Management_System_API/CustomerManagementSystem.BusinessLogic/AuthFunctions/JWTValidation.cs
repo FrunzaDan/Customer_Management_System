@@ -4,7 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace CustomerManagementSystem.BusinessLogic.Auth
+namespace CustomerManagementSystem.BusinessLogic.AuthFunctions
 {
     public class JWTValidation
     {
@@ -13,9 +13,9 @@ namespace CustomerManagementSystem.BusinessLogic.Auth
         private string JWTAudience;
         public readonly IBLLConfig _configuration;
 
-        public JWTValidation()
+        public JWTValidation(IBLLConfig configuration)
         {
-            _configuration = _configuration = ServiceLocator.GetService<IBLLConfig>(); ;
+            _configuration = configuration;
             JWTKey = _configuration.SecureJWTKey;
             JWTIssuer = _configuration.JWTIssuer;
             JWTAudience = _configuration.JWTAudience;
@@ -32,7 +32,7 @@ namespace CustomerManagementSystem.BusinessLogic.Auth
             {
                 authHeader = "Bearer " + bearerToken;
             }
-            JWTValidation jwtValidation = new JWTValidation();
+            JWTValidation jwtValidation = new JWTValidation(_configuration);
 
             if (string.IsNullOrEmpty(authHeader))
             {

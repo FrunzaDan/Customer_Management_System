@@ -1,19 +1,26 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CustomerManagementSystem.BusinessLogic;
-
-public static class ServiceLocator
+namespace CustomerManagementSystem.BusinessLogic
 {
-    public static IServiceProvider? Instance { get; private set; }
-
-    public static void SetLocatorProvider(IServiceProvider serviceProvider)
+    public static class ServiceLocator
     {
-        Instance = serviceProvider;
-    }
+        private static IServiceProvider? _instance;
 
-    public static T GetService<T>() where T : class
-    {
-        return Instance?.GetService<T>() ?? throw new InvalidOperationException("Service provider not initialized.");
+        public static IServiceProvider Instance
+        {
+            get => _instance ?? throw new InvalidOperationException("Service provider not initialized.");
+            set => _instance = value;
+        }
+
+        public static void SetLocatorProvider(IServiceProvider serviceProvider)
+        {
+            Instance = serviceProvider;
+        }
+
+        public static T GetService<T>() where T : class
+        {
+            return Instance?.GetService<T>() ?? throw new InvalidOperationException("Service provider not initialized.");
+        }
     }
 }
