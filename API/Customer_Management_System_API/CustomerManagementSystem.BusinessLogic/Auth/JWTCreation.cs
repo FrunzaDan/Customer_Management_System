@@ -1,4 +1,5 @@
 ﻿using CustomerManagementSystem.BusinessLogic.Configuration;
+using CustomerManagementSystem.DataAccess.DBConnection;
 using CustomerManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
@@ -13,13 +14,16 @@ namespace CustomerManagementSystem.BusinessLogic.Auth
         private string JWTIssuer;
         private string JWTAudience;
         private readonly IBLLConfig _configuration;
+        private readonly IDBUtils _dbUtils;
 
-        public JWTCreation(IBLLConfig configuration)
+        public JWTCreation()
         {
-            _configuration = configuration;
+            _configuration = ServiceLocator.GetService<IBLLConfig>();
             JWTKey = _configuration.SecureJWTKey;
             JWTIssuer = _configuration.JWTIssuer;
             JWTAudience = _configuration.JWTAudience;
+
+            _dbUtils = ServiceLocator.GetService<IDBUtils>();
         }
 
         public AccessTokenResponse GenerateBearerJWT(string merchantID, string merchantPassword)
@@ -30,8 +34,7 @@ namespace CustomerManagementSystem.BusinessLogic.Auth
             merchantCredentials.merchantID = merchantID;
             merchantCredentials.merchantPassword = merchantPassword;
 
-            // bool credentialsAreValid = _dbUtils.CheckMerchantCredentialsFromDB(merchantCredentials);
-            bool credentialsAreValid = true;
+            bool credentialsAreValid = _dbUtils.CheckMerchantCredentialsFromDB(merchantCredentials);
 
             if (credentialsAreValid)
             {

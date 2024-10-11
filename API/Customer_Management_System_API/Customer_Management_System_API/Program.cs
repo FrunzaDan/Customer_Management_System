@@ -45,8 +45,6 @@ builder.Services.AddSwaggerGen(setup =>
     });
 });
 
-builder.Services.AddSingleton<IBLLConfig, BLLConfig>();
-
 builder.Services.AddHttpClient();
 
 builder.Services.AddHttpsRedirection(options =>
@@ -56,6 +54,8 @@ builder.Services.AddHttpsRedirection(options =>
 });
 
 var app = builder.Build();
+
+ServiceLocator.SetLocatorProvider(app.Services);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

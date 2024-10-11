@@ -1,4 +1,4 @@
-﻿using CustomerManagementSystem.BusinessLogic.Configuration;
+﻿using CustomerManagementSystem.DataAccess.Configuration;
 //using CustomerManagementSystem.BusinessLogic.Services;
 //using CustomerManagementSystem.BusinessLogic.Services.Implementation;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +16,6 @@ public static class DataAccessDependencyInjection
 
     private static void AddServices(this IServiceCollection services)
     {
-        //services.AddScoped<IAuthService, AuthService>();
         services.AddSingleton<IDALConfig, DALConfig>();
     }
 }

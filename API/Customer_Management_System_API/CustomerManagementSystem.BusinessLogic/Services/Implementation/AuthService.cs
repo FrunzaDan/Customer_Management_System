@@ -8,19 +8,12 @@ namespace CustomerManagementSystem.BusinessLogic.Services.Implementation
 {
     public class AuthService : IAuthService
     {
-        private readonly IBLLConfig _configuration;
-
-        public AuthService(IBLLConfig configuration)
-        {
-            _configuration = configuration;
-        }
-
         public AccessTokenResponse GetAccessToken(MerchantCredentials merchantCredentials, HttpClient httpClient)
         {
             AccessTokenResponse accessTokenRsp = new AccessTokenResponse();
             try
             {
-                JWTCreation jwtCreation = new JWTCreation(_configuration);
+                JWTCreation jwtCreation = new JWTCreation();
 
                 if (merchantCredentials.merchantID is not null && merchantCredentials.merchantPassword is not null)
                 {
@@ -47,7 +40,7 @@ namespace CustomerManagementSystem.BusinessLogic.Services.Implementation
                 ResponseModel response = new ResponseModel();
 
                 MerchantCredentials clientDetails = new MerchantCredentials();
-                JWTValidation jwtValidation = new JWTValidation(_configuration);
+                JWTValidation jwtValidation = new JWTValidation();
                 if (jwtValidation.Authorize(httpContext, accessToken))
                 {
                     verifyTokenRsp.ResponseCode = StatusCodes.Status200OK;

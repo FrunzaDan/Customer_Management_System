@@ -13,9 +13,9 @@ namespace CustomerManagementSystem.BusinessLogic.Auth
         private string JWTAudience;
         public readonly IBLLConfig _configuration;
 
-        public JWTValidation(IBLLConfig configuration)
+        public JWTValidation()
         {
-            _configuration = configuration;
+            _configuration = _configuration = ServiceLocator.GetService<IBLLConfig>(); ;
             JWTKey = _configuration.SecureJWTKey;
             JWTIssuer = _configuration.JWTIssuer;
             JWTAudience = _configuration.JWTAudience;
@@ -32,7 +32,7 @@ namespace CustomerManagementSystem.BusinessLogic.Auth
             {
                 authHeader = "Bearer " + bearerToken;
             }
-            JWTValidation jwtValidation = new JWTValidation(_configuration);
+            JWTValidation jwtValidation = new JWTValidation();
 
             if (string.IsNullOrEmpty(authHeader))
             {

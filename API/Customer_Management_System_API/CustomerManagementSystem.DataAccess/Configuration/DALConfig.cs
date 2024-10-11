@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-namespace CustomerManagementSystem.BusinessLogic.Configuration
+namespace CustomerManagementSystem.DataAccess.Configuration
 {
     public class DALConfig : IDALConfig
     {

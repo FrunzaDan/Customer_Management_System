@@ -1,6 +1,7 @@
 ﻿using CustomerManagementSystem.BusinessLogic.Configuration;
 using CustomerManagementSystem.BusinessLogic.Services;
 using CustomerManagementSystem.BusinessLogic.Services.Implementation;
+using CustomerManagementSystem.DataAccess.DBConnection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CustomerManagementSystem.BusinessLogic;
@@ -16,7 +17,8 @@ public static class BusinessLogicDependencyInjection
 
     private static void AddServices(this IServiceCollection services)
     {
-        services.AddScoped<IAuthService, AuthService>();
+        services.AddSingleton<IAuthService, AuthService>();
+        services.AddSingleton<IDBUtils, DBUtils>();
         services.AddSingleton<IBLLConfig, BLLConfig>();
     }
 }

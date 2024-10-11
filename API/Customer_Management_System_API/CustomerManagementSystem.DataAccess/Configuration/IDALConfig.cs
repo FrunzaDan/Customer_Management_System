@@ -1,4 +1,4 @@
-﻿namespace CustomerManagementSystem.BusinessLogic.Configuration
+﻿namespace CustomerManagementSystem.DataAccess.Configuration
 {
     public interface IDALConfig
     {
