@@ -5,8 +5,17 @@ namespace CustomerManagementSystem.BusinessLogic.Services
 {
     public interface ICustomerService
     {
-        public AccessTokenResponse GetCustomers(MerchantCredentials merchantCredentials, HttpClient httpClient);
+        public CustomerListModel GetCustomers();
 
-        public AccessTokenResponse VerifyToken(string accessToken, HttpContext httpContext);
+        public CustomerModel GetCustomer(GetCustomerRequest getCustomerRqst);
+
+        public ResponseModel RegisterCustomerFunction(CustomerModel customerRqst);
+
+        public ResponseModel EditCustomerFunction(CustomerModel editCustomerRqst);
+
+        public ResponseModel DeactivateCustomer(string customerGUID);
+
+        public ResponseModel DeleteCustomer(string customerGUID);
+
     }
 }
