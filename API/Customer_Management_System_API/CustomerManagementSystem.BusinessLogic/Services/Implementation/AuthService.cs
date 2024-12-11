@@ -1,72 +1,75 @@
-﻿using CustomerManagementSystem.BusinessLogic.AuthFunctions;
+﻿using System.Net.Http.Headers;
+using CustomerManagementSystem.BusinessLogic.AuthFunctions;
 using CustomerManagementSystem.BusinessLogic.Configuration;
 using CustomerManagementSystem.DataAccess.DBConnection;
 using CustomerManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Http;
-using System.Net.Http.Headers;
 
-namespace CustomerManagementSystem.BusinessLogic.Services.Implementation
+namespace CustomerManagementSystem.BusinessLogic.Services.Implementation;
+
+public class AuthService : IAuthService
 {
-    public class AuthService : IAuthService
+    private readonly IBLLConfig _configuration;
+    private readonly IDBUtils _dbUtils;
+
+    public AuthService()
     {
-        private readonly IBLLConfig _configuration;
-        private readonly IDBUtils _dbUtils;
+        _configuration = ServiceLocator.GetService<IBLLConfig>();
+        _dbUtils = ServiceLocator.GetService<IDBUtils>();
+    }
 
-        public AuthService()
+    public AccessTokenResponse GetAccessToken(MerchantCredentials merchantCredentials, HttpClient httpClient)
+    {
+        var accessTokenRsp = new AccessTokenResponse();
+        try
         {
-            _configuration = ServiceLocator.GetService<IBLLConfig>();
-            _dbUtils = ServiceLocator.GetService<IDBUtils>();
+            var jwtCreation = new JwtCreation(_configuration, _dbUtils);
+
+            if (merchantCredentials.merchantID is not null && merchantCredentials.merchantPassword is not null)
+            {
+                accessTokenRsp = jwtCreation.GenerateBearerJwt(merchantCredentials.merchantID,
+                    merchantCredentials.merchantPassword);
+                if (accessTokenRsp.ResponseCode == StatusCodes.Status200OK &&
+                    !string.IsNullOrEmpty(accessTokenRsp.AccessToken))
+                    httpClient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", accessTokenRsp.AccessToken);
+            }
         }
-        public AccessTokenResponse GetAccessToken(MerchantCredentials merchantCredentials, HttpClient httpClient)
+        catch (Exception ex)
         {
-            AccessTokenResponse accessTokenRsp = new AccessTokenResponse();
-            try
-            {
-                JWTCreation jwtCreation = new JWTCreation(_configuration, _dbUtils);
-
-                if (merchantCredentials.merchantID is not null && merchantCredentials.merchantPassword is not null)
-                {
-                    accessTokenRsp = jwtCreation.GenerateBearerJWT(merchantCredentials.merchantID, merchantCredentials.merchantPassword);
-                    if (accessTokenRsp.ResponseCode == StatusCodes.Status200OK && !string.IsNullOrEmpty(accessTokenRsp.AccessToken))
-                    {
-                        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessTokenRsp.AccessToken);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                accessTokenRsp.ResponseCode = StatusCodes.Status500InternalServerError;
-                accessTokenRsp.ResponseMessage = ex.ToString();
-            }
-            return accessTokenRsp;
+            accessTokenRsp.ResponseCode = StatusCodes.Status500InternalServerError;
+            accessTokenRsp.ResponseMessage = ex.ToString();
         }
 
-        public AccessTokenResponse VerifyToken(string accessToken, HttpContext httpContext)
-        {
-            AccessTokenResponse verifyTokenRsp = new AccessTokenResponse();
-            try
-            {
-                ResponseModel response = new ResponseModel();
+        return accessTokenRsp;
+    }
 
-                MerchantCredentials clientDetails = new MerchantCredentials();
-                JWTValidation jwtValidation = new JWTValidation(_configuration);
-                if (jwtValidation.Authorize(httpContext, accessToken))
-                {
-                    verifyTokenRsp.ResponseCode = StatusCodes.Status200OK;
-                    verifyTokenRsp.ResponseMessage = "You Have Access Rights!";
-                }
-                else
-                {
-                    verifyTokenRsp.ResponseCode = StatusCodes.Status403Forbidden;
-                    verifyTokenRsp.ResponseMessage = "No Access Rights!";
-                }
-            }
-            catch (Exception ex)
+    public AccessTokenResponse VerifyToken(string accessToken, HttpContext httpContext)
+    {
+        var verifyTokenRsp = new AccessTokenResponse();
+        try
+        {
+            var response = new ResponseModel();
+
+            var clientDetails = new MerchantCredentials();
+            var jwtValidation = new JWTValidation(_configuration);
+            if (jwtValidation.Authorize(httpContext, accessToken))
             {
-                verifyTokenRsp.ResponseCode = StatusCodes.Status500InternalServerError;
-                verifyTokenRsp.ResponseMessage = ex.ToString();
+                verifyTokenRsp.ResponseCode = StatusCodes.Status200OK;
+                verifyTokenRsp.ResponseMessage = "You Have Access Rights!";
             }
-            return verifyTokenRsp;
+            else
+            {
+                verifyTokenRsp.ResponseCode = StatusCodes.Status403Forbidden;
+                verifyTokenRsp.ResponseMessage = "No Access Rights!";
+            }
         }
+        catch (Exception ex)
+        {
+            verifyTokenRsp.ResponseCode = StatusCodes.Status500InternalServerError;
+            verifyTokenRsp.ResponseMessage = ex.ToString();
+        }
+
+        return verifyTokenRsp;
     }
 }

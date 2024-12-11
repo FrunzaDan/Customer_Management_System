@@ -1,6 +1,4 @@
 ﻿using CustomerManagementSystem.DataAccess.Configuration;
-//using CustomerManagementSystem.BusinessLogic.Services;
-//using CustomerManagementSystem.BusinessLogic.Services.Implementation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CustomerManagementSystem.DataAccess;

@@ -1,31 +1,30 @@
-﻿using CustomerManagementSystem.Domain.Models;
-using CustomerManagementSystem.DataAccess.DBConnection;
+﻿using CustomerManagementSystem.DataAccess.DBConnection;
+using CustomerManagementSystem.Domain.Models;
 
-namespace CustomerManagementSystem.BusinessLogic.CustomerFunctions
+namespace CustomerManagementSystem.BusinessLogic.CustomerFunctions;
+
+public class CustomerDeactivation
 {
-    public class CustomerDeactivation
+    private readonly IDBUtils _dbUtils;
+
+    public CustomerDeactivation(IDBUtils dBUtils)
     {
-        private readonly IDBUtils _dbUtils;
+        _dbUtils = dBUtils;
+    }
 
-        public CustomerDeactivation(IDBUtils dBUtils)
+    public ResponseModel DeactivateCustomer(string customerGUID)
+    {
+        var response = new ResponseModel();
+        try
         {
-            _dbUtils = dBUtils;
+            response = _dbUtils.DeactivateCustomer(customerGUID);
+        }
+        catch (Exception ex)
+        {
+            response.ResponseCode = 500;
+            response.ResponseMessage = ex.ToString();
         }
 
-        public ResponseModel DeactivateCustomer(string customerGUID)
-        {
-            ResponseModel response = new ResponseModel();
-            try
-            {
-                response = _dbUtils.DeactivateCustomer(customerGUID);
-            }
-            catch (Exception ex)
-            {
-                response.ResponseCode = 500;
-                response.ResponseMessage = ex.ToString();
-            }
-
-            return response;
-        }
+        return response;
     }
 }

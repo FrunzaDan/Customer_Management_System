@@ -1,47 +1,48 @@
-﻿using CustomerManagementSystem.Domain.Models;
-using CustomerManagementSystem.BusinessLogic.Validations;
+﻿using CustomerManagementSystem.BusinessLogic.Validations;
 using CustomerManagementSystem.DataAccess.DBConnection;
+using CustomerManagementSystem.Domain.Models;
 
-namespace Customer_Management_System_Library.Functions
+namespace Customer_Management_System_Library.Functions;
+
+public class CustomerRegistration
 {
-    public class CustomerRegistration
+    private readonly IDBUtils _dbUtils;
+
+    public CustomerRegistration(IDBUtils dBUtils)
     {
-        private readonly IDBUtils _dbUtils;
+        _dbUtils = dBUtils;
+    }
 
-        public CustomerRegistration(IDBUtils dBUtils)
+    public ResponseModel RegisterCustomerFunction(CustomerModel customerRqst)
+    {
+        var response = new ResponseModel();
+        if (customerRqst.Email is not null && customerRqst.MSISDN is not null)
         {
-            _dbUtils = dBUtils;
+            if (EmailValidation.ValidateEmail(customerRqst.Email) == false)
+            {
+                response.ResponseCode = 409;
+                response.ResponseMessage = "Invalid Email";
+                return response;
+            }
+
+            if (MSISDNValidation.ValidateMsisdn(customerRqst.MSISDN) == false)
+            {
+                response.ResponseCode = 409;
+                response.ResponseMessage = "Invalid MSISDN";
+                return response;
+            }
         }
 
-        public ResponseModel RegisterCustomerFunction(CustomerModel customerRqst)
+        try
         {
-            ResponseModel response = new ResponseModel();
-            if (customerRqst.Email is not null && customerRqst.MSISDN is not null)
-            {
-                if (EmailValidation.ValidateEmail(customerRqst.Email) == false)
-                {
-                    response.ResponseCode = 409;
-                    response.ResponseMessage = "Invalid Email";
-                    return response;
-                }
-                if (MSISDNValidation.ValidateMsisdn(customerRqst.MSISDN) == false)
-                {
-                    response.ResponseCode = 409;
-                    response.ResponseMessage = "Invalid MSISDN";
-                    return response;
-                }
-            }
-
-            try
-            {
-                response = _dbUtils.RegisterCustomer(customerRqst);
-            }
-            catch (Exception ex)
-            {
-                response.ResponseCode = 500;
-                response.ResponseMessage = ex.ToString();
-            }
-            return response;
+            response = _dbUtils.RegisterCustomer(customerRqst);
         }
+        catch (Exception ex)
+        {
+            response.ResponseCode = 500;
+            response.ResponseMessage = ex.ToString();
+        }
+
+        return response;
     }
 }

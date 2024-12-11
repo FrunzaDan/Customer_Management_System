@@ -1,31 +1,30 @@
-﻿using CustomerManagementSystem.Domain.Models;
-using CustomerManagementSystem.DataAccess.DBConnection;
+﻿using CustomerManagementSystem.DataAccess.DBConnection;
+using CustomerManagementSystem.Domain.Models;
 
-namespace Customer_Management_System_Library
+namespace Customer_Management_System_Library;
+
+public class CustomerDeletion
 {
-    public class CustomerDeletion
+    private readonly IDBUtils _dbUtils;
+
+    public CustomerDeletion(IDBUtils dBUtils)
     {
-        private readonly IDBUtils _dbUtils;
+        _dbUtils = dBUtils;
+    }
 
-        public CustomerDeletion(IDBUtils dBUtils)
+    public ResponseModel DeleteCustomer(string customerGUID)
+    {
+        var response = new ResponseModel();
+        try
         {
-            _dbUtils = dBUtils;
+            response = _dbUtils.DeleteCustomer(customerGUID);
+        }
+        catch (Exception ex)
+        {
+            response.ResponseCode = 500;
+            response.ResponseMessage = ex.ToString();
         }
 
-        public ResponseModel DeleteCustomer(string customerGUID)
-        {
-            ResponseModel response = new ResponseModel();
-            try
-            {
-                response = _dbUtils.DeleteCustomer(customerGUID);
-            }
-            catch (Exception ex)
-            {
-                response.ResponseCode = 500;
-                response.ResponseMessage = ex.ToString();
-            }
-
-            return response;
-        }
+        return response;
     }
 }

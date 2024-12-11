@@ -17,7 +17,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/CustomerManagementSystem.WebAPI/bin/Debug/net7.0/CustomerManagementSystem.WebAPI.dll",
+            "program": "${workspaceFolder}/CustomerManagementSystem.WebAPI/bin/Debug/net8.0/CustomerManagementSystem.WebAPI.dll",
             "args": [],
             "cwd": "${workspaceFolder}/CustomerManagementSystem.WebAPI",
             "stopAtEntry": false,

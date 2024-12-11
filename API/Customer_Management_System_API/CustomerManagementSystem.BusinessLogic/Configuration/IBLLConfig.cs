@@ -1,10 +1,9 @@
-﻿namespace CustomerManagementSystem.BusinessLogic.Configuration
+﻿namespace CustomerManagementSystem.BusinessLogic.Configuration;
+
+public interface IBLLConfig
 {
-    public interface IBLLConfig
-    {
-        string SecureJWTKey { get; }
-        string JWTIssuer { get; }
-        string JWTAudience { get; }
-        string AccessTokenTimeout { get; }
-    }
+    string SecureJWTKey { get; }
+    string JWTIssuer { get; }
+    string JWTAudience { get; }
+    string AccessTokenTimeout { get; }
 }

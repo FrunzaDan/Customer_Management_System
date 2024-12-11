@@ -1,27 +1,18 @@
-﻿using CustomerManagementSystem.BusinessLogic.Constants;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
+using CustomerManagementSystem.BusinessLogic.Constants;
 
-namespace CustomerManagementSystem.BusinessLogic.Validations
+namespace CustomerManagementSystem.BusinessLogic.Validations;
+
+public class EmailValidation
 {
-    public class EmailValidation
+    public static bool ValidateEmail(string email)
     {
-        public static bool ValidateEmail(string email)
-        {
-            if (string.IsNullOrEmpty(email))
-            {
-                return false;
-            }
+        if (string.IsNullOrEmpty(email)) return false;
 
-            string pattern = RegexConstants.EmailRegex;
-            Match regexMatch = Regex.Match(email, pattern, RegexOptions.IgnoreCase);
-            if (regexMatch.Success)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
+        var pattern = RegexConstants.EmailRegex;
+        var regexMatch = Regex.Match(email, pattern, RegexOptions.IgnoreCase);
+        if (regexMatch.Success)
+            return true;
+        return false;
     }
 }

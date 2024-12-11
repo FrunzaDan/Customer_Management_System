@@ -1,42 +1,39 @@
-﻿using Microsoft.Data.SqlClient;
-using CustomerManagementSystem.DataAccess.Configuration;
+﻿using CustomerManagementSystem.DataAccess.Configuration;
+using Microsoft.Data.SqlClient;
 
-namespace CustomerManagementSystem.DataAccess.DBConnection
+namespace CustomerManagementSystem.DataAccess.DBConnection;
+
+public class CurrentSqlConnection
 {
-    public class CurrentSQLConnection
+    private readonly IDALConfig _configuration;
+
+    public CurrentSqlConnection(IDALConfig configuration)
     {
-        public readonly IDALConfig _configuration;
+        _configuration = configuration;
+    }
 
-        public CurrentSQLConnection(IDALConfig configuration)
+    public SqlConnection CreateCurrentSqlConnection()
+    {
+        var sqlConnection = new SqlConnection();
+        sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB_Docker;
+        if (CheckSqlConnection(sqlConnection) == false)
+            sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB_Windows;
+        return sqlConnection;
+    }
+
+    private bool CheckSqlConnection(SqlConnection sqlConnection)
+    {
+        var isConnected = false;
+        try
         {
-            _configuration = configuration;
+            sqlConnection.Open();
+            sqlConnection.Close();
+            isConnected = true;
+            return isConnected;
         }
-
-        public SqlConnection CreateCurrentSqlConnection()
+        catch (SqlException)
         {
-            SqlConnection sqlConnection = new SqlConnection();
-            sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB_Docker;
-            if (CheckSQLConnection(sqlConnection) == false)
-            {
-                sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB_Windows;
-            }
-            return sqlConnection;
-        }
-
-        private bool CheckSQLConnection(SqlConnection sqlConnection)
-        {
-            bool isConnected = false;
-            try
-            {
-                sqlConnection.Open();
-                sqlConnection.Close();
-                isConnected = true;
-                return isConnected;
-            }
-            catch (SqlException)
-            {
-                return isConnected;
-            }
+            return isConnected;
         }
     }
 }

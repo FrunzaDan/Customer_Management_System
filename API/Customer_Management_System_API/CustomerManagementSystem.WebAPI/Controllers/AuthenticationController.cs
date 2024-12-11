@@ -1,67 +1,57 @@
 using CustomerManagementSystem.BusinessLogic.Services;
 using CustomerManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
-using System.Threading.Tasks;
 
-namespace CustomerManagementSystem.WebAPI.Controllers
+namespace CustomerManagementSystem.WebAPI.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class AuthenticationController : ControllerBase
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class AuthenticationController : ControllerBase
+    private readonly IAuthService _authService;
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    public AuthenticationController(
+        IHttpClientFactory httpClientFactory, 
+        IAuthService authService)
     {
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IAuthService _authService;
+        _httpClientFactory = httpClientFactory;
+        _authService = authService;
+    }
 
-        public AuthenticationController(IHttpClientFactory httpClientFactory, IAuthService authService)
+    [Route("[action]")]
+    [HttpPost]
+    public IActionResult GetAccessToken([FromBody] MerchantCredentials merchantCredentials)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        try
         {
-            _httpClientFactory = httpClientFactory;
-            _authService = authService;
-        }
+            var httpClient = _httpClientFactory.CreateClient();
+            var accessTokenRsp = _authService.GetAccessToken(merchantCredentials, httpClient);
+            if (accessTokenRsp.ResponseCode.HasValue) Response.StatusCode = (int)accessTokenRsp.ResponseCode;
 
-        [Route("[action]")]
-        [HttpPost]
-        public IActionResult GetAccessToken([FromBody] MerchantCredentials merchantCredentials)
+            return Ok(accessTokenRsp);
+        }
+        catch (HttpRequestException httpEx)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            try
-            {
-                var httpClient = _httpClientFactory.CreateClient();
-                var accessTokenRsp = _authService.GetAccessToken(merchantCredentials, httpClient);
-                if (accessTokenRsp.ResponseCode.HasValue)
-                {
-                    Response.StatusCode = (int)accessTokenRsp.ResponseCode;
-                }
-
-                return Ok(accessTokenRsp);
-            }
-            catch (HttpRequestException httpEx)
-            {
-                // Log error (use a logger service if needed)
-                return StatusCode(500, $"Error making HTTP request: {httpEx.Message}");
-            }
-            catch (Exception ex)
-            {
-                // Log error
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            // Log error (use a logger service if needed)
+            return StatusCode(500, $"Error making HTTP request: {httpEx.Message}");
         }
-
-        [Route("[action]")]
-        [HttpGet]
-        public AccessTokenResponse VerifyToken(string accessToken)
+        catch (Exception ex)
         {
-            var httpContext = HttpContext;
-            var verifyTokenRsp = _authService.VerifyToken(accessToken, httpContext);
-
-            if (verifyTokenRsp.ResponseCode is not null)
-            {
-                Response.StatusCode = (int)verifyTokenRsp.ResponseCode;
-            }
-            return verifyTokenRsp;
+            // Log error
+            return StatusCode(500, $"Internal server error: {ex.Message}");
         }
+    }
+
+    [Route("[action]")]
+    [HttpGet]
+    public AccessTokenResponse VerifyToken(string accessToken)
+    {
+        var httpContext = HttpContext;
+        var verifyTokenRsp = _authService.VerifyToken(accessToken, httpContext);
+
+        if (verifyTokenRsp.ResponseCode is not null) Response.StatusCode = (int)verifyTokenRsp.ResponseCode;
+        return verifyTokenRsp;
     }
 }
