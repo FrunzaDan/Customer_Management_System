@@ -1,7 +1,7 @@
 ﻿namespace CustomerManagementSystem.DataAccess.Configuration;
 
-public interface IDALConfig
+public interface IDalConfig
 {
-    string CustomerManagementSystemDB_Windows { get; }
-    string CustomerManagementSystemDB_Docker { get; }
+    string CustomerManagementSystemDbWindows { get; }
+    string CustomerManagementSystemDbDocker { get; }
 }

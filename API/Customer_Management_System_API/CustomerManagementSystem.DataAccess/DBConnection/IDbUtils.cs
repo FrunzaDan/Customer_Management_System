@@ -2,7 +2,7 @@
 
 namespace CustomerManagementSystem.DataAccess.DBConnection;
 
-public interface IDBUtils
+public interface IDbUtils
 {
     public ResponseModel RegisterCustomer(CustomerModel customer);
 
@@ -12,9 +12,9 @@ public interface IDBUtils
 
     public ResponseModel EditCustomer(CustomerModel editCustomerRqst);
 
-    public ResponseModel DeactivateCustomer(string customerGUID);
+    public ResponseModel DeactivateCustomer(string customerGuid);
 
-    public ResponseModel DeleteCustomer(string customerGUID);
+    public ResponseModel DeleteCustomer(string customerGuid);
 
-    public bool CheckMerchantCredentialsFromDB(MerchantCredentials merchantCredentials);
+    public bool CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials);
 }

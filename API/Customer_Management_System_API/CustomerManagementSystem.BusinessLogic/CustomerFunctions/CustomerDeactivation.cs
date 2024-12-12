@@ -5,9 +5,9 @@ namespace CustomerManagementSystem.BusinessLogic.CustomerFunctions;
 
 public class CustomerDeactivation
 {
-    private readonly IDBUtils _dbUtils;
+    private readonly IDbUtils _dbUtils;
 
-    public CustomerDeactivation(IDBUtils dBUtils)
+    public CustomerDeactivation(IDbUtils dBUtils)
     {
         _dbUtils = dBUtils;
     }

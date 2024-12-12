@@ -5,11 +5,11 @@ using Microsoft.Data.SqlClient;
 
 namespace CustomerManagementSystem.DataAccess.DBConnection;
 
-public class DbUtils : IDBUtils
+public class DbUtils : IDbUtils
 {
     private readonly SqlConnection _sqlConnection;
 
-    public DbUtils(IDALConfig configuration)
+    public DbUtils(IDalConfig configuration)
     {
         var currentSqlConnection = new CurrentSqlConnection(configuration);
         _sqlConnection = currentSqlConnection.CreateCurrentSqlConnection();
@@ -35,7 +35,7 @@ public class DbUtils : IDBUtils
                 sqlCommand.Parameters.Add(new SqlParameter("@var_FirstName", customer.FirstName));
                 sqlCommand.Parameters.Add(new SqlParameter("@var_LastName", customer.LastName));
                 sqlCommand.Parameters.Add(new SqlParameter("@var_Email", customer.Email));
-                sqlCommand.Parameters.Add(new SqlParameter("@var_MSISDN", customer.MSISDN));
+                sqlCommand.Parameters.Add(new SqlParameter("@var_MSISDN", customer.Msisdn));
                 sqlCommand.Parameters.Add(new SqlParameter("@var_Gender", customer.Gender));
                 sqlCommand.Parameters.Add(new SqlParameter("@var_Birthdate", customer.Birthdate));
 
@@ -47,7 +47,7 @@ public class DbUtils : IDBUtils
                         sqlCommand.Parameters.Add(new SqlParameter("@var_Country", address.Country));
                         sqlCommand.Parameters.Add(new SqlParameter("@var_County", address.County));
                         sqlCommand.Parameters.Add(new SqlParameter("@var_Town", address.Town));
-                        sqlCommand.Parameters.Add(new SqlParameter("@var_ZIP", address.ZIP));
+                        sqlCommand.Parameters.Add(new SqlParameter("@var_ZIP", address.Zip));
                         sqlCommand.Parameters.Add(new SqlParameter("@var_Street", address.Street));
                         sqlCommand.Parameters.Add(new SqlParameter("@var_Number", address.Number));
                     }
@@ -113,8 +113,8 @@ public class DbUtils : IDBUtils
                 sqlCommand.Connection = _sqlConnection;
                 sqlCommand.CommandText = "dbo.usp_getCustomer";
                 sqlCommand.CommandType = CommandType.StoredProcedure;
-                sqlCommand.Parameters.Add(new SqlParameter("@var_SearchOption", customer.searchOption));
-                sqlCommand.Parameters.Add(new SqlParameter("@var_SearchVariable", customer.searchVariable));
+                sqlCommand.Parameters.Add(new SqlParameter("@var_SearchOption", customer.SearchOption));
+                sqlCommand.Parameters.Add(new SqlParameter("@var_SearchVariable", customer.SearchVariable));
 
                 var sqlDataReader = sqlCommand.ExecuteReader();
                 while (sqlDataReader.Read())
@@ -157,7 +157,7 @@ public class DbUtils : IDBUtils
 
                     try
                     {
-                        customerResponse.MSISDN = sqlDataReader["msisdn"].ToString();
+                        customerResponse.Msisdn = sqlDataReader["msisdn"].ToString();
                     }
                     catch
                     {
@@ -213,7 +213,7 @@ public class DbUtils : IDBUtils
 
                     try
                     {
-                        customerResponse.Address.ZIP = sqlDataReader["zip_code"].ToString();
+                        customerResponse.Address.Zip = sqlDataReader["zip_code"].ToString();
                     }
                     catch
                     {
@@ -336,7 +336,7 @@ public class DbUtils : IDBUtils
 
                     try
                     {
-                        customer.MSISDN = sqlDataReader["msisdn"].ToString();
+                        customer.Msisdn = sqlDataReader["msisdn"].ToString();
                     }
                     catch
                     {
@@ -392,7 +392,7 @@ public class DbUtils : IDBUtils
 
                     try
                     {
-                        customer.Address.ZIP = sqlDataReader["zip_code"].ToString();
+                        customer.Address.Zip = sqlDataReader["zip_code"].ToString();
                     }
                     catch
                     {
@@ -432,7 +432,7 @@ public class DbUtils : IDBUtils
                 _sqlConnection.Close();
                 customerListResponse.ResponseCode = 200;
                 customerListResponse.ResponseMessage = "Customers found in DB!";
-                customerListResponse.customerList = customerList;
+                customerListResponse.CustomerList = customerList;
             }
         }
         catch (Exception ex)
@@ -468,7 +468,7 @@ public class DbUtils : IDBUtils
                 sqlCommand.Parameters.Add(new SqlParameter("@var_FirstName", customer.FirstName));
                 sqlCommand.Parameters.Add(new SqlParameter("@var_LastName", customer.LastName));
                 sqlCommand.Parameters.Add(new SqlParameter("@var_Email", customer.Email));
-                sqlCommand.Parameters.Add(new SqlParameter("@var_MSISDN", customer.MSISDN));
+                sqlCommand.Parameters.Add(new SqlParameter("@var_MSISDN", customer.Msisdn));
                 sqlCommand.Parameters.Add(new SqlParameter("@var_Gender", customer.Gender));
                 sqlCommand.Parameters.Add(new SqlParameter("@var_Birthdate", customer.Birthdate));
 
@@ -480,7 +480,7 @@ public class DbUtils : IDBUtils
                         sqlCommand.Parameters.Add(new SqlParameter("@var_Country", address.Country));
                         sqlCommand.Parameters.Add(new SqlParameter("@var_County", address.County));
                         sqlCommand.Parameters.Add(new SqlParameter("@var_Town", address.Town));
-                        sqlCommand.Parameters.Add(new SqlParameter("@var_ZIP", address.ZIP));
+                        sqlCommand.Parameters.Add(new SqlParameter("@var_ZIP", address.Zip));
                         sqlCommand.Parameters.Add(new SqlParameter("@var_Street", address.Street));
                         sqlCommand.Parameters.Add(new SqlParameter("@var_Number", address.Number));
                     }
@@ -533,7 +533,7 @@ public class DbUtils : IDBUtils
         return response;
     }
 
-    public ResponseModel DeactivateCustomer(string customerGUID)
+    public ResponseModel DeactivateCustomer(string customerGuid)
     {
         var response = new ResponseModel();
 
@@ -547,7 +547,7 @@ public class DbUtils : IDBUtils
                 sqlCommand.CommandText = "dbo.usp_deactivateCustomer";
                 sqlCommand.CommandType = CommandType.StoredProcedure;
 
-                sqlCommand.Parameters.Add(new SqlParameter("@var_Guid", customerGUID));
+                sqlCommand.Parameters.Add(new SqlParameter("@var_Guid", customerGuid));
 
                 var sqlDataReader = sqlCommand.ExecuteReader();
                 while (sqlDataReader.Read())
@@ -646,7 +646,7 @@ public class DbUtils : IDBUtils
         return response;
     }
 
-    public bool CheckMerchantCredentialsFromDB(MerchantCredentials merchantCredentials)
+    public bool CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials)
     {
         var isValid = false;
 
@@ -658,9 +658,9 @@ public class DbUtils : IDBUtils
                 sqlCommand.Connection = _sqlConnection;
                 sqlCommand.CommandText = "dbo.usp_checkMerchantCredentials";
                 sqlCommand.CommandType = CommandType.StoredProcedure;
-                sqlCommand.Parameters.Add(new SqlParameter("@var_MerchantID", merchantCredentials.merchantID));
+                sqlCommand.Parameters.Add(new SqlParameter("@var_MerchantID", merchantCredentials.MerchantId));
                 sqlCommand.Parameters.Add(new SqlParameter("@var_MerchantPassword",
-                    merchantCredentials.merchantPassword));
+                    merchantCredentials.MerchantPassword));
 
                 var sqlDataReader = sqlCommand.ExecuteReader();
                 while (sqlDataReader.Read())

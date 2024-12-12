@@ -2,22 +2,22 @@
 
 namespace CustomerManagementSystem.DataAccess.Configuration;
 
-public class DALConfig : IDALConfig
+public class DalConfig : IDalConfig
 {
     private readonly IConfiguration _configuration;
 
-    public DALConfig(IConfiguration configuration)
+    public DalConfig(IConfiguration configuration)
     {
         _configuration = configuration;
     }
 
-    public string CustomerManagementSystemDB_Windows =>
+    public string CustomerManagementSystemDbWindows =>
         _configuration["ConnectionStrings:CustomerManagementSystemDB_Windows"] ?? throw new ArgumentNullException(
-            nameof(CustomerManagementSystemDB_Windows),
+            nameof(CustomerManagementSystemDbWindows),
             "The config value CustomerManagementSystemDB_Windows cannot be null.");
 
-    public string CustomerManagementSystemDB_Docker =>
+    public string CustomerManagementSystemDbDocker =>
         _configuration["ConnectionStrings:CustomerManagementSystemDB_Docker"] ?? throw new ArgumentNullException(
-            nameof(CustomerManagementSystemDB_Docker),
+            nameof(CustomerManagementSystemDbDocker),
             "The config value CustomerManagementSystemDB_Docker cannot be null.");
 }

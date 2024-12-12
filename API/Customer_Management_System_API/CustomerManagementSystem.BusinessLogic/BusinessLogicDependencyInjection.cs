@@ -18,7 +18,7 @@ public static class BusinessLogicDependencyInjection
     private static void AddServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
-        services.AddSingleton<IDBUtils, DbUtils>();
-        services.AddSingleton<IBLLConfig, BLLConfig>();
+        services.AddSingleton<IDbUtils, DbUtils>();
+        services.AddSingleton<IBllConfig, BllConfig>();
     }
 }

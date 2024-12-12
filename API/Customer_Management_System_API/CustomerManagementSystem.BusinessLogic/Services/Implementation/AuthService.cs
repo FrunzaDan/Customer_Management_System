@@ -9,14 +9,8 @@ namespace CustomerManagementSystem.BusinessLogic.Services.Implementation;
 
 public class AuthService : IAuthService
 {
-    private readonly IBLLConfig _configuration;
-    private readonly IDBUtils _dbUtils;
-
-    public AuthService()
-    {
-        _configuration = ServiceLocator.GetService<IBLLConfig>();
-        _dbUtils = ServiceLocator.GetService<IDBUtils>();
-    }
+    private readonly IBllConfig _configuration = ServiceLocator.GetService<IBllConfig>();
+    private readonly IDbUtils _dbUtils = ServiceLocator.GetService<IDbUtils>();
 
     public AccessTokenResponse GetAccessToken(MerchantCredentials merchantCredentials, HttpClient httpClient)
     {
@@ -25,10 +19,10 @@ public class AuthService : IAuthService
         {
             var jwtCreation = new JwtCreation(_configuration, _dbUtils);
 
-            if (merchantCredentials.merchantID is not null && merchantCredentials.merchantPassword is not null)
+            if (merchantCredentials.MerchantId is not null && merchantCredentials.MerchantPassword is not null)
             {
-                accessTokenRsp = jwtCreation.GenerateBearerJwt(merchantCredentials.merchantID,
-                    merchantCredentials.merchantPassword);
+                accessTokenRsp = jwtCreation.GenerateBearerJwt(merchantCredentials.MerchantId,
+                    merchantCredentials.MerchantPassword);
                 if (accessTokenRsp.ResponseCode == StatusCodes.Status200OK &&
                     !string.IsNullOrEmpty(accessTokenRsp.AccessToken))
                     httpClient.DefaultRequestHeaders.Authorization =
@@ -49,10 +43,7 @@ public class AuthService : IAuthService
         var verifyTokenRsp = new AccessTokenResponse();
         try
         {
-            var response = new ResponseModel();
-
-            var clientDetails = new MerchantCredentials();
-            var jwtValidation = new JWTValidation(_configuration);
+            var jwtValidation = new JwtValidation(_configuration);
             if (jwtValidation.Authorize(httpContext, accessToken))
             {
                 verifyTokenRsp.ResponseCode = StatusCodes.Status200OK;

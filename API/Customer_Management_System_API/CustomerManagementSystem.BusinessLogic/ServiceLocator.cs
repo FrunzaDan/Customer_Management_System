@@ -4,6 +4,7 @@ namespace CustomerManagementSystem.BusinessLogic;
 
 public static class ServiceLocator
 {
+    private static readonly object Lock = new();
     private static IServiceProvider? _instance;
 
     public static IServiceProvider Instance
@@ -11,16 +12,18 @@ public static class ServiceLocator
         get => _instance ?? throw new InvalidOperationException("Service provider not initialized.");
         private set
         {
-            if (_instance != null)
-                throw new InvalidOperationException("Service provider has already been set and cannot be modified.");
-            _instance = value;
+            lock (Lock)
+            {
+                if (_instance != null)
+                    throw new InvalidOperationException("Service provider has already been set and cannot be modified.");
+                _instance = value;
+            }
         }
     }
 
     public static void SetLocatorProvider(IServiceProvider serviceProvider)
     {
-        if (serviceProvider == null)
-            throw new ArgumentNullException(nameof(serviceProvider));
+        ArgumentNullException.ThrowIfNull(serviceProvider);
 
         Instance = serviceProvider;
     }

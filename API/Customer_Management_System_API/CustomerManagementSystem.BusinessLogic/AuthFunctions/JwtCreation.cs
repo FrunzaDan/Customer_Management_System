@@ -11,18 +11,18 @@ namespace CustomerManagementSystem.BusinessLogic.AuthFunctions;
 
 public class JwtCreation
 {
-    private readonly IBLLConfig _configuration;
-    private readonly IDBUtils _dbUtils;
+    private readonly IBllConfig _configuration;
+    private readonly IDbUtils _dbUtils;
     private readonly string _jwtAudience;
     private readonly string _jwtIssuer;
     private readonly byte[] _jwtKey;
 
-    public JwtCreation(IBLLConfig configuration, IDBUtils dbUtils)
+    public JwtCreation(IBllConfig configuration, IDbUtils dbUtils)
     {
         _configuration = configuration;
-        _jwtKey = Encoding.ASCII.GetBytes(_configuration.SecureJWTKey);
-        _jwtIssuer = _configuration.JWTIssuer;
-        _jwtAudience = _configuration.JWTAudience;
+        _jwtKey = Encoding.ASCII.GetBytes(_configuration.SecureJwtKey);
+        _jwtIssuer = _configuration.JwtIssuer;
+        _jwtAudience = _configuration.JwtAudience;
         _dbUtils = dbUtils;
     }
 
@@ -44,11 +44,11 @@ public class JwtCreation
             // Validate merchant credentials
             var merchantCredentials = new MerchantCredentials
             {
-                merchantID = merchantId,
-                merchantPassword = merchantPassword
+                MerchantId = merchantId,
+                MerchantPassword = merchantPassword
             };
 
-            var credentialsAreValid = _dbUtils.CheckMerchantCredentialsFromDB(merchantCredentials);
+            var credentialsAreValid = _dbUtils.CheckMerchantCredentialsFromDb(merchantCredentials);
             if (!credentialsAreValid)
             {
                 return new AccessTokenResponse
@@ -89,11 +89,11 @@ public class JwtCreation
         }
     }
 
-    private SecurityTokenDescriptor BuildTokenDescriptor(string merchantID)
+    private SecurityTokenDescriptor BuildTokenDescriptor(string merchantId)
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Sid, merchantID),
+            new Claim(ClaimTypes.Sid, merchantId),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // Unique ID for the token
             new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString("o")) // Issued at
         };

@@ -5,9 +5,9 @@ namespace CustomerManagementSystem.DataAccess.DBConnection;
 
 public class CurrentSqlConnection
 {
-    private readonly IDALConfig _configuration;
+    private readonly IDalConfig _configuration;
 
-    public CurrentSqlConnection(IDALConfig configuration)
+    public CurrentSqlConnection(IDalConfig configuration)
     {
         _configuration = configuration;
     }
@@ -15,9 +15,9 @@ public class CurrentSqlConnection
     public SqlConnection CreateCurrentSqlConnection()
     {
         var sqlConnection = new SqlConnection();
-        sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB_Docker;
+        sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDbDocker;
         if (CheckSqlConnection(sqlConnection) == false)
-            sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDB_Windows;
+            sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDbWindows;
         return sqlConnection;
     }
 

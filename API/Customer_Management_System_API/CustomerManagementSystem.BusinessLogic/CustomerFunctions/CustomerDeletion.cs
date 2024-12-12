@@ -1,13 +1,13 @@
 ﻿using CustomerManagementSystem.DataAccess.DBConnection;
 using CustomerManagementSystem.Domain.Models;
 
-namespace Customer_Management_System_Library;
+namespace CustomerManagementSystem.BusinessLogic.CustomerFunctions;
 
 public class CustomerDeletion
 {
-    private readonly IDBUtils _dbUtils;
+    private readonly IDbUtils _dbUtils;
 
-    public CustomerDeletion(IDBUtils dBUtils)
+    public CustomerDeletion(IDbUtils dBUtils)
     {
         _dbUtils = dBUtils;
     }

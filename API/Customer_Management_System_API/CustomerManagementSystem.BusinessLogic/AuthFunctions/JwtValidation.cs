@@ -7,29 +7,29 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace CustomerManagementSystem.BusinessLogic.AuthFunctions;
 
-public class JWTValidation
+public class JwtValidation
 {
-    public readonly IBLLConfig _configuration;
-    private readonly string JWTAudience;
-    private readonly string JWTIssuer;
-    private readonly string JWTKey;
+    private readonly IBllConfig _configuration;
+    private readonly string _jwtAudience;
+    private readonly string _jwtIssuer;
+    private readonly string _jwtKey;
 
-    public JWTValidation(IBLLConfig configuration)
+    public JwtValidation(IBllConfig configuration)
     {
         _configuration = configuration;
-        JWTKey = _configuration.SecureJWTKey;
-        JWTIssuer = _configuration.JWTIssuer;
-        JWTAudience = _configuration.JWTAudience;
+        _jwtKey = _configuration.SecureJwtKey;
+        _jwtIssuer = _configuration.JwtIssuer;
+        _jwtAudience = _configuration.JwtAudience;
     }
 
     public bool Authorize(HttpContext httpContext, string? bearerToken)
     {
-        var authHeader = string.Empty;
+        string authHeader;
         if (string.IsNullOrEmpty(bearerToken))
-            authHeader = httpContext.Request.Headers["Authorization"].ToString() ?? "Error";
+            authHeader = httpContext.Request.Headers["Authorization"].ToString();
         else
             authHeader = "Bearer " + bearerToken;
-        var jwtValidation = new JWTValidation(_configuration);
+        var jwtValidation = new JwtValidation(_configuration);
 
         if (string.IsNullOrEmpty(authHeader)) return false;
 
@@ -39,15 +39,14 @@ public class JWTValidation
         if (string.IsNullOrEmpty(jwt))
             throw new SecurityTokenException("Missing JWT Token in Authorization HTTP Header");
 
-        if (jwtValidation.ValidateToken(jwt)) return true;
-        return false;
+        return jwtValidation.ValidateToken(jwt);
     }
 
-    private bool ValidateToken(string token)
+    private bool ValidateToken(string? token)
     {
         if (token == null) return false;
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(JWTKey);
+        var key = Encoding.ASCII.GetBytes(_jwtKey);
         try
         {
             tokenHandler.ValidateToken(token, new TokenValidationParameters
@@ -55,9 +54,9 @@ public class JWTValidation
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
                 ValidateIssuer = true,
-                ValidIssuer = JWTIssuer,
+                ValidIssuer = _jwtIssuer,
                 ValidateAudience = true,
-                ValidAudience = JWTAudience,
+                ValidAudience = _jwtAudience,
                 ClockSkew = TimeSpan.Zero
             }, out var validatedToken);
 
@@ -65,18 +64,15 @@ public class JWTValidation
 
             var claimsAreValid = VerifyClaims(jwtToken);
 
-            if (claimsAreValid)
-                return true;
-            return false;
+            return claimsAreValid;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            ex.ToString();
             return false;
         }
     }
 
-    private bool VerifyClaims(JwtSecurityToken jwtToken)
+    private static bool VerifyClaims(JwtSecurityToken jwtToken)
     {
         var claimsAreValid = false;
 

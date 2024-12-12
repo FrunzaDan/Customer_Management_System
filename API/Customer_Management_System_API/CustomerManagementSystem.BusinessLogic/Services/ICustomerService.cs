@@ -6,13 +6,13 @@ public interface ICustomerService
 {
     public CustomerListModel GetCustomers();
 
-    public CustomerModel GetCustomer(GetCustomerRequest getCustomerRqst);
+    public CustomerModel GetCustomer(GetCustomerRequest getCustomerRequest);
 
-    public ResponseModel RegisterCustomerFunction(CustomerModel customerRqst);
+    public ResponseModel RegisterCustomerFunction(CustomerModel customerRequest);
 
-    public ResponseModel EditCustomerFunction(CustomerModel editCustomerRqst);
+    public ResponseModel EditCustomerFunction(CustomerModel editCustomerRequest);
 
-    public ResponseModel DeactivateCustomer(string customerGUID);
+    public ResponseModel DeactivateCustomer(string customerGuid);
 
-    public ResponseModel DeleteCustomer(string customerGUID);
+    public ResponseModel DeleteCustomer(string customerGuid);
 }

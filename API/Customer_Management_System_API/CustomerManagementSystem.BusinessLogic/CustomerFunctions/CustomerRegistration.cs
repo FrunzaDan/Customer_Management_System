@@ -2,13 +2,13 @@
 using CustomerManagementSystem.DataAccess.DBConnection;
 using CustomerManagementSystem.Domain.Models;
 
-namespace Customer_Management_System_Library.Functions;
+namespace CustomerManagementSystem.BusinessLogic.CustomerFunctions;
 
 public class CustomerRegistration
 {
-    private readonly IDBUtils _dbUtils;
+    private readonly IDbUtils _dbUtils;
 
-    public CustomerRegistration(IDBUtils dBUtils)
+    public CustomerRegistration(IDbUtils dBUtils)
     {
         _dbUtils = dBUtils;
     }
@@ -16,7 +16,7 @@ public class CustomerRegistration
     public ResponseModel RegisterCustomerFunction(CustomerModel customerRqst)
     {
         var response = new ResponseModel();
-        if (customerRqst.Email is not null && customerRqst.MSISDN is not null)
+        if (customerRqst.Email is not null && customerRqst.Msisdn is not null)
         {
             if (EmailValidation.ValidateEmail(customerRqst.Email) == false)
             {
@@ -25,7 +25,7 @@ public class CustomerRegistration
                 return response;
             }
 
-            if (MSISDNValidation.ValidateMsisdn(customerRqst.MSISDN) == false)
+            if (MSISDNValidation.ValidateMsisdn(customerRqst.Msisdn) == false)
             {
                 response.ResponseCode = 409;
                 response.ResponseMessage = "Invalid MSISDN";

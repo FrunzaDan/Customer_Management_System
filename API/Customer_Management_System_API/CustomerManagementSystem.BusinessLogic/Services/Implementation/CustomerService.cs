@@ -6,13 +6,13 @@ namespace CustomerManagementSystem.BusinessLogic.Services.Implementation;
 
 public class CustomerService : ICustomerService
 {
-    private readonly IBLLConfig _configuration;
-    private readonly IDBUtils _dbUtils;
+    private readonly IBllConfig _configuration;
+    private readonly IDbUtils _dbUtils;
 
     public CustomerService()
     {
-        _configuration = ServiceLocator.GetService<IBLLConfig>();
-        _dbUtils = ServiceLocator.GetService<IDBUtils>();
+        _configuration = ServiceLocator.GetService<IBllConfig>();
+        _dbUtils = ServiceLocator.GetService<IDbUtils>();
     }
 
     public ResponseModel DeactivateCustomer(string customerGUID)
@@ -25,7 +25,7 @@ public class CustomerService : ICustomerService
         throw new NotImplementedException();
     }
 
-    public ResponseModel EditCustomerFunction(CustomerModel editCustomerRqst)
+    public ResponseModel EditCustomerFunction(CustomerModel editCustomerRequest)
     {
         throw new NotImplementedException();
     }

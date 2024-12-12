@@ -2,5 +2,5 @@
 
 public class CustomerListModel : ResponseModel
 {
-    public List<CustomerModel>? customerList { get; set; }
+    public List<CustomerModel>? CustomerList { get; set; }
 }

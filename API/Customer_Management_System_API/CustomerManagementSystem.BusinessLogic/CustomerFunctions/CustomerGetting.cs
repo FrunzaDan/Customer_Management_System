@@ -2,13 +2,13 @@
 using CustomerManagementSystem.DataAccess.DBConnection;
 using CustomerManagementSystem.Domain.Models;
 
-namespace Customer_Management_System_Library.Functions;
+namespace CustomerManagementSystem.BusinessLogic.CustomerFunctions;
 
 public class CustomerGetting
 {
-    private readonly IDBUtils _dbUtils;
+    private readonly IDbUtils _dbUtils;
 
-    public CustomerGetting(IDBUtils dBUtils)
+    public CustomerGetting(IDbUtils dBUtils)
     {
         _dbUtils = dBUtils;
     }
@@ -16,23 +16,23 @@ public class CustomerGetting
     public CustomerModel GetCustomerFunction(GetCustomerRequest getCustomerRqst)
     {
         var response = new CustomerModel();
-        if (getCustomerRqst.searchVariable is null)
+        if (getCustomerRqst.SearchVariable is null)
         {
             response.ResponseCode = 500;
             return response;
         }
 
-        if (GUIDValidation.ValidateGUID(getCustomerRqst.searchVariable))
+        if (GUIDValidation.ValidateGUID(getCustomerRqst.SearchVariable))
         {
-            getCustomerRqst.searchOption = 1;
+            getCustomerRqst.SearchOption = 1;
         }
-        else if (MSISDNValidation.ValidateMsisdn(getCustomerRqst.searchVariable))
+        else if (MSISDNValidation.ValidateMsisdn(getCustomerRqst.SearchVariable))
         {
-            getCustomerRqst.searchOption = 2;
+            getCustomerRqst.SearchOption = 2;
         }
-        else if (EmailValidation.ValidateEmail(getCustomerRqst.searchVariable))
+        else if (EmailValidation.ValidateEmail(getCustomerRqst.SearchVariable))
         {
-            getCustomerRqst.searchOption = 3;
+            getCustomerRqst.SearchOption = 3;
         }
         else
         {

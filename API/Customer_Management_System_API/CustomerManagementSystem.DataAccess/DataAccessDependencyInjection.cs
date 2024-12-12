@@ -14,6 +14,6 @@ public static class DataAccessDependencyInjection
 
     private static void AddServices(this IServiceCollection services)
     {
-        services.AddSingleton<IDALConfig, DALConfig>();
+        services.AddSingleton<IDalConfig, DalConfig>();
     }
 }
