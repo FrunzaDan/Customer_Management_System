@@ -7,10 +7,10 @@ public static class ServiceLocator
     private static readonly object Lock = new();
     private static IServiceProvider? _instance;
 
-    public static IServiceProvider Instance
+    private static IServiceProvider Instance
     {
         get => _instance ?? throw new InvalidOperationException("Service provider not initialized.");
-        private set
+        set
         {
             lock (Lock)
             {
