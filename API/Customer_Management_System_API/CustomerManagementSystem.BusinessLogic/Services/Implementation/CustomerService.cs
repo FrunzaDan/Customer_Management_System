@@ -12,17 +12,18 @@ public class CustomerService : ICustomerService
     private readonly IBllConfig _configuration = ServiceLocator.GetService<IBllConfig>();
     private readonly IDbUtils _dbUtils = ServiceLocator.GetService<IDbUtils>();
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private bool _isAuthorized;
     
     public CustomerService(IHttpContextAccessor httpContextAccessor)
     {
         _httpContextAccessor = httpContextAccessor;
+        JwtValidation jwtValidation = new JwtValidation(_configuration);
+        _isAuthorized = jwtValidation.Authorize(httpContextAccessor.HttpContext, null);
     }
 
     public async Task<ResponseModel> DeactivateCustomer(string customerGuid)
     {
-        var httpContext = _httpContextAccessor.HttpContext;
-        JwtValidation jwtValidation = new JwtValidation(_configuration);
-        if (!jwtValidation.Authorize(httpContext, null))
+        if (!_isAuthorized)
         {
             return new ResponseModel
             {
@@ -38,9 +39,7 @@ public class CustomerService : ICustomerService
 
     public async Task<ResponseModel> DeleteCustomer(string customerGuid)
     {
-        var httpContext = _httpContextAccessor.HttpContext;
-        JwtValidation jwtValidation = new JwtValidation(_configuration);
-        if (!jwtValidation.Authorize(httpContext, null))
+        if (!_isAuthorized)
         {
             return new ResponseModel
             {
@@ -56,9 +55,7 @@ public class CustomerService : ICustomerService
 
     public async Task<ResponseModel> EditCustomer(CustomerModel editCustomerRequest)
     {
-        var httpContext = _httpContextAccessor.HttpContext;
-        JwtValidation jwtValidation = new JwtValidation(_configuration);
-        if (!jwtValidation.Authorize(httpContext, null))
+        if (!_isAuthorized)
         {
             return new ResponseModel
             {
@@ -74,9 +71,7 @@ public class CustomerService : ICustomerService
 
     public async Task<CustomerModel> GetCustomer(GetCustomerRequest getCustomerRqst)
     {
-        var httpContext = _httpContextAccessor.HttpContext;
-        JwtValidation jwtValidation = new JwtValidation(_configuration);
-        if (!jwtValidation.Authorize(httpContext, null))
+        if (!_isAuthorized)
         {
             return new CustomerModel()
             {
@@ -92,9 +87,7 @@ public class CustomerService : ICustomerService
 
     public async Task<CustomerListModel> GetCustomers()
     {
-        var httpContext = _httpContextAccessor.HttpContext;
-        JwtValidation jwtValidation = new JwtValidation(_configuration);
-        if (!jwtValidation.Authorize(httpContext, null))
+        if (!_isAuthorized)
         {
             return new CustomerListModel()
             {
@@ -109,9 +102,7 @@ public class CustomerService : ICustomerService
 
     public async Task<ResponseModel> RegisterCustomer(CustomerModel customerRqst)
     {
-        var httpContext = _httpContextAccessor.HttpContext;
-        JwtValidation jwtValidation = new JwtValidation(_configuration);
-        if (!jwtValidation.Authorize(httpContext, null))
+        if (!_isAuthorized)
         {
             return new ResponseModel()
             {

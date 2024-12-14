@@ -87,8 +87,8 @@ public class JwtCreation
         var claims = new List<Claim>
         {
             new(ClaimTypes.Sid, merchantId),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // Unique ID for the token
-            new(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString("o")) // Issued at
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString("o"))
         };
 
         return new SecurityTokenDescriptor
