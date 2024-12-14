@@ -20,15 +20,15 @@ public class CustomerRegistration
         {
             if (EmailValidation.ValidateEmail(customerRqst.Email) == false)
             {
-                response.ResponseCode = 409;
-                response.ResponseMessage = "Invalid Email";
+                response.Status = 409;
+                response.ResponseMessage = "Invalid or empty Email";
                 return response;
             }
 
             if (MSISDNValidation.ValidateMsisdn(customerRqst.Msisdn) == false)
             {
-                response.ResponseCode = 409;
-                response.ResponseMessage = "Invalid MSISDN";
+                response.Status = 409;
+                response.ResponseMessage = "Invalid or empty MSISDN";
                 return response;
             }
         }
@@ -39,7 +39,7 @@ public class CustomerRegistration
         }
         catch (Exception ex)
         {
-            response.ResponseCode = 500;
+            response.Status = 500;
             response.ResponseMessage = ex.ToString();
         }
 

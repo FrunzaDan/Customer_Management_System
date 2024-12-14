@@ -21,7 +21,7 @@ public class CustomerEditing
         }
         catch (Exception ex)
         {
-            response.ResponseCode = 500;
+            response.Status = 500;
             response.ResponseMessage = ex.ToString();
         }
 

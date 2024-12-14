@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace CustomerManagementSystem.Domain.Models;
+﻿namespace CustomerManagementSystem.Domain.Models;
 
 public sealed class MerchantCredentialsCheck
 {

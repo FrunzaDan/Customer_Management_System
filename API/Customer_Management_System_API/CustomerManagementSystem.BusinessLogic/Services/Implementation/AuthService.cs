@@ -11,10 +11,16 @@ public class AuthService : IAuthService
 {
     private readonly IBllConfig _configuration = ServiceLocator.GetService<IBllConfig>();
     private readonly IDbUtils _dbUtils = ServiceLocator.GetService<IDbUtils>();
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public async Task<AccessTokenResponse> GetAccessToken(MerchantCredentials merchantCredentials, HttpClient httpClient)
+    public AuthService(IHttpContextAccessor httpContextAccessor)
     {
-        
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    public async Task<AccessTokenResponse> GetAccessToken(MerchantCredentials merchantCredentials,
+        HttpClient httpClient)
+    {
         ArgumentNullException.ThrowIfNull(merchantCredentials);
         ArgumentNullException.ThrowIfNull(httpClient);
 
@@ -25,34 +31,35 @@ public class AuthService : IAuthService
             var jwtCreation = new JwtCreation(_configuration, _dbUtils);
             if (string.IsNullOrEmpty(merchantCredentials.MerchantId) ||
                 string.IsNullOrEmpty(merchantCredentials.MerchantPassword))
-            {
                 return new AccessTokenResponse
                 {
-                    ResponseCode = StatusCodes.Status400BadRequest,
+                    Status = StatusCodes.Status400BadRequest,
                     ResponseMessage = "Invalid Merchant Credentials"
                 };
-            }
 
-            response = await jwtCreation.GenerateBearerJwt(merchantCredentials.MerchantId, merchantCredentials.MerchantPassword);
+            response = await jwtCreation.GenerateBearerJwt(merchantCredentials.MerchantId,
+                merchantCredentials.MerchantPassword);
 
-            if (response.ResponseCode == StatusCodes.Status200OK && 
+            if (response.Status == StatusCodes.Status200OK &&
                 !string.IsNullOrEmpty(response.AccessToken))
-            {
                 httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", response.AccessToken);
-            }
         }
         catch (Exception ex)
         {
-            response.ResponseCode = StatusCodes.Status500InternalServerError;
+            response.Status = StatusCodes.Status500InternalServerError;
             response.ResponseMessage = "An error occurred on our side while generating the access token: " + ex.Message;
         }
 
         return response;
     }
 
-    public ResponseModel VerifyToken(string accessToken, HttpContext httpContext)
+    public ResponseModel VerifyToken(string accessToken)
     {
+        var httpContext = _httpContextAccessor.HttpContext;
+        if (httpContext is null)
+            throw new ArgumentNullException(nameof(httpContext));
+        ArgumentNullException.ThrowIfNull(httpContext);
         if (string.IsNullOrEmpty(accessToken))
             throw new ArgumentNullException(nameof(accessToken));
         ArgumentNullException.ThrowIfNull(httpContext);
@@ -64,7 +71,7 @@ public class AuthService : IAuthService
             var jwtValidation = new JwtValidation(_configuration);
             var isAuthorized = jwtValidation.Authorize(httpContext, accessToken);
 
-            response.ResponseCode = isAuthorized
+            response.Status = isAuthorized
                 ? StatusCodes.Status200OK
                 : StatusCodes.Status403Forbidden;
 
@@ -74,7 +81,7 @@ public class AuthService : IAuthService
         }
         catch (Exception ex)
         {
-            response.ResponseCode = StatusCodes.Status500InternalServerError;
+            response.Status = StatusCodes.Status500InternalServerError;
             response.ResponseMessage = "An error occurred while verifying the token: " + ex.Message;
         }
 

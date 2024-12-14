@@ -12,7 +12,7 @@ public class AuthenticationController : ControllerBase
     private readonly IHttpClientFactory _httpClientFactory;
 
     public AuthenticationController(
-        IHttpClientFactory httpClientFactory, 
+        IHttpClientFactory httpClientFactory,
         IAuthService authService)
     {
         _httpClientFactory = httpClientFactory;
@@ -23,26 +23,21 @@ public class AuthenticationController : ControllerBase
     [HttpPost]
     public async Task<AccessTokenResponse> GetAccessToken(MerchantCredentials merchantCredentials)
     {
-            var httpClient = _httpClientFactory.CreateClient();
-            var response = await _authService.GetAccessToken(merchantCredentials, httpClient);
-            if (response.ResponseCode.HasValue)
-            {
-                Response.StatusCode = (int)response.ResponseCode;
-            }
-            return response;
+        var httpClient = _httpClientFactory.CreateClient();
+        var response = await _authService.GetAccessToken(merchantCredentials, httpClient);
+        if (response.Status.HasValue) Response.StatusCode = (int)response.Status;
+
+        return response;
     }
 
     [Route("[action]")]
     [HttpGet]
     public ResponseModel VerifyToken(string accessToken)
     {
-        var httpContext = HttpContext;
-        var response = _authService.VerifyToken(accessToken, httpContext);
+        var response = _authService.VerifyToken(accessToken);
 
-        if (response.ResponseCode.HasValue)
-        {
-            Response.StatusCode = (int)response.ResponseCode;
-        }
+        if (response.Status.HasValue) Response.StatusCode = (int)response.Status;
+
         return response;
     }
 }

@@ -29,15 +29,13 @@ public class JwtCreation
     public async Task<AccessTokenResponse> GenerateBearerJwt(string merchantId, string merchantPassword)
     {
         if (string.IsNullOrWhiteSpace(merchantId) || string.IsNullOrWhiteSpace(merchantPassword))
-        {
             return new AccessTokenResponse
             {
                 AccessToken = null,
                 ValidUntil = null,
-                ResponseCode = StatusCodes.Status400BadRequest,
+                Status = StatusCodes.Status400BadRequest,
                 ResponseMessage = "Merchant ID and Password cannot be empty."
             };
-        }
 
         try
         {
@@ -50,15 +48,13 @@ public class JwtCreation
 
             var credentialsAreValid = await _dbUtils.CheckMerchantCredentialsFromDb(merchantCredentials);
             if (!credentialsAreValid.IsValid)
-            {
                 return new AccessTokenResponse
                 {
                     AccessToken = null,
                     ValidUntil = null,
-                    ResponseCode = StatusCodes.Status403Forbidden,
+                    Status = StatusCodes.Status403Forbidden,
                     ResponseMessage = credentialsAreValid.ErrorMessage
                 };
-            }
 
             // Generate token
             var tokenDescriptor = BuildTokenDescriptor(merchantId);
@@ -70,7 +66,7 @@ public class JwtCreation
             {
                 AccessToken = accessToken,
                 ValidUntil = tokenDescriptor.Expires?.ToString("o"),
-                ResponseCode = StatusCodes.Status200OK,
+                Status = StatusCodes.Status200OK,
                 ResponseMessage = "Success!"
             };
         }
@@ -80,7 +76,7 @@ public class JwtCreation
             {
                 AccessToken = null,
                 ValidUntil = null,
-                ResponseCode = StatusCodes.Status500InternalServerError,
+                Status = StatusCodes.Status500InternalServerError,
                 ResponseMessage = $"An error occurred: {ex.Message}"
             };
         }
@@ -90,16 +86,17 @@ public class JwtCreation
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Sid, merchantId),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // Unique ID for the token
-            new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString("o")) // Issued at
+            new(ClaimTypes.Sid, merchantId),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // Unique ID for the token
+            new(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString("o")) // Issued at
         };
 
         return new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddMinutes(double.Parse(_configuration.AccessTokenTimeout)),
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(_jwtKey), SecurityAlgorithms.HmacSha256Signature),
+            SigningCredentials =
+                new SigningCredentials(new SymmetricSecurityKey(_jwtKey), SecurityAlgorithms.HmacSha256Signature),
             Issuer = _jwtIssuer,
             Audience = _jwtAudience
         };

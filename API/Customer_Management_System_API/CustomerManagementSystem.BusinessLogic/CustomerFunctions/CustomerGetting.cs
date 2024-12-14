@@ -18,7 +18,7 @@ public class CustomerGetting
         var response = new CustomerModel();
         if (getCustomerRqst.SearchVariable is null)
         {
-            response.ResponseCode = 500;
+            response.Status = 500;
             return response;
         }
 
@@ -47,7 +47,7 @@ public class CustomerGetting
         }
         catch (Exception ex)
         {
-            response.ResponseCode = 500;
+            response.Status = 500;
             response.ResponseMessage = ex.ToString();
         }
 

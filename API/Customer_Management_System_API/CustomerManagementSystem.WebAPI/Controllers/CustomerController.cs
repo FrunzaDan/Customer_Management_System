@@ -1,4 +1,3 @@
-using CustomerManagementSystem.BusinessLogic.AuthFunctions;
 using CustomerManagementSystem.BusinessLogic.Services;
 using CustomerManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -15,15 +14,14 @@ public class CustomerController : ControllerBase
     {
         _customerService = customerService;
     }
+
     [Route("[action]")]
     [HttpPost]
     public async Task<ResponseModel> RegisterCustomer(CustomerModel customerRqst)
     {
         var response = await _customerService.RegisterCustomer(customerRqst);
-        if (response.ResponseCode.HasValue)
-        {
-            Response.StatusCode = (int)response.ResponseCode;
-        }
+        if (response.Status.HasValue) Response.StatusCode = (int)response.Status;
+
         return response;
     }
 
@@ -36,10 +34,8 @@ public class CustomerController : ControllerBase
             SearchVariable = searchVariable
         };
         var response = await _customerService.GetCustomer(getCustomerRqst);
-        if (response.ResponseCode.HasValue)
-        {
-            Response.StatusCode = (int)response.ResponseCode;
-        }
+        if (response.Status.HasValue) Response.StatusCode = (int)response.Status;
+
         return response;
     }
 
@@ -48,10 +44,8 @@ public class CustomerController : ControllerBase
     public async Task<CustomerListModel> GetCustomers()
     {
         var response = await _customerService.GetCustomers();
-        if (response.ResponseCode.HasValue)
-        {
-            Response.StatusCode = (int)response.ResponseCode;
-        }
+        if (response.Status.HasValue) Response.StatusCode = (int)response.Status;
+
         return response;
     }
 
@@ -60,10 +54,8 @@ public class CustomerController : ControllerBase
     public async Task<ResponseModel> EditCustomer(CustomerModel editCustomerRqst)
     {
         var response = await _customerService.EditCustomer(editCustomerRqst);
-        if (response.ResponseCode.HasValue)
-        {
-            Response.StatusCode = (int)response.ResponseCode;
-        }
+        if (response.Status.HasValue) Response.StatusCode = (int)response.Status;
+
         return response;
     }
 
@@ -72,10 +64,8 @@ public class CustomerController : ControllerBase
     public async Task<ResponseModel> DeactivateCustomer(string customerGUID)
     {
         var response = await _customerService.DeactivateCustomer(customerGUID);
-        if (response.ResponseCode.HasValue)
-        {
-            Response.StatusCode = (int)response.ResponseCode;
-        }
+        if (response.Status.HasValue) Response.StatusCode = (int)response.Status;
+
         return response;
     }
 
@@ -84,11 +74,9 @@ public class CustomerController : ControllerBase
     public async Task<ResponseModel> DeleteCustomer(string customerGuid)
     {
         var response = await _customerService.DeleteCustomer(customerGuid);
-        
-        if (response.ResponseCode.HasValue)
-        {
-            Response.StatusCode = (int)response.ResponseCode;
-        }
+
+        if (response.Status.HasValue) Response.StatusCode = (int)response.Status;
+
         return response;
     }
 }

@@ -2,6 +2,6 @@
 
 public class ResponseModel
 {
-    public int? ResponseCode { get; set; }
+    public int? Status { get; set; }
     public string? ResponseMessage { get; set; }
 }

@@ -17,27 +17,18 @@ public class CurrentSqlConnection
         string connectionString;
 
         if (CheckSqlConnection(_configuration.CustomerManagementSystemDbDocker))
-        {
             connectionString = _configuration.CustomerManagementSystemDbDocker;
-        }
         else if (CheckSqlConnection(_configuration.CustomerManagementSystemDbWindows))
-        {
             connectionString = _configuration.CustomerManagementSystemDbWindows;
-        }
         else
-        {
             throw new InvalidOperationException("No valid SQL connection could be established.");
-        }
 
         return connectionString;
     }
 
     private static bool CheckSqlConnection(string connectionString)
     {
-        if (string.IsNullOrWhiteSpace(connectionString))
-        {
-            return false;
-        }
+        if (string.IsNullOrWhiteSpace(connectionString)) return false;
 
         try
         {

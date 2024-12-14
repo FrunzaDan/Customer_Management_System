@@ -7,6 +7,8 @@ using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHttpContextAccessor();
+
 // Adds the Business Logic Layer
 builder.Services.AddBusinessLogic();
 

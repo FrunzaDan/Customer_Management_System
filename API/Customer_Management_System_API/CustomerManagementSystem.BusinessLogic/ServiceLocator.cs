@@ -15,7 +15,8 @@ public static class ServiceLocator
             lock (Lock)
             {
                 if (_instance != null)
-                    throw new InvalidOperationException("Service provider has already been set and cannot be modified.");
+                    throw new InvalidOperationException(
+                        "Service provider has already been set and cannot be modified.");
                 _instance = value;
             }
         }
