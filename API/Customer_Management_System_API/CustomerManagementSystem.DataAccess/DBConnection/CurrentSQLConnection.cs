@@ -41,11 +41,9 @@ public class CurrentSqlConnection
 
         try
         {
-            using (var sqlConnection = new SqlConnection(connectionString))
-            {
-                sqlConnection.Open();
-                return true;
-            }
+            using var sqlConnection = new SqlConnection(connectionString);
+            sqlConnection.Open();
+            return true;
         }
         catch (SqlException)
         {

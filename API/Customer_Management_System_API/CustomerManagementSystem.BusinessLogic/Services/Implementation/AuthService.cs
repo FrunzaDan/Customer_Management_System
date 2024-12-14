@@ -1,9 +1,9 @@
-﻿using CustomerManagementSystem.BusinessLogic.AuthFunctions;
+﻿using System.Net.Http.Headers;
+using CustomerManagementSystem.BusinessLogic.AuthFunctions;
 using CustomerManagementSystem.BusinessLogic.Configuration;
 using CustomerManagementSystem.DataAccess.DBConnection;
 using CustomerManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Http;
-using System.Net.Http.Headers;
 
 namespace CustomerManagementSystem.BusinessLogic.Services.Implementation;
 
