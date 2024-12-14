@@ -5,7 +5,7 @@ namespace CustomerManagementSystem.BusinessLogic.Services;
 
 public interface IAuthService
 {
-    public AccessTokenResponse GetAccessToken(MerchantCredentials merchantCredentials, HttpClient httpClient);
+    public Task<AccessTokenResponse> GetAccessToken(MerchantCredentials merchantCredentials, HttpClient httpClient);
 
-    public AccessTokenResponse VerifyToken(string accessToken, HttpContext httpContext);
+    public ResponseModel VerifyToken(string accessToken, HttpContext httpContext);
 }

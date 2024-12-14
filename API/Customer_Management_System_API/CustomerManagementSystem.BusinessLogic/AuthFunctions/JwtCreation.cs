@@ -26,7 +26,7 @@ public class JwtCreation
         _dbUtils = dbUtils;
     }
 
-    public AccessTokenResponse GenerateBearerJwt(string merchantId, string merchantPassword)
+    public async Task<AccessTokenResponse> GenerateBearerJwt(string merchantId, string merchantPassword)
     {
         if (string.IsNullOrWhiteSpace(merchantId) || string.IsNullOrWhiteSpace(merchantPassword))
         {
@@ -48,15 +48,15 @@ public class JwtCreation
                 MerchantPassword = merchantPassword
             };
 
-            var credentialsAreValid = _dbUtils.CheckMerchantCredentialsFromDb(merchantCredentials);
-            if (!credentialsAreValid)
+            var credentialsAreValid = await _dbUtils.CheckMerchantCredentialsFromDb(merchantCredentials);
+            if (!credentialsAreValid.IsValid)
             {
                 return new AccessTokenResponse
                 {
                     AccessToken = null,
                     ValidUntil = null,
                     ResponseCode = StatusCodes.Status403Forbidden,
-                    ResponseMessage = "Invalid credentials. No Access Rights!"
+                    ResponseMessage = credentialsAreValid.ErrorMessage
                 };
             }
 
@@ -76,9 +76,6 @@ public class JwtCreation
         }
         catch (Exception ex)
         {
-            // Log exception if a logging service is available
-            // _logger.LogError(ex, "Error generating JWT");
-
             return new AccessTokenResponse
             {
                 AccessToken = null,

@@ -16,5 +16,5 @@ public interface IDbUtils
 
     public ResponseModel DeleteCustomer(string customerGuid);
 
-    public bool CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials);
+    public Task<MerchantCredentialsCheck> CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials);
 }

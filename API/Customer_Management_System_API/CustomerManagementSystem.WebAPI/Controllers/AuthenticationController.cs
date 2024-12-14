@@ -21,37 +21,28 @@ public class AuthenticationController : ControllerBase
 
     [Route("[action]")]
     [HttpPost]
-    public IActionResult GetAccessToken([FromBody] MerchantCredentials merchantCredentials)
+    public async Task<AccessTokenResponse> GetAccessToken(MerchantCredentials merchantCredentials)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-        try
-        {
             var httpClient = _httpClientFactory.CreateClient();
-            var accessTokenRsp = _authService.GetAccessToken(merchantCredentials, httpClient);
-            if (accessTokenRsp.ResponseCode.HasValue) Response.StatusCode = (int)accessTokenRsp.ResponseCode;
-
-            return Ok(accessTokenRsp);
-        }
-        catch (HttpRequestException httpEx)
-        {
-            // Log error (use a logger service if needed)
-            return StatusCode(500, $"Error making HTTP request: {httpEx.Message}");
-        }
-        catch (Exception ex)
-        {
-            // Log error
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
+            var accessTokenRsp = await _authService.GetAccessToken(merchantCredentials, httpClient);
+            if (accessTokenRsp.ResponseCode.HasValue)
+            {
+                Response.StatusCode = (int)accessTokenRsp.ResponseCode;
+            }
+            return accessTokenRsp;
     }
 
     [Route("[action]")]
     [HttpGet]
-    public AccessTokenResponse VerifyToken(string accessToken)
+    public ResponseModel VerifyToken(string accessToken)
     {
         var httpContext = HttpContext;
         var verifyTokenRsp = _authService.VerifyToken(accessToken, httpContext);
 
-        if (verifyTokenRsp.ResponseCode is not null) Response.StatusCode = (int)verifyTokenRsp.ResponseCode;
+        if (verifyTokenRsp.ResponseCode.HasValue)
+        {
+            Response.StatusCode = (int)verifyTokenRsp.ResponseCode;
+        }
         return verifyTokenRsp;
     }
 }

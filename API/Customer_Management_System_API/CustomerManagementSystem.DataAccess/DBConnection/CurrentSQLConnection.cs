@@ -12,28 +12,44 @@ public class CurrentSqlConnection
         _configuration = configuration;
     }
 
-    public SqlConnection CreateCurrentSqlConnection()
+    public string GetCorrectSqlConnectionString()
     {
-        var sqlConnection = new SqlConnection();
-        sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDbDocker;
-        if (CheckSqlConnection(sqlConnection) == false)
-            sqlConnection.ConnectionString = _configuration.CustomerManagementSystemDbWindows;
-        return sqlConnection;
+        string connectionString;
+
+        if (CheckSqlConnection(_configuration.CustomerManagementSystemDbDocker))
+        {
+            connectionString = _configuration.CustomerManagementSystemDbDocker;
+        }
+        else if (CheckSqlConnection(_configuration.CustomerManagementSystemDbWindows))
+        {
+            connectionString = _configuration.CustomerManagementSystemDbWindows;
+        }
+        else
+        {
+            throw new InvalidOperationException("No valid SQL connection could be established.");
+        }
+
+        return connectionString;
     }
 
-    private bool CheckSqlConnection(SqlConnection sqlConnection)
+    private static bool CheckSqlConnection(string connectionString)
     {
-        var isConnected = false;
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            return false;
+        }
+
         try
         {
-            sqlConnection.Open();
-            sqlConnection.Close();
-            isConnected = true;
-            return isConnected;
+            using (var sqlConnection = new SqlConnection(connectionString))
+            {
+                sqlConnection.Open();
+                return true;
+            }
         }
         catch (SqlException)
         {
-            return isConnected;
+            return false;
         }
     }
 }

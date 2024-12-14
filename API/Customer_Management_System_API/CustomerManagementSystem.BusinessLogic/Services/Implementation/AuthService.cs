@@ -12,55 +12,72 @@ public class AuthService : IAuthService
     private readonly IBllConfig _configuration = ServiceLocator.GetService<IBllConfig>();
     private readonly IDbUtils _dbUtils = ServiceLocator.GetService<IDbUtils>();
 
-    public AccessTokenResponse GetAccessToken(MerchantCredentials merchantCredentials, HttpClient httpClient)
+    public async Task<AccessTokenResponse> GetAccessToken(MerchantCredentials merchantCredentials, HttpClient httpClient)
     {
-        var accessTokenRsp = new AccessTokenResponse();
+        
+        ArgumentNullException.ThrowIfNull(merchantCredentials);
+        ArgumentNullException.ThrowIfNull(httpClient);
+
+        var accessTokenResponse = new AccessTokenResponse();
+
         try
         {
             var jwtCreation = new JwtCreation(_configuration, _dbUtils);
-
-            if (merchantCredentials.MerchantId is not null && merchantCredentials.MerchantPassword is not null)
+            if (string.IsNullOrEmpty(merchantCredentials.MerchantId) ||
+                string.IsNullOrEmpty(merchantCredentials.MerchantPassword))
             {
-                accessTokenRsp = jwtCreation.GenerateBearerJwt(merchantCredentials.MerchantId,
-                    merchantCredentials.MerchantPassword);
-                if (accessTokenRsp.ResponseCode == StatusCodes.Status200OK &&
-                    !string.IsNullOrEmpty(accessTokenRsp.AccessToken))
-                    httpClient.DefaultRequestHeaders.Authorization =
-                        new AuthenticationHeaderValue("Bearer", accessTokenRsp.AccessToken);
+                return new AccessTokenResponse
+                {
+                    ResponseCode = StatusCodes.Status400BadRequest,
+                    ResponseMessage = "Invalid Merchant Credentials"
+                };
+            }
+
+            accessTokenResponse = await jwtCreation.GenerateBearerJwt(merchantCredentials.MerchantId, merchantCredentials.MerchantPassword);
+
+            if (accessTokenResponse.ResponseCode == StatusCodes.Status200OK && 
+                !string.IsNullOrEmpty(accessTokenResponse.AccessToken))
+            {
+                httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", accessTokenResponse.AccessToken);
             }
         }
         catch (Exception ex)
         {
-            accessTokenRsp.ResponseCode = StatusCodes.Status500InternalServerError;
-            accessTokenRsp.ResponseMessage = ex.ToString();
+            accessTokenResponse.ResponseCode = StatusCodes.Status500InternalServerError;
+            accessTokenResponse.ResponseMessage = "An error occurred on our side while generating the access token.";
         }
 
-        return accessTokenRsp;
+        return accessTokenResponse;
     }
 
-    public AccessTokenResponse VerifyToken(string accessToken, HttpContext httpContext)
+    public ResponseModel VerifyToken(string accessToken, HttpContext httpContext)
     {
-        var verifyTokenRsp = new AccessTokenResponse();
+        if (string.IsNullOrEmpty(accessToken))
+            throw new ArgumentNullException(nameof(accessToken));
+        ArgumentNullException.ThrowIfNull(httpContext);
+
+        var verifyTokenResponse = new AccessTokenResponse();
+
         try
         {
             var jwtValidation = new JwtValidation(_configuration);
-            if (jwtValidation.Authorize(httpContext, accessToken))
-            {
-                verifyTokenRsp.ResponseCode = StatusCodes.Status200OK;
-                verifyTokenRsp.ResponseMessage = "You Have Access Rights!";
-            }
-            else
-            {
-                verifyTokenRsp.ResponseCode = StatusCodes.Status403Forbidden;
-                verifyTokenRsp.ResponseMessage = "No Access Rights!";
-            }
+            var isAuthorized = jwtValidation.Authorize(httpContext, accessToken);
+
+            verifyTokenResponse.ResponseCode = isAuthorized
+                ? StatusCodes.Status200OK
+                : StatusCodes.Status403Forbidden;
+
+            verifyTokenResponse.ResponseMessage = isAuthorized
+                ? "You Have Access Rights!"
+                : "No Access Rights!";
         }
         catch (Exception ex)
         {
-            verifyTokenRsp.ResponseCode = StatusCodes.Status500InternalServerError;
-            verifyTokenRsp.ResponseMessage = ex.ToString();
+            verifyTokenResponse.ResponseCode = StatusCodes.Status500InternalServerError;
+            verifyTokenResponse.ResponseMessage = "An error occurred while verifying the token.";
         }
 
-        return verifyTokenRsp;
+        return verifyTokenResponse;
     }
 }
