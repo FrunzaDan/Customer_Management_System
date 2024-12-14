@@ -12,12 +12,12 @@ public class CustomerDeactivation
         _dbUtils = dBUtils;
     }
 
-    public ResponseModel DeactivateCustomer(string customerGUID)
+    public async Task<ResponseModel> DeactivateCustomer(string customerGuid)
     {
         var response = new ResponseModel();
         try
         {
-            response = _dbUtils.DeactivateCustomer(customerGUID);
+            response = await _dbUtils.DeactivateCustomer(customerGuid);
         }
         catch (Exception ex)
         {

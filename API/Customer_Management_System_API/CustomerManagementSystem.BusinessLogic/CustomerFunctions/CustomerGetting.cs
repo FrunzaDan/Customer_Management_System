@@ -13,7 +13,7 @@ public class CustomerGetting
         _dbUtils = dBUtils;
     }
 
-    public CustomerModel GetCustomerFunction(GetCustomerRequest getCustomerRqst)
+    public async Task<CustomerModel> GetCustomerFunction(GetCustomerRequest getCustomerRqst)
     {
         var response = new CustomerModel();
         if (getCustomerRqst.SearchVariable is null)
@@ -43,7 +43,7 @@ public class CustomerGetting
 
         try
         {
-            response = _dbUtils.GetCustomer(getCustomerRqst);
+            response = await _dbUtils.GetCustomer(getCustomerRqst);
         }
         catch (Exception ex)
         {
@@ -54,13 +54,13 @@ public class CustomerGetting
         return response;
     }
 
-    public CustomerListModel GetCustomersFunction()
+    public async Task<CustomerListModel> GetCustomersFunction()
     {
         var response = new CustomerListModel();
 
         try
         {
-            response = _dbUtils.GetCustomers();
+            response = await _dbUtils.GetCustomers();
         }
         catch (Exception)
         {

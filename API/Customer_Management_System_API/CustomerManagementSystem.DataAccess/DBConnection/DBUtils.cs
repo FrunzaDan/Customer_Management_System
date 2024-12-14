@@ -16,7 +16,7 @@ public class DbUtils : IDbUtils
     
     private string CurrentConnectionString { get; set; }
 
-    public ResponseModel RegisterCustomer(CustomerModel customer)
+    public async Task<ResponseModel> RegisterCustomer(CustomerModel customer)
     {
         var response = new ResponseModel();
         var returnValue = 0;
@@ -103,7 +103,7 @@ public class DbUtils : IDbUtils
         return response;
     }
 
-    public CustomerModel GetCustomer(GetCustomerRequest customer)
+    public async Task<CustomerModel> GetCustomer(GetCustomerRequest customer)
     {
         var customerResponse = new CustomerModel();
         customerResponse.Address = new AddressModel();
@@ -284,7 +284,7 @@ public class DbUtils : IDbUtils
         return customerResponse;
     }
 
-    public CustomerListModel GetCustomers()
+    public async Task<CustomerListModel> GetCustomers()
     {
         var customerListResponse = new CustomerListModel();
         var customerList = new List<CustomerModel>();
@@ -460,7 +460,7 @@ public class DbUtils : IDbUtils
         return customerListResponse;
     }
 
-    public ResponseModel EditCustomer(CustomerModel customer)
+    public async Task<ResponseModel> EditCustomer(CustomerModel customer)
     {
         var response = new ResponseModel();
 
@@ -545,7 +545,7 @@ public class DbUtils : IDbUtils
         return response;
     }
 
-    public ResponseModel DeactivateCustomer(string customerGuid)
+    public async Task<ResponseModel> DeactivateCustomer(string customerGuid)
     {
         var response = new ResponseModel();
 
@@ -605,7 +605,7 @@ public class DbUtils : IDbUtils
         return response;
     }
 
-    public ResponseModel DeleteCustomer(string customerGUID)
+    public async Task<ResponseModel> DeleteCustomer(string customerGUID)
     {
         var response = new ResponseModel();
 

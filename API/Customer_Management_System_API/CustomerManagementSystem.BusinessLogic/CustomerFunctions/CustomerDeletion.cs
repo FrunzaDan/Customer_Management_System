@@ -12,12 +12,12 @@ public class CustomerDeletion
         _dbUtils = dBUtils;
     }
 
-    public ResponseModel DeleteCustomer(string customerGUID)
+    public async Task<ResponseModel> DeleteCustomer(string customerGuid)
     {
         var response = new ResponseModel();
         try
         {
-            response = _dbUtils.DeleteCustomer(customerGUID);
+            response = await _dbUtils.DeleteCustomer(customerGuid);
         }
         catch (Exception ex)
         {

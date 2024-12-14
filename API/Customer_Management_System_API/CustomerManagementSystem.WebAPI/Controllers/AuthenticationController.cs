@@ -24,12 +24,12 @@ public class AuthenticationController : ControllerBase
     public async Task<AccessTokenResponse> GetAccessToken(MerchantCredentials merchantCredentials)
     {
             var httpClient = _httpClientFactory.CreateClient();
-            var accessTokenRsp = await _authService.GetAccessToken(merchantCredentials, httpClient);
-            if (accessTokenRsp.ResponseCode.HasValue)
+            var response = await _authService.GetAccessToken(merchantCredentials, httpClient);
+            if (response.ResponseCode.HasValue)
             {
-                Response.StatusCode = (int)accessTokenRsp.ResponseCode;
+                Response.StatusCode = (int)response.ResponseCode;
             }
-            return accessTokenRsp;
+            return response;
     }
 
     [Route("[action]")]
@@ -37,12 +37,12 @@ public class AuthenticationController : ControllerBase
     public ResponseModel VerifyToken(string accessToken)
     {
         var httpContext = HttpContext;
-        var verifyTokenRsp = _authService.VerifyToken(accessToken, httpContext);
+        var response = _authService.VerifyToken(accessToken, httpContext);
 
-        if (verifyTokenRsp.ResponseCode.HasValue)
+        if (response.ResponseCode.HasValue)
         {
-            Response.StatusCode = (int)verifyTokenRsp.ResponseCode;
+            Response.StatusCode = (int)response.ResponseCode;
         }
-        return verifyTokenRsp;
+        return response;
     }
 }

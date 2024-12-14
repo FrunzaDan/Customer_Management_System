@@ -4,15 +4,15 @@ namespace CustomerManagementSystem.BusinessLogic.Services;
 
 public interface ICustomerService
 {
-    public CustomerListModel GetCustomers();
+    public Task<CustomerListModel> GetCustomers();
 
-    public CustomerModel GetCustomer(GetCustomerRequest getCustomerRequest);
+    public Task<CustomerModel> GetCustomer(GetCustomerRequest getCustomerRequest);
 
-    public ResponseModel RegisterCustomerFunction(CustomerModel customerRequest);
+    public Task<ResponseModel> RegisterCustomer(CustomerModel customerRequest);
 
-    public ResponseModel EditCustomerFunction(CustomerModel editCustomerRequest);
+    public Task<ResponseModel> EditCustomer(CustomerModel editCustomerRequest);
 
-    public ResponseModel DeactivateCustomer(string customerGuid);
+    public Task<ResponseModel> DeactivateCustomer(string customerGuid);
 
-    public ResponseModel DeleteCustomer(string customerGuid);
+    public Task<ResponseModel> DeleteCustomer(string customerGuid);
 }

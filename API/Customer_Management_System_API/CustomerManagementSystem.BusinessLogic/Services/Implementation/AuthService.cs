@@ -1,9 +1,9 @@
-﻿using System.Net.Http.Headers;
-using CustomerManagementSystem.BusinessLogic.AuthFunctions;
+﻿using CustomerManagementSystem.BusinessLogic.AuthFunctions;
 using CustomerManagementSystem.BusinessLogic.Configuration;
 using CustomerManagementSystem.DataAccess.DBConnection;
 using CustomerManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Http;
+using System.Net.Http.Headers;
 
 namespace CustomerManagementSystem.BusinessLogic.Services.Implementation;
 
@@ -18,7 +18,7 @@ public class AuthService : IAuthService
         ArgumentNullException.ThrowIfNull(merchantCredentials);
         ArgumentNullException.ThrowIfNull(httpClient);
 
-        var accessTokenResponse = new AccessTokenResponse();
+        var response = new AccessTokenResponse();
 
         try
         {
@@ -33,22 +33,22 @@ public class AuthService : IAuthService
                 };
             }
 
-            accessTokenResponse = await jwtCreation.GenerateBearerJwt(merchantCredentials.MerchantId, merchantCredentials.MerchantPassword);
+            response = await jwtCreation.GenerateBearerJwt(merchantCredentials.MerchantId, merchantCredentials.MerchantPassword);
 
-            if (accessTokenResponse.ResponseCode == StatusCodes.Status200OK && 
-                !string.IsNullOrEmpty(accessTokenResponse.AccessToken))
+            if (response.ResponseCode == StatusCodes.Status200OK && 
+                !string.IsNullOrEmpty(response.AccessToken))
             {
                 httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", accessTokenResponse.AccessToken);
+                    new AuthenticationHeaderValue("Bearer", response.AccessToken);
             }
         }
         catch (Exception ex)
         {
-            accessTokenResponse.ResponseCode = StatusCodes.Status500InternalServerError;
-            accessTokenResponse.ResponseMessage = "An error occurred on our side while generating the access token.";
+            response.ResponseCode = StatusCodes.Status500InternalServerError;
+            response.ResponseMessage = "An error occurred on our side while generating the access token: " + ex.Message;
         }
 
-        return accessTokenResponse;
+        return response;
     }
 
     public ResponseModel VerifyToken(string accessToken, HttpContext httpContext)
@@ -57,27 +57,27 @@ public class AuthService : IAuthService
             throw new ArgumentNullException(nameof(accessToken));
         ArgumentNullException.ThrowIfNull(httpContext);
 
-        var verifyTokenResponse = new AccessTokenResponse();
+        var response = new ResponseModel();
 
         try
         {
             var jwtValidation = new JwtValidation(_configuration);
             var isAuthorized = jwtValidation.Authorize(httpContext, accessToken);
 
-            verifyTokenResponse.ResponseCode = isAuthorized
+            response.ResponseCode = isAuthorized
                 ? StatusCodes.Status200OK
                 : StatusCodes.Status403Forbidden;
 
-            verifyTokenResponse.ResponseMessage = isAuthorized
+            response.ResponseMessage = isAuthorized
                 ? "You Have Access Rights!"
                 : "No Access Rights!";
         }
         catch (Exception ex)
         {
-            verifyTokenResponse.ResponseCode = StatusCodes.Status500InternalServerError;
-            verifyTokenResponse.ResponseMessage = "An error occurred while verifying the token.";
+            response.ResponseCode = StatusCodes.Status500InternalServerError;
+            response.ResponseMessage = "An error occurred while verifying the token: " + ex.Message;
         }
 
-        return verifyTokenResponse;
+        return response;
     }
 }

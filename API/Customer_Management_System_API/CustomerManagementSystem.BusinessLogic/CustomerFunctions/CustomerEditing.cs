@@ -12,12 +12,12 @@ public class CustomerEditing
         _dbUtils = dBUtils;
     }
 
-    public ResponseModel EditCustomerFunction(CustomerModel editCustomerRqst)
+    public async Task<ResponseModel> EditCustomerFunction(CustomerModel editCustomerRqst)
     {
         var response = new ResponseModel();
         try
         {
-            response = _dbUtils.EditCustomer(editCustomerRqst);
+            response = await _dbUtils.EditCustomer(editCustomerRqst);
         }
         catch (Exception ex)
         {

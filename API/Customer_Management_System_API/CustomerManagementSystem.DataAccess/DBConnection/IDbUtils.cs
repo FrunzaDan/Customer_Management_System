@@ -4,17 +4,17 @@ namespace CustomerManagementSystem.DataAccess.DBConnection;
 
 public interface IDbUtils
 {
-    public ResponseModel RegisterCustomer(CustomerModel customer);
+    public Task<ResponseModel> RegisterCustomer(CustomerModel customer);
 
-    public CustomerModel GetCustomer(GetCustomerRequest getCustomerRqst);
+    public Task<CustomerModel> GetCustomer(GetCustomerRequest getCustomerRqst);
 
-    public CustomerListModel GetCustomers();
+    public Task<CustomerListModel> GetCustomers();
 
-    public ResponseModel EditCustomer(CustomerModel editCustomerRqst);
+    public Task<ResponseModel> EditCustomer(CustomerModel editCustomerRqst);
 
-    public ResponseModel DeactivateCustomer(string customerGuid);
+    public Task<ResponseModel> DeactivateCustomer(string customerGuid);
 
-    public ResponseModel DeleteCustomer(string customerGuid);
+    public Task<ResponseModel> DeleteCustomer(string customerGuid);
 
     public Task<MerchantCredentialsCheck> CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials);
 }

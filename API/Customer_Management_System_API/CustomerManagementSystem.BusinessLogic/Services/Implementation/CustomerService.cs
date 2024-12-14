@@ -1,4 +1,5 @@
 using CustomerManagementSystem.BusinessLogic.Configuration;
+using CustomerManagementSystem.BusinessLogic.CustomerFunctions;
 using CustomerManagementSystem.DataAccess.DBConnection;
 using CustomerManagementSystem.Domain.Models;
 
@@ -6,42 +7,48 @@ namespace CustomerManagementSystem.BusinessLogic.Services.Implementation;
 
 public class CustomerService : ICustomerService
 {
-    private readonly IBllConfig _configuration;
-    private readonly IDbUtils _dbUtils;
+    private readonly IBllConfig _configuration = ServiceLocator.GetService<IBllConfig>();
+    private readonly IDbUtils _dbUtils = ServiceLocator.GetService<IDbUtils>();
 
-    public CustomerService()
+    public async Task<ResponseModel> DeactivateCustomer(string customerGuid)
     {
-        _configuration = ServiceLocator.GetService<IBllConfig>();
-        _dbUtils = ServiceLocator.GetService<IDbUtils>();
+        var customerDeactivation = new CustomerDeactivation(_dbUtils);
+        var response = await customerDeactivation.DeactivateCustomer(customerGuid);
+        return response;
     }
 
-    public ResponseModel DeactivateCustomer(string customerGUID)
+    public async Task<ResponseModel> DeleteCustomer(string customerGuid)
     {
-        throw new NotImplementedException();
+        var customerDeletion = new CustomerDeletion(_dbUtils);
+        var response = await customerDeletion.DeleteCustomer(customerGuid);
+        return response;
     }
 
-    public ResponseModel DeleteCustomer(string customerGUID)
+    public async Task<ResponseModel> EditCustomer(CustomerModel editCustomerRequest)
     {
-        throw new NotImplementedException();
+        var customerEditing = new CustomerEditing(_dbUtils);
+        var response = await customerEditing.EditCustomerFunction(editCustomerRequest);
+        return response;
     }
 
-    public ResponseModel EditCustomerFunction(CustomerModel editCustomerRequest)
+    public async Task<CustomerModel> GetCustomer(GetCustomerRequest getCustomerRqst)
     {
-        throw new NotImplementedException();
+        var customerGetting = new CustomerGetting(_dbUtils);
+        var response = await customerGetting.GetCustomerFunction(getCustomerRqst);
+        return response;
     }
 
-    public CustomerModel GetCustomer(GetCustomerRequest getCustomerRqst)
+    public async Task<CustomerListModel> GetCustomers()
     {
-        throw new NotImplementedException();
+        var customerGetting = new CustomerGetting(_dbUtils);
+        var response = await customerGetting.GetCustomersFunction();
+        return response;
     }
 
-    public CustomerListModel GetCustomers()
+    public async Task<ResponseModel> RegisterCustomer(CustomerModel customerRqst)
     {
-        throw new NotImplementedException();
-    }
-
-    public ResponseModel RegisterCustomerFunction(CustomerModel customerRqst)
-    {
-        throw new NotImplementedException();
+        var customerRegistration = new CustomerRegistration(_dbUtils);
+        var response = await customerRegistration.RegisterCustomerFunction(customerRqst);
+        return response;
     }
 }

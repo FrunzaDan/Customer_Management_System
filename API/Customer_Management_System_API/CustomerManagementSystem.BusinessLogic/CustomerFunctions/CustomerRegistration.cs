@@ -13,7 +13,7 @@ public class CustomerRegistration
         _dbUtils = dBUtils;
     }
 
-    public ResponseModel RegisterCustomerFunction(CustomerModel customerRqst)
+    public async Task<ResponseModel> RegisterCustomerFunction(CustomerModel customerRqst)
     {
         var response = new ResponseModel();
         if (customerRqst.Email is not null && customerRqst.Msisdn is not null)
@@ -35,7 +35,7 @@ public class CustomerRegistration
 
         try
         {
-            response = _dbUtils.RegisterCustomer(customerRqst);
+            response = await _dbUtils.RegisterCustomer(customerRqst);
         }
         catch (Exception ex)
         {
