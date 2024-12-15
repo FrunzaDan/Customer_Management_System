@@ -40,10 +40,21 @@ public class AuthService : IAuthService
             response = await jwtCreation.GenerateBearerJwt(merchantCredentials.MerchantId,
                 merchantCredentials.MerchantPassword);
 
-            if (response.Status == StatusCodes.Status200OK &&
-                !string.IsNullOrEmpty(response.AccessToken))
-                httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", response.AccessToken);
+            if (response.Status == StatusCodes.Status200OK && !string.IsNullOrEmpty(response.AccessToken))
+            {
+                if (VerifyToken(response.AccessToken).Status == StatusCodes.Status200OK)
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", response.AccessToken);
+                }
+                else
+                {
+                    response.AccessToken = null;
+                    response.ValidUntil = null;
+                    response.Status = StatusCodes.Status500InternalServerError;
+                    response.ResponseMessage = "Token generated but could not be verified!";
+                }
+                
+            }
         }
         catch (Exception ex)
         {

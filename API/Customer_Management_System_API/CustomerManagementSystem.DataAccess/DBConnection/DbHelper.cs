@@ -3,7 +3,7 @@ using Microsoft.Data.SqlClient;
 
 namespace CustomerManagementSystem.DataAccess.DBConnection;
 
-public class DbHelper
+public static class DbHelper
 {
     public static CustomerModel MapCustomerFromReader(SqlDataReader reader)
     {
