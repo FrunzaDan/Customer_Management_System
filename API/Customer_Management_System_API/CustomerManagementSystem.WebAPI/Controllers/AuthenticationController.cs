@@ -9,13 +9,10 @@ namespace CustomerManagementSystem.WebAPI.Controllers;
 public class AuthenticationController : ControllerBase
 {
     private readonly IAuthService _authService;
-    private readonly IHttpClientFactory _httpClientFactory;
 
     public AuthenticationController(
-        IHttpClientFactory httpClientFactory,
         IAuthService authService)
     {
-        _httpClientFactory = httpClientFactory;
         _authService = authService;
     }
 
@@ -23,8 +20,7 @@ public class AuthenticationController : ControllerBase
     [HttpPost]
     public async Task<AccessTokenResponse> GetAccessToken(MerchantCredentials merchantCredentials)
     {
-        var httpClient = _httpClientFactory.CreateClient();
-        var response = await _authService.GetAccessToken(merchantCredentials, httpClient);
+        var response = await _authService.GetAccessToken(merchantCredentials);
         if (response.Status.HasValue) Response.StatusCode = (int)response.Status;
 
         return response;

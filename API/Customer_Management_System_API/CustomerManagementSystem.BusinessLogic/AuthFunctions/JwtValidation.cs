@@ -13,8 +13,9 @@ public class JwtValidation
     private readonly string _jwtIssuer;
     private readonly string _jwtKey;
 
-    public JwtValidation(IBllConfig configuration)
+    public JwtValidation()
     {
+        var configuration = ServiceLocator.GetServiceFromServiceProvider<IBllConfig>();
         _jwtKey = configuration.SecureJwtKey;
         _jwtIssuer = configuration.JwtIssuer;
         _jwtAudience = configuration.JwtAudience;

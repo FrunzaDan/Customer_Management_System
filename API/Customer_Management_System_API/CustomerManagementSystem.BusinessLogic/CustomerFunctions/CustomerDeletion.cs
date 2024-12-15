@@ -7,9 +7,9 @@ public class CustomerDeletion
 {
     private readonly IDbUtils _dbUtils;
 
-    public CustomerDeletion(IDbUtils dBUtils)
+    public CustomerDeletion()
     {
-        _dbUtils = dBUtils;
+        _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
     }
 
     public async Task<ResponseModel> DeleteCustomer(string customerGuid)

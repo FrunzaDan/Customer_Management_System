@@ -7,9 +7,9 @@ public class CustomerDeactivation
 {
     private readonly IDbUtils _dbUtils;
 
-    public CustomerDeactivation(IDbUtils dBUtils)
+    public CustomerDeactivation()
     {
-        _dbUtils = dBUtils;
+        _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
     }
 
     public async Task<ResponseModel> DeactivateCustomer(string customerGuid)

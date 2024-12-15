@@ -43,7 +43,6 @@ public static class DbHelper
         AddAddressParameters(command, customer.Address);
     }
 
-    // Helper method to add address parameters
     private static void AddAddressParameters(SqlCommand command, AddressModel? address)
     {
         if (address == null) return;

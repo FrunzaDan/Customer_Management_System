@@ -10,13 +10,11 @@ namespace CustomerManagementSystem.BusinessLogic.Services.Implementation;
 
 public class CustomerService : ICustomerService
 {
-    private readonly IBllConfig _configuration = ServiceLocator.GetServiceFromServiceProvider<IBllConfig>();
-    private readonly IDbUtils _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
     private readonly bool _isAuthorized;
     
     public CustomerService(IHttpContextAccessor httpContextAccessor)
     {
-        JwtValidation jwtValidation = new JwtValidation(_configuration);
+        JwtValidation jwtValidation = new JwtValidation();
         _isAuthorized = jwtValidation.Authorize(httpContextAccessor.HttpContext, null);
     }
 
@@ -31,7 +29,7 @@ public class CustomerService : ICustomerService
             };
         }
 
-        var customerDeactivation = new CustomerDeactivation(_dbUtils);
+        var customerDeactivation = new CustomerDeactivation();
         var response = await customerDeactivation.DeactivateCustomer(customerGuid);
         return response;
     }
@@ -47,7 +45,7 @@ public class CustomerService : ICustomerService
             };
         }
         
-        var customerDeletion = new CustomerDeletion(_dbUtils);
+        var customerDeletion = new CustomerDeletion();
         var response = await customerDeletion.DeleteCustomer(customerGuid);
         return response;
     }
@@ -63,7 +61,7 @@ public class CustomerService : ICustomerService
             };
         }
         
-        var customerEditing = new CustomerEditing(_dbUtils);
+        var customerEditing = new CustomerEditing();
         var response = await customerEditing.EditCustomerFunction(editCustomerRequest);
         return response;
     }
@@ -79,7 +77,7 @@ public class CustomerService : ICustomerService
             };
         }
         
-        var customerGetting = new CustomerGetting(_dbUtils);
+        var customerGetting = new CustomerGetting();
         var response = await customerGetting.GetCustomerFunction(getCustomerRqst);
         return response;
     }
@@ -94,7 +92,7 @@ public class CustomerService : ICustomerService
                 ResponseMessage = "No access rights for this request!"
             };
         }
-        var customerGetting = new CustomerGetting(_dbUtils);
+        var customerGetting = new CustomerGetting();
         var response = await customerGetting.GetCustomersFunction();
         return response;
     }
@@ -109,7 +107,7 @@ public class CustomerService : ICustomerService
                 ResponseMessage = "No access rights for this request!"
             };
         }
-        var customerRegistration = new CustomerRegistration(_dbUtils);
+        var customerRegistration = new CustomerRegistration();
         var response = await customerRegistration.RegisterCustomerFunction(customerRqst);
         return response;
     }

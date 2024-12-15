@@ -15,10 +15,10 @@ public class JwtCreation
     private readonly IDbUtils _dbUtils;
     private readonly byte[] _jwtKey;
 
-    public JwtCreation(IBllConfig configuration, IDbUtils dbUtils)
+    public JwtCreation()
     {
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        _dbUtils = dbUtils ?? throw new ArgumentNullException(nameof(dbUtils));
+        _configuration = ServiceLocator.GetServiceFromServiceProvider<IBllConfig>();
+        _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
         _jwtKey = Encoding.ASCII.GetBytes(_configuration.SecureJwtKey);
     }
 

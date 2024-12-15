@@ -10,7 +10,7 @@ public class CustomerController : ControllerBase
 {
     private readonly ICustomerService _customerService;
 
-    public CustomerController(IHttpClientFactory httpClientFactory, ICustomerService customerService)
+    public CustomerController(ICustomerService customerService)
     {
         _customerService = customerService;
     }

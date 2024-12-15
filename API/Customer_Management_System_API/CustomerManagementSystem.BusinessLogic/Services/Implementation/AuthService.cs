@@ -1,7 +1,5 @@
 ﻿using System.Net.Http.Headers;
 using CustomerManagementSystem.BusinessLogic.AuthFunctions;
-using CustomerManagementSystem.BusinessLogic.Configuration;
-using CustomerManagementSystem.DataAccess.DBConnection;
 using CustomerManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Http;
 
@@ -9,26 +7,25 @@ namespace CustomerManagementSystem.BusinessLogic.Services.Implementation;
 
 public class AuthService : IAuthService
 {
-    private readonly IBllConfig _configuration = ServiceLocator.GetServiceFromServiceProvider<IBllConfig>();
-    private readonly IDbUtils _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public AuthService(IHttpContextAccessor httpContextAccessor)
+    public AuthService(IHttpContextAccessor httpContextAccessor, IHttpClientFactory httpClientFactory)
     {
         _httpContextAccessor = httpContextAccessor;
+        _httpClientFactory = httpClientFactory;
     }
 
-    public async Task<AccessTokenResponse> GetAccessToken(MerchantCredentials merchantCredentials,
-        HttpClient httpClient)
+    public async Task<AccessTokenResponse> GetAccessToken(MerchantCredentials merchantCredentials)
     {
         ArgumentNullException.ThrowIfNull(merchantCredentials);
-        ArgumentNullException.ThrowIfNull(httpClient);
+        var httpClient = _httpClientFactory.CreateClient();
 
         var response = new AccessTokenResponse();
 
         try
         {
-            var jwtCreation = new JwtCreation(_configuration, _dbUtils);
+            var jwtCreation = new JwtCreation();
             if (string.IsNullOrEmpty(merchantCredentials.MerchantId) ||
                 string.IsNullOrEmpty(merchantCredentials.MerchantPassword))
                 return new AccessTokenResponse
@@ -79,7 +76,7 @@ public class AuthService : IAuthService
 
         try
         {
-            var jwtValidation = new JwtValidation(_configuration);
+            var jwtValidation = new JwtValidation();
             var isAuthorized = jwtValidation.Authorize(httpContext, accessToken);
 
             response.Status = isAuthorized

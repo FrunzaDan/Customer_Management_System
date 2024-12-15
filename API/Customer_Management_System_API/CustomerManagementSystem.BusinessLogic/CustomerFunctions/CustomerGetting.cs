@@ -8,9 +8,9 @@ public class CustomerGetting
 {
     private readonly IDbUtils _dbUtils;
 
-    public CustomerGetting(IDbUtils dBUtils)
+    public CustomerGetting()
     {
-        _dbUtils = dBUtils;
+        _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
     }
 
     public async Task<CustomerModel> GetCustomerFunction(GetCustomerRequest getCustomerRqst)
