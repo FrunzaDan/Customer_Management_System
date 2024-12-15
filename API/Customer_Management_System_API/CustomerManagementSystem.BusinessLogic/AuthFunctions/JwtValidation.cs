@@ -72,6 +72,7 @@ public class JwtValidation
 
     private static bool VerifyClaims(JwtSecurityToken jwtToken)
     {
-        return jwtToken.Claims.Any() && jwtToken.Claims.Any(x => x.Type == ClaimTypes.Sid && !string.IsNullOrEmpty(x.Value));
+        return jwtToken.Claims.Any() &&
+               jwtToken.Claims.Any(x => x.Type == ClaimTypes.Sid && !string.IsNullOrEmpty(x.Value));
     }
 }

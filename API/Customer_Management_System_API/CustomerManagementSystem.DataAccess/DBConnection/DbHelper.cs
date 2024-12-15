@@ -30,7 +30,7 @@ public static class DbHelper
 
         return customer;
     }
-    
+
     public static void AddCustomerParameters(SqlCommand command, CustomerModel customer)
     {
         command.Parameters.AddWithValue("@var_Guid", customer.Guid ?? Guid.NewGuid().ToString());

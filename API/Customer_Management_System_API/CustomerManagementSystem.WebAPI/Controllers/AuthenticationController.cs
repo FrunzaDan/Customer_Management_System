@@ -5,35 +5,39 @@ using Microsoft.AspNetCore.Mvc;
 namespace CustomerManagementSystem.WebAPI.Controllers;
 
 [ApiController]
-[Route("[controller]")]
-public class AuthenticationController : ControllerBase
+[Route("api/[controller]")]
+public class AuthenticationController(IAuthService authService) : ControllerBase
 {
-    private readonly IAuthService _authService;
-
-    public AuthenticationController(
-        IAuthService authService)
+    [HttpPost("access-token")]
+    public async Task<ActionResult<ResponseModel>> GetAccessToken([FromBody] MerchantCredentials merchantCredentials)
     {
-        _authService = authService;
+        try
+        {
+            var response = await authService.GetAccessToken(merchantCredentials);
+            return StatusCode(response.Status ?? 200, response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500,
+                new { Message = "An error occurred while processing your request.", Details = ex.Message });
+        }
     }
 
-    [Route("[action]")]
-    [HttpPost]
-    public async Task<AccessTokenResponse> GetAccessToken(MerchantCredentials merchantCredentials)
+    [HttpGet("verify-token")]
+    public ActionResult<ResponseModel> VerifyToken([FromQuery] string accessToken)
     {
-        var response = await _authService.GetAccessToken(merchantCredentials);
-        if (response.Status.HasValue) Response.StatusCode = (int)response.Status;
+        if (string.IsNullOrEmpty(accessToken))
+            return BadRequest(new { Message = "Access token cannot be null or empty." });
 
-        return response;
-    }
-
-    [Route("[action]")]
-    [HttpGet]
-    public ResponseModel VerifyToken(string accessToken)
-    {
-        var response = _authService.VerifyToken(accessToken);
-
-        if (response.Status.HasValue) Response.StatusCode = (int)response.Status;
-
-        return response;
+        try
+        {
+            var response = authService.VerifyToken(accessToken);
+            return StatusCode(response.Status ?? 200, response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500,
+                new { Message = "An error occurred while processing your request.", Details = ex.Message });
+        }
     }
 }

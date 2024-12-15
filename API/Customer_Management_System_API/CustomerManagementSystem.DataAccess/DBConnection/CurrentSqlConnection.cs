@@ -1,4 +1,5 @@
-﻿using CustomerManagementSystem.DataAccess.Configuration;
+﻿using System.Data;
+using CustomerManagementSystem.DataAccess.Configuration;
 using Microsoft.Data.SqlClient;
 
 namespace CustomerManagementSystem.DataAccess.DBConnection;
@@ -37,7 +38,7 @@ public class CurrentSqlConnection
         {
             using var sqlConnection = new SqlConnection(connectionString);
             sqlConnection.Open();
-            return sqlConnection.State == System.Data.ConnectionState.Open;
+            return sqlConnection.State == ConnectionState.Open;
         }
         catch (SqlException)
         {
@@ -48,5 +49,4 @@ public class CurrentSqlConnection
             return false;
         }
     }
-
 }

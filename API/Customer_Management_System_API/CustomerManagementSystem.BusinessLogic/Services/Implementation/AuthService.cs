@@ -5,21 +5,13 @@ using Microsoft.AspNetCore.Http;
 
 namespace CustomerManagementSystem.BusinessLogic.Services.Implementation;
 
-public class AuthService : IAuthService
+public class AuthService(IHttpContextAccessor httpContextAccessor, IHttpClientFactory httpClientFactory)
+    : IAuthService
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IHttpClientFactory _httpClientFactory;
-
-    public AuthService(IHttpContextAccessor httpContextAccessor, IHttpClientFactory httpClientFactory)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _httpClientFactory = httpClientFactory;
-    }
-
     public async Task<AccessTokenResponse> GetAccessToken(MerchantCredentials merchantCredentials)
     {
         ArgumentNullException.ThrowIfNull(merchantCredentials);
-        var httpClient = _httpClientFactory.CreateClient();
+        var httpClient = httpClientFactory.CreateClient();
 
         var response = new AccessTokenResponse();
 
@@ -41,7 +33,8 @@ public class AuthService : IAuthService
             {
                 if (VerifyToken(response.AccessToken).Status == StatusCodes.Status200OK)
                 {
-                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", response.AccessToken);
+                    httpClient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", response.AccessToken);
                 }
                 else
                 {
@@ -50,7 +43,6 @@ public class AuthService : IAuthService
                     response.Status = StatusCodes.Status500InternalServerError;
                     response.ResponseMessage = "Token generated but could not be verified!";
                 }
-                
             }
         }
         catch (Exception ex)
@@ -64,7 +56,7 @@ public class AuthService : IAuthService
 
     public ResponseModel VerifyToken(string accessToken)
     {
-        var httpContext = _httpContextAccessor.HttpContext;
+        var httpContext = httpContextAccessor.HttpContext;
         if (httpContext is null)
             throw new ArgumentNullException(nameof(httpContext));
         ArgumentNullException.ThrowIfNull(httpContext);

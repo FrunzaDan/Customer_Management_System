@@ -5,78 +5,109 @@ using Microsoft.AspNetCore.Mvc;
 namespace CustomerManagementSystem.WebAPI.Controllers;
 
 [ApiController]
-[Route("[controller]")]
-public class CustomerController : ControllerBase
+[Route("api/[controller]")]
+public class CustomerController(ICustomerService customerService) : ControllerBase
 {
-    private readonly ICustomerService _customerService;
-
-    public CustomerController(ICustomerService customerService)
+    [HttpPost("register")]
+    public async Task<IActionResult> RegisterCustomer([FromBody] CustomerModel customerRqst)
     {
-        _customerService = customerService;
-    }
-
-    [Route("[action]")]
-    [HttpPost]
-    public async Task<ResponseModel> RegisterCustomer(CustomerModel customerRqst)
-    {
-        var response = await _customerService.RegisterCustomer(customerRqst);
-        if (response.Status.HasValue) Response.StatusCode = (int)response.Status;
-
-        return response;
-    }
-
-    [Route("[action]")]
-    [HttpGet]
-    public async Task<CustomerModel> GetCustomer(string searchVariable)
-    {
-        var getCustomerRqst = new GetCustomerRequest
+        try
         {
-            SearchVariable = searchVariable
-        };
-        var response = await _customerService.GetCustomer(getCustomerRqst);
-        if (response.Status.HasValue) Response.StatusCode = (int)response.Status;
-
-        return response;
+            var response = await customerService.RegisterCustomer(customerRqst);
+            return StatusCode(response.Status ?? 200, response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500,
+                new { Message = "An error occurred while processing your request.", Details = ex.Message });
+        }
     }
 
-    [Route("[action]")]
-    [HttpGet]
-    public async Task<CustomerListModel> GetCustomers()
+    [HttpGet("get")]
+    public async Task<IActionResult> GetCustomer([FromQuery] string searchVariable)
     {
-        var response = await _customerService.GetCustomers();
-        if (response.Status.HasValue) Response.StatusCode = (int)response.Status;
+        try
+        {
+            if (string.IsNullOrEmpty(searchVariable))
+                return BadRequest(new { Message = "Search variable cannot be null or empty." });
 
-        return response;
+            var getCustomerRqst = new GetCustomerRequest
+            {
+                SearchVariable = searchVariable
+            };
+            var response = await customerService.GetCustomer(getCustomerRqst);
+            return StatusCode(response.Status ?? 200, response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500,
+                new { Message = "An error occurred while processing your request.", Details = ex.Message });
+        }
     }
 
-    [Route("[action]")]
-    [HttpPatch]
-    public async Task<ResponseModel> EditCustomer(CustomerModel editCustomerRqst)
+    [HttpGet("all")]
+    public async Task<IActionResult> GetCustomers()
     {
-        var response = await _customerService.EditCustomer(editCustomerRqst);
-        if (response.Status.HasValue) Response.StatusCode = (int)response.Status;
-
-        return response;
+        try
+        {
+            var response = await customerService.GetCustomers();
+            return StatusCode(response.Status ?? 200, response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500,
+                new { Message = "An error occurred while processing your request.", Details = ex.Message });
+        }
     }
 
-    [Route("[action]")]
-    [HttpPatch]
-    public async Task<ResponseModel> DeactivateCustomer(string customerGUID)
+    [HttpPatch("edit")]
+    public async Task<IActionResult> EditCustomer([FromBody] CustomerModel editCustomerRqst)
     {
-        var response = await _customerService.DeactivateCustomer(customerGUID);
-        if (response.Status.HasValue) Response.StatusCode = (int)response.Status;
-
-        return response;
+        try
+        {
+            var response = await customerService.EditCustomer(editCustomerRqst);
+            return StatusCode(response.Status ?? 200, response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500,
+                new { Message = "An error occurred while processing your request.", Details = ex.Message });
+        }
     }
 
-    [Route("[action]")]
-    [HttpDelete]
-    public async Task<ResponseModel> DeleteCustomer(string customerGuid)
+    [HttpPatch("deactivate")]
+    public async Task<IActionResult> DeactivateCustomer([FromQuery] string customerGuid)
     {
-        var response = await _customerService.DeleteCustomer(customerGuid);
+        try
+        {
+            if (string.IsNullOrEmpty(customerGuid))
+                return BadRequest(new { Message = "Customer GUID cannot be null or empty." });
 
-        if (response.Status.HasValue) Response.StatusCode = (int)response.Status;
+            var response = await customerService.DeactivateCustomer(customerGuid);
+            return StatusCode(response.Status ?? 200, response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500,
+                new { Message = "An error occurred while processing your request.", Details = ex.Message });
+        }
+    }
 
-        return response;
+    [HttpDelete("delete")]
+    public async Task<IActionResult> DeleteCustomer([FromQuery] string customerGuid)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(customerGuid))
+                return BadRequest(new { Message = "Customer GUID cannot be null or empty." });
+
+            var response = await customerService.DeleteCustomer(customerGuid);
+            return StatusCode(response.Status ?? 200, response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500,
+                new { Message = "An error occurred while processing your request.", Details = ex.Message });
+        }
     }
 }

@@ -56,16 +56,6 @@ public class CustomerGetting
 
     public async Task<CustomerListModel> GetCustomersFunction()
     {
-        var response = new CustomerListModel();
-
-        try
-        {
-            response = await _dbUtils.GetCustomers();
-        }
-        catch (Exception)
-        {
-        }
-
-        return response;
+        return await _dbUtils.GetCustomers();
     }
 }
