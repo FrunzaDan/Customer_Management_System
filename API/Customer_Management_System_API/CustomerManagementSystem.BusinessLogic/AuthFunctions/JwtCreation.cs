@@ -13,92 +13,89 @@ public class JwtCreation
 {
     private readonly IBllConfig _configuration;
     private readonly IDbUtils _dbUtils;
-    private readonly string _jwtAudience;
-    private readonly string _jwtIssuer;
     private readonly byte[] _jwtKey;
 
     public JwtCreation(IBllConfig configuration, IDbUtils dbUtils)
     {
-        _configuration = configuration;
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _dbUtils = dbUtils ?? throw new ArgumentNullException(nameof(dbUtils));
         _jwtKey = Encoding.ASCII.GetBytes(_configuration.SecureJwtKey);
-        _jwtIssuer = _configuration.JwtIssuer;
-        _jwtAudience = _configuration.JwtAudience;
-        _dbUtils = dbUtils;
     }
 
     public async Task<AccessTokenResponse> GenerateBearerJwt(string merchantId, string merchantPassword)
     {
         if (string.IsNullOrWhiteSpace(merchantId) || string.IsNullOrWhiteSpace(merchantPassword))
-            return new AccessTokenResponse
-            {
-                AccessToken = null,
-                ValidUntil = null,
-                Status = StatusCodes.Status400BadRequest,
-                ResponseMessage = "Merchant ID and Password cannot be empty."
-            };
+            return CreateErrorResponse(StatusCodes.Status400BadRequest, "Merchant ID and Password cannot be empty.");
 
         try
         {
             // Validate merchant credentials
-            var merchantCredentials = new MerchantCredentials
-            {
-                MerchantId = merchantId,
-                MerchantPassword = merchantPassword
-            };
-
-            var credentialsAreValid = await _dbUtils.CheckMerchantCredentialsFromDb(merchantCredentials);
-            if (!credentialsAreValid.IsValid)
-                return new AccessTokenResponse
-                {
-                    AccessToken = null,
-                    ValidUntil = null,
-                    Status = StatusCodes.Status403Forbidden,
-                    ResponseMessage = credentialsAreValid.ErrorMessage
-                };
+            var credentialsCheck = await ValidateMerchantCredentials(merchantId, merchantPassword);
+            if (credentialsCheck is { IsValid: false, ErrorMessage: not null })
+                return CreateErrorResponse(StatusCodes.Status403Forbidden, credentialsCheck.ErrorMessage);
 
             // Generate token
-            var tokenDescriptor = BuildTokenDescriptor(merchantId);
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var accessToken = tokenHandler.WriteToken(token);
+            var token = GenerateJwtToken(merchantId);
 
             return new AccessTokenResponse
             {
-                AccessToken = accessToken,
-                ValidUntil = tokenDescriptor.Expires?.ToString("o"),
+                AccessToken = token,
+                ValidUntil = DateTime.UtcNow.AddMinutes(double.Parse(_configuration.AccessTokenTimeout)).ToString("o"),
                 Status = StatusCodes.Status200OK,
                 ResponseMessage = "Success!"
             };
         }
         catch (Exception ex)
         {
-            return new AccessTokenResponse
-            {
-                AccessToken = null,
-                ValidUntil = null,
-                Status = StatusCodes.Status500InternalServerError,
-                ResponseMessage = $"An error occurred: {ex.Message}"
-            };
+            return CreateErrorResponse(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
         }
+    }
+
+    private async Task<ResultValidityCheck> ValidateMerchantCredentials(string merchantId, string merchantPassword)
+    {
+        var merchantCredentials = new MerchantCredentials
+        {
+            MerchantId = merchantId,
+            MerchantPassword = merchantPassword
+        };
+
+        return await _dbUtils.CheckMerchantCredentialsFromDb(merchantCredentials);
+    }
+
+    private string GenerateJwtToken(string merchantId)
+    {
+        var tokenDescriptor = BuildTokenDescriptor(merchantId);
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
     }
 
     private SecurityTokenDescriptor BuildTokenDescriptor(string merchantId)
     {
-        var claims = new List<Claim>
-        {
-            new(ClaimTypes.Sid, merchantId),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString("o"))
-        };
-
         return new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(claims),
+            Subject = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.Sid, merchantId),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString("o"))
+            }),
             Expires = DateTime.UtcNow.AddMinutes(double.Parse(_configuration.AccessTokenTimeout)),
-            SigningCredentials =
-                new SigningCredentials(new SymmetricSecurityKey(_jwtKey), SecurityAlgorithms.HmacSha256Signature),
-            Issuer = _jwtIssuer,
-            Audience = _jwtAudience
+            SigningCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(_jwtKey), SecurityAlgorithms.HmacSha256Signature),
+            Issuer = _configuration.JwtIssuer,
+            Audience = _configuration.JwtAudience
+        };
+    }
+
+    private AccessTokenResponse CreateErrorResponse(int statusCode, string message)
+    {
+        return new AccessTokenResponse
+        {
+            AccessToken = null,
+            ValidUntil = null,
+            Status = statusCode,
+            ResponseMessage = message
         };
     }
 }

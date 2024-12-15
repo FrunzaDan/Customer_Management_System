@@ -9,17 +9,15 @@ namespace CustomerManagementSystem.BusinessLogic.AuthFunctions;
 
 public class JwtValidation
 {
-    private readonly IBllConfig _configuration;
     private readonly string _jwtAudience;
     private readonly string _jwtIssuer;
     private readonly string _jwtKey;
 
     public JwtValidation(IBllConfig configuration)
     {
-        _configuration = configuration;
-        _jwtKey = _configuration.SecureJwtKey;
-        _jwtIssuer = _configuration.JwtIssuer;
-        _jwtAudience = _configuration.JwtAudience;
+        _jwtKey = configuration.SecureJwtKey;
+        _jwtIssuer = configuration.JwtIssuer;
+        _jwtAudience = configuration.JwtAudience;
     }
 
     public bool Authorize(HttpContext httpContext, string? bearerToken)
@@ -29,7 +27,6 @@ public class JwtValidation
             authHeader = httpContext.Request.Headers["Authorization"].ToString();
         else
             authHeader = "Bearer " + bearerToken;
-        var jwtValidation = new JwtValidation(_configuration);
 
         if (string.IsNullOrEmpty(authHeader)) return false;
 
@@ -39,7 +36,7 @@ public class JwtValidation
         if (string.IsNullOrEmpty(jwt))
             throw new SecurityTokenException("Missing JWT Token in Authorization HTTP Header");
 
-        return jwtValidation.ValidateToken(jwt);
+        return ValidateToken(jwt);
     }
 
     private bool ValidateToken(string? token)
@@ -74,11 +71,6 @@ public class JwtValidation
 
     private static bool VerifyClaims(JwtSecurityToken jwtToken)
     {
-        var claimsAreValid = false;
-
-        var userId = jwtToken.Claims.First(x => x.Type == ClaimTypes.Sid).Value;
-
-        if (!string.IsNullOrEmpty(userId)) claimsAreValid = true;
-        return claimsAreValid;
+        return jwtToken.Claims.Any() && jwtToken.Claims.Any(x => x.Type == ClaimTypes.Sid && !string.IsNullOrEmpty(x.Value));
     }
 }

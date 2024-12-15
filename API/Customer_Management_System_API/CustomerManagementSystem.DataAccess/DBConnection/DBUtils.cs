@@ -341,9 +341,9 @@ public class DbUtils : IDbUtils
         return response;
     }
 
-    public async Task<MerchantCredentialsCheck> CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials)
+    public async Task<ResultValidityCheck> CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials)
     {
-        var merchantCredentialsCheck = new MerchantCredentialsCheck
+        var merchantCredentialsCheck = new ResultValidityCheck
         {
             IsValid = false,
             ErrorMessage = null
@@ -370,7 +370,11 @@ public class DbUtils : IDbUtils
                     merchantRoleInt == 1801;
 
                 if (!merchantCredentialsCheck.IsValid)
-                    merchantCredentialsCheck.ErrorMessage = "The provided merchant credentials were invalid!";
+                    merchantCredentialsCheck.ErrorMessage = "The provided merchant credentials had invalid roles!";
+            }
+            else
+            {
+                merchantCredentialsCheck.ErrorMessage = "No matching merchant credentials found!";
             }
         }
         catch (Exception ex)
