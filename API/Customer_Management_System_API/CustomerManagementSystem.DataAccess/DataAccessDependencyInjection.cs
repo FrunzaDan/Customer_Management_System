@@ -7,13 +7,7 @@ public static class DataAccessDependencyInjection
 {
     public static IServiceCollection AddDataAccess(this IServiceCollection services)
     {
-        services.AddServices();
-
-        return services;
-    }
-
-    private static void AddServices(this IServiceCollection services)
-    {
         services.AddSingleton<IDalConfig, DalConfig>();
+        return services;
     }
 }

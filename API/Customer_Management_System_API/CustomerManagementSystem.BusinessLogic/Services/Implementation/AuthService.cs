@@ -9,8 +9,8 @@ namespace CustomerManagementSystem.BusinessLogic.Services.Implementation;
 
 public class AuthService : IAuthService
 {
-    private readonly IBllConfig _configuration = ServiceLocator.GetService<IBllConfig>();
-    private readonly IDbUtils _dbUtils = ServiceLocator.GetService<IDbUtils>();
+    private readonly IBllConfig _configuration = ServiceLocator.GetServiceFromServiceProvider<IBllConfig>();
+    private readonly IDbUtils _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public AuthService(IHttpContextAccessor httpContextAccessor)

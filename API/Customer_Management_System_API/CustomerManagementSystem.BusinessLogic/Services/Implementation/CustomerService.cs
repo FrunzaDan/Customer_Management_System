@@ -10,8 +10,8 @@ namespace CustomerManagementSystem.BusinessLogic.Services.Implementation;
 
 public class CustomerService : ICustomerService
 {
-    private readonly IBllConfig _configuration = ServiceLocator.GetService<IBllConfig>();
-    private readonly IDbUtils _dbUtils = ServiceLocator.GetService<IDbUtils>();
+    private readonly IBllConfig _configuration = ServiceLocator.GetServiceFromServiceProvider<IBllConfig>();
+    private readonly IDbUtils _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
     private readonly bool _isAuthorized;
     
     public CustomerService(IHttpContextAccessor httpContextAccessor)

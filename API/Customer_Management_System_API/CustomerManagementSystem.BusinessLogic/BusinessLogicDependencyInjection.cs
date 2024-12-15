@@ -10,16 +10,10 @@ public static class BusinessLogicDependencyInjection
 {
     public static IServiceCollection AddBusinessLogic(this IServiceCollection services)
     {
-        services.AddServices();
-
-        return services;
-    }
-
-    private static void AddServices(this IServiceCollection services)
-    {
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddSingleton<IDbUtils, DbUtils>();
         services.AddSingleton<IBllConfig, BllConfig>();
+        return services;
     }
 }

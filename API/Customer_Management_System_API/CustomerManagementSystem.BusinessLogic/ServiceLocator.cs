@@ -1,37 +1,46 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CustomerManagementSystem.BusinessLogic;
-
-public static class ServiceLocator
+namespace CustomerManagementSystem.BusinessLogic
 {
-    private static readonly object Lock = new();
-    private static IServiceProvider? _instance;
-
-    private static IServiceProvider Instance
+    public static class ServiceLocator
     {
-        get => _instance ?? throw new InvalidOperationException("Service provider not initialized.");
-        set
+        private static readonly object Lock = new();
+        private static IServiceProvider? _instance;
+
+        private static IServiceProvider Instance
         {
-            lock (Lock)
+            get
             {
-                if (_instance != null)
-                    throw new InvalidOperationException(
-                        "Service provider has already been set and cannot be modified.");
-                _instance = value;
+                if (_instance == null)
+                {
+                    throw new InvalidOperationException("Service provider not initialized.");
+                }
+                return _instance;
+            }
+            set
+            {
+                lock (Lock)
+                {
+                    if (_instance != null)
+                    {
+                        throw new InvalidOperationException("Service provider has already been set and cannot be modified.");
+                    }
+
+                    _instance = value ?? throw new ArgumentNullException(nameof(value), "Service provider cannot be null.");
+                }
             }
         }
-    }
 
-    public static void SetLocatorProvider(IServiceProvider serviceProvider)
-    {
-        ArgumentNullException.ThrowIfNull(serviceProvider);
+        public static void SetLocatorProvider(IServiceProvider serviceProvider)
+        {
+            ArgumentNullException.ThrowIfNull(serviceProvider);
+            Instance = serviceProvider;
+        }
 
-        Instance = serviceProvider;
-    }
-
-    public static T GetService<T>() where T : class
-    {
-        return Instance.GetService<T>() ??
-               throw new InvalidOperationException($"Service of type {typeof(T).Name} not found.");
+        public static T GetServiceFromServiceProvider<T>() where T : class
+        {
+            var service = Instance.GetService<T>();
+            return service ?? throw new InvalidOperationException($"Service of type {typeof(T).Name} not found.");
+        }
     }
 }
