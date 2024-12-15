@@ -2,6 +2,6 @@
 
 public interface IDalConfig
 {
-    string CustomerManagementSystemDbWindows { get; }
-    string CustomerManagementSystemDbDocker { get; }
+    string? CustomerManagementSystemDbWindows { get; }
+    string? CustomerManagementSystemDbDocker { get; }
 }

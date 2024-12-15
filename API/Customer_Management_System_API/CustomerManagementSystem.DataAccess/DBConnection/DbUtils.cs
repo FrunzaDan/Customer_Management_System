@@ -7,382 +7,228 @@ namespace CustomerManagementSystem.DataAccess.DBConnection;
 
 public class DbUtils : IDbUtils
 {
+    private readonly IDalConfig _configuration;
+    private string? CurrentConnectionString { get; set; }
+
     public DbUtils(IDalConfig configuration)
     {
-        var currentSqlConnection = new CurrentSqlConnection(configuration);
+        _configuration = configuration;
+    }
 
+    private void CheckConnectionString()
+    {
+        if (!string.IsNullOrEmpty(CurrentConnectionString)) return;
+        var currentSqlConnection = new CurrentSqlConnection(_configuration);
         CurrentConnectionString = currentSqlConnection.GetCorrectSqlConnectionString();
     }
 
-    private string CurrentConnectionString { get; }
+    private async Task<T> ExecuteStoredProcedureAsync<T>(
+        string storedProcedure,
+        Action<SqlCommand>? configureCommand,
+        Func<SqlDataReader, Task<T>> handleReader)
+    {
+        CheckConnectionString();
+        await using var connection = new SqlConnection(CurrentConnectionString);
+        await connection.OpenAsync().ConfigureAwait(false);
+        await using var command = new SqlCommand(storedProcedure, connection);
+        command.CommandType = CommandType.StoredProcedure;
+
+        configureCommand?.Invoke(command);
+
+        await using var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
+        return await handleReader(reader);
+    }
+
+    // Generic method to handle the ResponseModel parsing
+    private async Task<ResponseModel> HandleResponseAsync(SqlDataReader reader, string successMessage, string conflictMessage, string errorMessage)
+    {
+        if (await reader.ReadAsync().ConfigureAwait(false))
+        {
+            return new ResponseModel
+            {
+                Status = reader.GetInt32("ReturnValue") == 200 ? 200 : 409,
+                ResponseMessage = reader.GetInt32("ReturnValue") == 200 ? successMessage : conflictMessage
+            };
+        }
+
+        return new ResponseModel
+        {
+            Status = 500,
+            ResponseMessage = errorMessage
+        };
+    }
 
     public async Task<ResponseModel> RegisterCustomer(CustomerModel customer)
     {
-        var response = new ResponseModel();
-
-        try
+        const string storedProcedure = "dbo.usp_createCustomer";
+        return await ExecuteStoredProcedureAsync(storedProcedure, command =>
         {
-            await using var sqlConnection = new SqlConnection(CurrentConnectionString);
-            await sqlConnection.OpenAsync();
-
-            const string storedProcedure = "dbo.usp_createCustomer";
-
-            await using var sqlCommand = new SqlCommand(storedProcedure, sqlConnection);
-            sqlCommand.CommandType = CommandType.StoredProcedure;
-
-            sqlCommand.Parameters.AddWithValue("@var_Guid", Guid.NewGuid().ToString());
-            sqlCommand.Parameters.AddWithValue("@var_FirstName", customer.FirstName);
-            sqlCommand.Parameters.AddWithValue("@var_LastName", customer.LastName);
-            sqlCommand.Parameters.AddWithValue("@var_Email", customer.Email);
-            sqlCommand.Parameters.AddWithValue("@var_MSISDN", customer.Msisdn);
-            sqlCommand.Parameters.AddWithValue("@var_Gender", customer.Gender);
-            sqlCommand.Parameters.AddWithValue("@var_Birthdate", customer.Birthdate);
-
-            if (customer.Address is not null)
-                // Add address parameters if present
-                if (customer.Address is not null)
-                {
-                    sqlCommand.Parameters.AddWithValue("@var_Country",
-                        customer.Address.Country ?? (object)DBNull.Value);
-                    sqlCommand.Parameters.AddWithValue("@var_County", customer.Address.County ?? (object)DBNull.Value);
-                    sqlCommand.Parameters.AddWithValue("@var_Town", customer.Address.Town ?? (object)DBNull.Value);
-                    sqlCommand.Parameters.AddWithValue("@var_ZIP", customer.Address.Zip ?? (object)DBNull.Value);
-                    sqlCommand.Parameters.AddWithValue("@var_Street", customer.Address.Street ?? (object)DBNull.Value);
-                    sqlCommand.Parameters.AddWithValue("@var_Number", customer.Address.Number ?? (object)DBNull.Value);
-                }
-
-            await using var reader = await sqlCommand.ExecuteReaderAsync();
-
-            if (await reader.ReadAsync() && int.TryParse(reader["ReturnValue"].ToString(), out var parsedReturnValue))
-            {
-                response.Status = parsedReturnValue switch
-                {
-                    200 => 200,
-                    _ => 409
-                };
-                response.ResponseMessage = parsedReturnValue == 200 ? "Success" : "Conflict occurred.";
-            }
-            else
-            {
-                response.Status = 500;
-                response.ResponseMessage = "Failed to connect to DB or retrieve a valid response.";
-            }
-        }
-        catch (Exception ex)
-        {
-            response.Status = 500;
-            response.ResponseMessage = ex.ToString();
-        }
-
-        if (response.Status != null) return response;
-        response.Status = 500;
-        response.ResponseMessage = "Couldn't read ResponseCode";
-
-        return response;
+            DbHelper.AddCustomerParameters(command, customer);
+        }, async reader => await HandleResponseAsync(reader, "Success", "Conflict occurred.", "Internal Error"));
     }
 
     public async Task<CustomerModel> GetCustomer(GetCustomerRequest request)
     {
-        var customerResponse = new CustomerModel { Address = new AddressModel() };
-
-        try
+        const string storedProcedure = "dbo.usp_getCustomer";
+        return await ExecuteStoredProcedureAsync(storedProcedure, command =>
         {
-            await using var sqlConnection = new SqlConnection(CurrentConnectionString);
-            await sqlConnection.OpenAsync();
-
-            const string storedProcedure = "dbo.usp_getCustomer";
-
-            await using var sqlCommand = new SqlCommand(storedProcedure, sqlConnection);
-            sqlCommand.CommandType = CommandType.StoredProcedure;
-
-            // Use explicit parameterization for clarity
-            sqlCommand.Parameters.Add(new SqlParameter("@var_SearchOption", SqlDbType.NVarChar)
-                { Value = request.SearchOption });
-            sqlCommand.Parameters.Add(new SqlParameter("@var_SearchVariable", SqlDbType.NVarChar)
-                { Value = request.SearchVariable ?? (object)DBNull.Value });
-
-            await using var reader = await sqlCommand.ExecuteReaderAsync();
-
-            if (await reader.ReadAsync())
-            {
-                customerResponse = DbHelper.MapCustomerFromReader(reader);
-                customerResponse.Status = 200;
-                customerResponse.ResponseMessage = "Customer found in the DB!";
-            }
-            else
-            {
-                customerResponse.Status = 404;
-                customerResponse.ResponseMessage = "Customer was not found in the DB!";
-            }
-        }
-        catch (Exception ex)
+            command.Parameters.AddWithValue("@var_SearchOption", request.SearchOption);
+            command.Parameters.AddWithValue("@var_SearchVariable", request.SearchVariable ?? (object)DBNull.Value);
+        }, async reader =>
         {
-            customerResponse.Status = 500;
-            customerResponse.ResponseMessage = ex.Message; // or ex.ToString() for more detail
-        }
-
-        return customerResponse;
+            return await reader.ReadAsync().ConfigureAwait(false) ? DbHelper.MapCustomerFromReader(reader) : new CustomerModel { Status = 404, ResponseMessage = "Customer not found" };
+        });
     }
-
 
     public async Task<CustomerListModel> GetCustomers()
     {
-        var customerListResponse = new CustomerListModel();
-        var customerList = new List<CustomerModel>();
-
-        try
+        const string storedProcedure = "dbo.usp_getCustomers";
+        return await ExecuteStoredProcedureAsync(storedProcedure, null, async reader =>
         {
-            await using var sqlConnection = new SqlConnection(CurrentConnectionString);
-            await sqlConnection.OpenAsync();
+            var customers = new List<CustomerModel>();
+            while (await reader.ReadAsync().ConfigureAwait(false))
+            {
+                customers.Add(DbHelper.MapCustomerFromReader(reader));
+            }
 
-            const string storedProcedure = "dbo.usp_getCustomers";
-
-            await using var sqlCommand = new SqlCommand(storedProcedure, sqlConnection);
-            sqlCommand.CommandType = CommandType.StoredProcedure;
-
-            await using var reader = await sqlCommand.ExecuteReaderAsync();
-
-            while (await reader.ReadAsync()) customerList.Add(DbHelper.MapCustomerFromReader(reader));
-
-            customerListResponse.Status = 200;
-            customerListResponse.ResponseMessage = $"{customerList.Count} customers found in DB!";
-            customerListResponse.CustomerList = customerList;
-        }
-        catch (Exception ex)
-        {
-            customerListResponse.Status = 500;
-            customerListResponse.ResponseMessage = ex.Message;
-        }
-
-        return customerListResponse;
+            return new CustomerListModel
+            {
+                CustomerList = customers,
+                Status = 200,
+                ResponseMessage = $"{customers.Count} customers found."
+            };
+        });
     }
-
 
     public async Task<ResponseModel> EditCustomer(CustomerModel customer)
     {
-        var response = new ResponseModel();
-
-        try
+        const string storedProcedure = "dbo.usp_editCustomer";
+        return await ExecuteStoredProcedureAsync(storedProcedure, command =>
         {
-            await using var sqlConnection = new SqlConnection(CurrentConnectionString);
-            await sqlConnection.OpenAsync();
-
-            const string storedProcedure = "dbo.usp_editCustomer";
-
-            await using var sqlCommand = new SqlCommand(storedProcedure, sqlConnection);
-            sqlCommand.CommandType = CommandType.StoredProcedure;
-
-            sqlCommand.Parameters.AddWithValue("@var_Guid", customer.Guid);
-            sqlCommand.Parameters.AddWithValue("@var_FirstName", customer.FirstName);
-            sqlCommand.Parameters.AddWithValue("@var_LastName", customer.LastName);
-            sqlCommand.Parameters.AddWithValue("@var_Email", customer.Email);
-            sqlCommand.Parameters.AddWithValue("@var_MSISDN", customer.Msisdn);
-            sqlCommand.Parameters.AddWithValue("@var_Gender", customer.Gender);
-            sqlCommand.Parameters.AddWithValue("@var_Birthdate", customer.Birthdate);
-
-            if (customer.Address is not null)
+            DbHelper.AddCustomerParameters(command, customer);
+        }, async reader =>
+        {
+            if (await reader.ReadAsync().ConfigureAwait(false))
             {
-                var address = customer.Address;
-                if (address is not null)
+                var customerStatus = reader["customer_Status"].ToString();
+                if (int.TryParse(customerStatus, out var customerStatusInt) && (customerStatusInt == 1901 || customerStatusInt == 1903))
                 {
-                    sqlCommand.Parameters.AddWithValue("@var_Country", address.Country);
-                    sqlCommand.Parameters.AddWithValue("@var_County", address.County);
-                    sqlCommand.Parameters.AddWithValue("@var_Town", address.Town);
-                    sqlCommand.Parameters.AddWithValue("@var_ZIP", address.Zip);
-                    sqlCommand.Parameters.AddWithValue("@var_Street", address.Street);
-                    sqlCommand.Parameters.AddWithValue("@var_Number", address.Number);
+                    return new ResponseModel
+                    {
+                        Status = 200,
+                        ResponseMessage = "Customer edited successfully!"
+                    };
                 }
+
+                return new ResponseModel
+                {
+                    Status = 500,
+                    ResponseMessage = "Could not read customer status code!"
+                };
             }
 
-            await using var reader = await sqlCommand.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
-                try
-                {
-                    int.TryParse(reader["customer_Status"].ToString(), out var customerStatusInt);
-                    if (customerStatusInt == 1901)
-                    {
-                        response.Status = 200;
-                        response.ResponseMessage = "Customer edited successfully!";
-                    }
-                    else if (customerStatusInt == 1903)
-                    {
-                        response.Status = 200;
-                        response.ResponseMessage = "Customer edited successfully!";
-                    }
-                    else
-                    {
-                        response.Status = 500;
-                        response.ResponseMessage = "Could not read customer status code!";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    response.Status = 500;
-                    response.ResponseMessage = ex.ToString();
-                }
-        }
-        catch (Exception ex)
-        {
-            response.Status = 500;
-            response.ResponseMessage = ex.ToString();
-        }
-
-        if (response.Status == null)
-        {
-            response.Status = 500;
-            response.ResponseMessage = "Couldn't read ResponseCode";
-        }
-
-        return response;
+            return new ResponseModel
+            {
+                Status = 500,
+                ResponseMessage = "Couldn't read ResponseCode"
+            };
+        });
     }
 
     public async Task<ResponseModel> DeactivateCustomer(string customerGuid)
     {
-        var response = new ResponseModel();
-
-        try
+        const string storedProcedure = "dbo.usp_deactivateCustomer";
+        return await ExecuteStoredProcedureAsync<ResponseModel>(storedProcedure, command =>
         {
-            await using var sqlConnection = new SqlConnection(CurrentConnectionString);
-            await sqlConnection.OpenAsync();
-
-            const string storedProcedure = "dbo.usp_deactivateCustomer";
-
-            await using var sqlCommand = new SqlCommand(storedProcedure, sqlConnection);
-            sqlCommand.CommandType = CommandType.StoredProcedure;
-
-            sqlCommand.Parameters.AddWithValue("@var_Guid", customerGuid);
-
-            await using var reader = await sqlCommand.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
-                try
-                {
-                    int.TryParse(reader["customer_Status"].ToString(), out var customerStatusInt);
-                    if (customerStatusInt == 1903)
-                    {
-                        response.Status = 200;
-                        response.ResponseMessage = "Customer deactivated successfully!";
-                    }
-                    else
-                    {
-                        response.Status = 500;
-                        response.ResponseMessage = "Could not read customer status code!";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    response.Status = 500;
-                    response.ResponseMessage = ex.ToString();
-                }
-        }
-        catch (Exception ex)
+            command.Parameters.AddWithValue("@var_Guid", customerGuid);
+        }, async reader =>
         {
-            response.Status = 500;
-            response.ResponseMessage = ex.ToString();
-        }
+            if (await reader.ReadAsync().ConfigureAwait(false))
+            {
+                return await ParseStatus(reader, 1903, "Customer deactivated successfully!");
+            }
 
-        if (response.Status == null)
-        {
-            response.Status = 500;
-            response.ResponseMessage = "Couldn't read ResponseCode";
-        }
-
-        return response;
+            return new ResponseModel
+            {
+                Status = 500,
+                ResponseMessage = "Couldn't read ResponseCode"
+            };
+        });
     }
 
     public async Task<ResponseModel> DeleteCustomer(string customerGuid)
     {
-        var response = new ResponseModel();
-
-        try
+        const string storedProcedure = "dbo.usp_deleteCustomer";
+        return await ExecuteStoredProcedureAsync<ResponseModel>(storedProcedure, command =>
         {
-            await using var sqlConnection = new SqlConnection(CurrentConnectionString);
-            await sqlConnection.OpenAsync();
+            command.Parameters.AddWithValue("@var_Guid", customerGuid);
+        }, async reader =>
+        {
+            if (await reader.ReadAsync().ConfigureAwait(false))
+            {
+                return await ParseStatus(reader, 1903, "Customer deleted successfully!");
+            }
 
-            const string storedProcedure = "dbo.usp_deleteCustomer";
+            return new ResponseModel
+            {
+                Status = 500,
+                ResponseMessage = "Couldn't read ResponseCode"
+            };
+        });
+    }
 
-            await using var sqlCommand = new SqlCommand(storedProcedure, sqlConnection);
-            sqlCommand.CommandType = CommandType.StoredProcedure;
-            sqlCommand.Parameters.AddWithValue("@var_Guid", customerGuid);
 
-            await using var reader = await sqlCommand.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
-                try
+    // Helper method to parse common status logic
+    private async Task<ResponseModel> ParseStatus(SqlDataReader reader, int expectedStatus, string successMessage)
+    {
+        if (await reader.ReadAsync().ConfigureAwait(false))
+        {
+            if (int.TryParse(reader["customer_Status"].ToString(), out var customerStatusInt) && customerStatusInt == expectedStatus)
+            {
+                return new ResponseModel
                 {
-                    int.TryParse(reader["customer_Status"].ToString(), out var customerStatusInt);
-                    if (customerStatusInt == 1903)
-                    {
-                        response.Status = 200;
-                        response.ResponseMessage = "Customer deactivated successfully!";
-                    }
-                    else
-                    {
-                        response.Status = 500;
-                        response.ResponseMessage = "Could not read customer status code!";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    response.Status = 500;
-                    response.ResponseMessage = ex.ToString();
-                }
-        }
-        catch (Exception ex)
-        {
-            response.Status = 500;
-            response.ResponseMessage = ex.ToString();
+                    Status = 200,
+                    ResponseMessage = successMessage
+                };
+            }
+
+            return new ResponseModel
+            {
+                Status = 500,
+                ResponseMessage = "Could not read customer status code!"
+            };
         }
 
-        if (response.Status == null)
+        return new ResponseModel
         {
-            response.Status = 500;
-            response.ResponseMessage = "Couldn't read ResponseCode";
-        }
-
-        return response;
+            Status = 500,
+            ResponseMessage = "Couldn't read ResponseCode"
+        };
     }
 
     public async Task<ResultValidityCheck> CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials)
     {
-        var merchantCredentialsCheck = new ResultValidityCheck
+        const string storedProcedure = "dbo.usp_checkMerchantCredentials";
+        return await ExecuteStoredProcedureAsync(storedProcedure, command =>
         {
-            IsValid = false,
-            ErrorMessage = null
-        };
-
-        try
+            command.Parameters.AddWithValue("@var_MerchantID", merchantCredentials.MerchantId);
+            command.Parameters.AddWithValue("@var_MerchantPassword", merchantCredentials.MerchantPassword);
+        }, async reader =>
         {
-            await using var sqlConnection = new SqlConnection(CurrentConnectionString);
-            await sqlConnection.OpenAsync();
-
-            const string storedProcedure = "dbo.usp_checkMerchantCredentials";
-
-            await using var sqlCommand = new SqlCommand(storedProcedure, sqlConnection);
-            sqlCommand.CommandType = CommandType.StoredProcedure;
-
-            sqlCommand.Parameters.AddWithValue("@var_MerchantID", merchantCredentials.MerchantId);
-            sqlCommand.Parameters.AddWithValue("@var_MerchantPassword", merchantCredentials.MerchantPassword);
-
-            await using var reader = await sqlCommand.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            var result = new ResultValidityCheck { IsValid = false };
+            if (await reader.ReadAsync().ConfigureAwait(false))
             {
-                merchantCredentialsCheck.IsValid =
-                    int.TryParse(reader["merchant_role"].ToString(), out var merchantRoleInt) &&
-                    merchantRoleInt == 1801;
-
-                if (!merchantCredentialsCheck.IsValid)
-                    merchantCredentialsCheck.ErrorMessage = "The provided merchant credentials had invalid roles!";
+                result.IsValid = int.TryParse(reader["merchant_role"].ToString(), out var role) && role == 1801;
+                if (!result.IsValid)
+                {
+                    result.ErrorMessage = "The provided merchant credentials had invalid roles!";
+                }
             }
             else
             {
-                merchantCredentialsCheck.ErrorMessage = "No matching merchant credentials found!";
+                result.ErrorMessage = "No matching merchant credentials found!";
             }
-        }
-        catch (Exception ex)
-        {
-            merchantCredentialsCheck.IsValid = false;
-            merchantCredentialsCheck.ErrorMessage = ex.Message;
-        }
-
-        return merchantCredentialsCheck;
+            return result;
+        });
     }
 }

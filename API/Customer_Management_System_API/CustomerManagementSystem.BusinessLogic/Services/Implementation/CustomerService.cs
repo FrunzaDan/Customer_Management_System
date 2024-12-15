@@ -1,3 +1,4 @@
+using System.Data;
 using CustomerManagementSystem.BusinessLogic.Configuration;
 using CustomerManagementSystem.BusinessLogic.CustomerFunctions;
 using CustomerManagementSystem.BusinessLogic.AuthFunctions;
@@ -11,12 +12,10 @@ public class CustomerService : ICustomerService
 {
     private readonly IBllConfig _configuration = ServiceLocator.GetService<IBllConfig>();
     private readonly IDbUtils _dbUtils = ServiceLocator.GetService<IDbUtils>();
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private bool _isAuthorized;
+    private readonly bool _isAuthorized;
     
     public CustomerService(IHttpContextAccessor httpContextAccessor)
     {
-        _httpContextAccessor = httpContextAccessor;
         JwtValidation jwtValidation = new JwtValidation(_configuration);
         _isAuthorized = jwtValidation.Authorize(httpContextAccessor.HttpContext, null);
     }

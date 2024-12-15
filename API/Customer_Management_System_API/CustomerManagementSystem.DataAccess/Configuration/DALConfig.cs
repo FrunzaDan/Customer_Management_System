@@ -11,12 +11,12 @@ public class DalConfig : IDalConfig
         _configuration = configuration;
     }
 
-    public string CustomerManagementSystemDbWindows =>
+    public string? CustomerManagementSystemDbWindows =>
         _configuration["ConnectionStrings:CustomerManagementSystemDB_Windows"] ?? throw new ArgumentNullException(
             nameof(CustomerManagementSystemDbWindows),
             "The config value CustomerManagementSystemDB_Windows cannot be null.");
 
-    public string CustomerManagementSystemDbDocker =>
+    public string? CustomerManagementSystemDbDocker =>
         _configuration["ConnectionStrings:CustomerManagementSystemDB_Docker"] ?? throw new ArgumentNullException(
             nameof(CustomerManagementSystemDbDocker),
             "The config value CustomerManagementSystemDB_Docker cannot be null.");

@@ -9,36 +9,44 @@ public class CurrentSqlConnection
 
     public CurrentSqlConnection(IDalConfig configuration)
     {
-        _configuration = configuration;
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
-    public string GetCorrectSqlConnectionString()
+    public string? GetCorrectSqlConnectionString()
     {
-        string connectionString;
-
-        if (CheckSqlConnection(_configuration.CustomerManagementSystemDbDocker))
-            connectionString = _configuration.CustomerManagementSystemDbDocker;
-        else if (CheckSqlConnection(_configuration.CustomerManagementSystemDbWindows))
-            connectionString = _configuration.CustomerManagementSystemDbWindows;
-        else
-            throw new InvalidOperationException("No valid SQL connection could be established.");
-
-        return connectionString;
+        return GetValidConnectionString(
+            _configuration.CustomerManagementSystemDbDocker,
+            _configuration.CustomerManagementSystemDbWindows);
     }
 
-    private static bool CheckSqlConnection(string connectionString)
+    private static string? GetValidConnectionString(params string?[] connectionStrings)
     {
-        if (string.IsNullOrWhiteSpace(connectionString)) return false;
+        foreach (var connectionString in connectionStrings)
+            if (IsConnectionValid(connectionString))
+                return connectionString;
+
+        return null;
+    }
+
+    private static bool IsConnectionValid(string? connectionString)
+    {
+        if (string.IsNullOrWhiteSpace(connectionString))
+            return false;
 
         try
         {
             using var sqlConnection = new SqlConnection(connectionString);
             sqlConnection.Open();
-            return true;
+            return sqlConnection.State == System.Data.ConnectionState.Open;
         }
         catch (SqlException)
         {
             return false;
         }
+        catch
+        {
+            return false;
+        }
     }
+
 }

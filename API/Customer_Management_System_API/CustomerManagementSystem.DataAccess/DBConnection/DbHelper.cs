@@ -30,4 +30,29 @@ public static class DbHelper
 
         return customer;
     }
+    
+    public static void AddCustomerParameters(SqlCommand command, CustomerModel customer)
+    {
+        command.Parameters.AddWithValue("@var_Guid", customer.Guid ?? Guid.NewGuid().ToString());
+        command.Parameters.AddWithValue("@var_FirstName", customer.FirstName);
+        command.Parameters.AddWithValue("@var_LastName", customer.LastName);
+        command.Parameters.AddWithValue("@var_Email", customer.Email);
+        command.Parameters.AddWithValue("@var_MSISDN", customer.Msisdn);
+        command.Parameters.AddWithValue("@var_Gender", customer.Gender);
+        command.Parameters.AddWithValue("@var_Birthdate", customer.Birthdate);
+        AddAddressParameters(command, customer.Address);
+    }
+
+    // Helper method to add address parameters
+    private static void AddAddressParameters(SqlCommand command, AddressModel? address)
+    {
+        if (address == null) return;
+
+        command.Parameters.AddWithValue("@var_Country", address.Country ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("@var_County", address.County ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("@var_Town", address.Town ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("@var_ZIP", address.Zip ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("@var_Street", address.Street ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("@var_Number", address.Number ?? (object)DBNull.Value);
+    }
 }
