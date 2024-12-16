@@ -1,22 +1,17 @@
 import { Injectable } from '@angular/core';
-import {
-  HttpClient,
-  HttpHeaders,
-  HttpParams,
-  HttpParamsOptions,
-} from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { map, catchError } from 'rxjs/operators';
-import { UserLoginResponse } from 'src/app/interfaces/user-login-response';
-import { UserLoginRequest } from 'src/app/interfaces/user-login-request';
 import { GenericResponse } from 'src/app/interfaces/generic-response';
-import { Subject, BehaviorSubject, of, Observable, throwError } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class VerifyTokenService {
-  readonly APIURL = 'https://localhost:7145/api/Authentication/verify-token';
+  readonly APIURL =
+    environment.CustomerManagementSystemAPI +
+    '/api/Authentication/verify-token';
   httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json',
