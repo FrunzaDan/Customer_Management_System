@@ -15,7 +15,7 @@ import { environment } from '../../environments/environment';
 })
 export class AddCustomerService {
   readonly APIURL =
-    environment.CustomerManagementSystemAPI + '/Customer/RegisterCustomer';
+    environment.CustomerManagementSystemAPI + '/api/Customer/register';
   httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json',

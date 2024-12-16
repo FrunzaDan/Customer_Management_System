@@ -14,7 +14,7 @@ import { environment } from '../../environments/environment';
 })
 export class GetCustomerService {
   readonly APIURL =
-    environment.CustomerManagementSystemAPI + '/Customer/GetCustomer';
+    environment.CustomerManagementSystemAPI + '/api/Customer/get';
 
   constructor(private http: HttpClient) {}
 

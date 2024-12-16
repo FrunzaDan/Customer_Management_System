@@ -19,7 +19,8 @@ import { environment } from '../../environments/environment';
 })
 export class UserLoginService {
   readonly APIURL =
-    environment.CustomerManagementSystemAPI + '/Authentication/GetAccessToken';
+    environment.CustomerManagementSystemAPI +
+    '/api/Authentication/access-token';
 
   httpOptions = {
     headers: new HttpHeaders({
@@ -46,15 +47,15 @@ export class UserLoginService {
 
   checkcredentials(response: UserLoginResponse): void {
     if (
-      response.responseCode == '200' &&
+      response.status == '200' &&
       response.responseMessage == 'Success!' &&
       response.accessToken != null
     ) {
       sessionStorage.setItem('accessToken', response.accessToken);
       this.router.navigateByUrl('customers');
-    } else if (response.responseCode == '403') {
+    } else if (response.status == '403') {
       this.errorSubject.next(response.responseMessage);
-    } else if (response.responseCode == '404') {
+    } else if (response.status == '404') {
       this.errorSubject.next(response.responseMessage);
     } else {
       this.errorSubject.next('Our servers are down!');
