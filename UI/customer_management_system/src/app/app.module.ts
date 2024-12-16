@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { Route, RouterModule } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -20,29 +20,22 @@ import { CustomerDetailsComponent } from './components/customer-details/customer
 import { FeaturesComponent } from './components/features/features.component';
 import { AboutComponent } from './components/about/about.component';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    NavigationBarComponent,
-    FooterComponent,
-    UserLoginComponent,
-    PageNotFoundComponent,
-    HomeComponent,
-    CustomerListComponent,
-    EditCustomerComponent,
-    AddCustomerComponent,
-    CustomerDetailsComponent,
-    FeaturesComponent,
-    AboutComponent,
-  ],
-  imports: [
-    BrowserModule,
-    HttpClientModule,
-    AppRoutingModule,
-    ReactiveFormsModule,
-    BrowserAnimationsModule,
-  ],
-  providers: [],
-  bootstrap: [AppComponent],
-})
+@NgModule({ declarations: [
+        AppComponent,
+        NavigationBarComponent,
+        FooterComponent,
+        UserLoginComponent,
+        PageNotFoundComponent,
+        HomeComponent,
+        CustomerListComponent,
+        EditCustomerComponent,
+        AddCustomerComponent,
+        CustomerDetailsComponent,
+        FeaturesComponent,
+        AboutComponent,
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        AppRoutingModule,
+        ReactiveFormsModule,
+        BrowserAnimationsModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule {}

@@ -1,9 +1,5 @@
 import { Injectable } from '@angular/core';
-import {
-  HttpClient,
-  HttpParams,
-  HttpParamsOptions,
-} from '@angular/common/http';
+import { HttpClient, HttpParams, HttpParamsOptions } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Customer } from 'src/app/interfaces/get-customer-list-response';
