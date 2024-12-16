@@ -1,61 +1,68 @@
 ﻿using CustomerManagementSystem.BusinessLogic.Validations;
 using CustomerManagementSystem.DataAccess.DBConnection;
 using CustomerManagementSystem.Domain.Models;
+using System.Threading.Tasks;
 
-namespace CustomerManagementSystem.BusinessLogic.CustomerFunctions;
-
-public class CustomerGetting
+namespace CustomerManagementSystem.BusinessLogic.CustomerFunctions
 {
-    private readonly IDbUtils _dbUtils;
-
-    public CustomerGetting()
+    public class CustomerGetting
     {
-        _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
-    }
+        private readonly IDbUtils _dbUtils;
 
-    public async Task<CustomerModel> GetCustomerFunction(GetCustomerRequest getCustomerRqst)
-    {
-        var response = new CustomerModel();
-        if (getCustomerRqst.SearchVariable is null)
+        public CustomerGetting()
         {
-            response.Status = 500;
-            return response;
+            _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
         }
 
-        if (GUIDValidation.ValidateGUID(getCustomerRqst.SearchVariable))
+        public async Task<CustomerModel> GetCustomerFunction(GetCustomerRequest getCustomerRqst)
         {
-            getCustomerRqst.SearchOption = 1;
-        }
-        else if (MSISDNValidation.ValidateMsisdn(getCustomerRqst.SearchVariable))
-        {
-            getCustomerRqst.SearchOption = 2;
-        }
-        else if (EmailValidation.ValidateEmail(getCustomerRqst.SearchVariable))
-        {
-            getCustomerRqst.SearchOption = 3;
-        }
-        else
-        {
-            response.ResponseMessage =
-                "No valid search variable was provided! Search variables can be GUID, MSISDN or Email!";
-            return response;
+            if (string.IsNullOrEmpty(getCustomerRqst?.SearchVariable))
+            {
+                return new CustomerModel { Status = 404 };
+            }
+
+            var searchOptions = new (Func<string, bool> validation, int searchOption)[]
+            {
+                (GUIDValidation.ValidateGUID, 1),
+                (MSISDNValidation.ValidateMsisdn, 2),
+                (EmailValidation.ValidateEmail, 3)
+            };
+
+            foreach (var (validation, searchOption) in searchOptions)
+            {
+                if (validation(getCustomerRqst.SearchVariable))
+                {
+                    getCustomerRqst.SearchOption = searchOption;
+                    break;
+                }
+            }
+
+            if (getCustomerRqst.SearchOption == 0)
+            {
+                return new CustomerModel
+                {
+                    Status = 400,
+                    ResponseMessage = "No valid search variable was provided! Search variables can be GUID, MSISDN or Email!"
+                };
+            }
+
+            try
+            {
+                return await _dbUtils.GetCustomer(getCustomerRqst);
+            }
+            catch (Exception ex)
+            {
+                return new CustomerModel
+                {
+                    Status = 500,
+                    ResponseMessage = ex.Message
+                };
+            }
         }
 
-        try
+        public async Task<CustomerListModel> GetCustomersFunction()
         {
-            response = await _dbUtils.GetCustomer(getCustomerRqst);
+            return await _dbUtils.GetCustomers();
         }
-        catch (Exception ex)
-        {
-            response.Status = 500;
-            response.ResponseMessage = ex.ToString();
-        }
-
-        return response;
-    }
-
-    public async Task<CustomerListModel> GetCustomersFunction()
-    {
-        return await _dbUtils.GetCustomers();
     }
 }

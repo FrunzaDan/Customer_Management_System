@@ -1,23 +1,29 @@
 CREATE PROCEDURE [dbo].[usp_checkMerchantCredentials]
-  @var_MerchantID NVARCHAR(50),
-  @var_MerchantPassword VARCHAR(100)
-
+    @var_MerchantID NVARCHAR(50),
+    @var_MerchantPassword VARCHAR(100)
 AS
 BEGIN
-  SET NOCOUNT ON
+    SET NOCOUNT ON;
 
-  DECLARE @currDate DATETIME;
-  SET @currDate = GETDATE();
+    DECLARE @currDate DATETIME = GETDATE();
 
-  UPDATE tbl_merchants SET last_interaction = @currDate WHERE merchant_id = @var_MerchantID;
+    -- Update last interaction timestamp
+    UPDATE tbl_merchants
+    SET last_interaction = @currDate
+    WHERE merchant_id = @var_MerchantID;
 
-  DECLARE @hashedMerchantPassword BINARY(32);
-  SET @hashedMerchantPassword = HASHBYTES('SHA2_256', @var_MerchantPassword)
+    -- Hash the provided password
+    DECLARE @hashedMerchantPassword BINARY(32) = HASHBYTES('SHA2_256', @var_MerchantPassword);
 
-  IF EXISTS ( SELECT merchant_id
-  FROM tbl_merchants
-  WHERE merchant_id = @var_MerchantID AND merchant_password = @hashedMerchantPassword)
-SELECT merchant_role
-  FROM tbl_merchants
-  WHERE merchant_id = @var_MerchantID
+    -- Check credentials and return merchant role if valid
+    IF EXISTS (
+        SELECT 1
+        FROM tbl_merchants
+        WHERE merchant_id = @var_MerchantID AND merchant_password = @hashedMerchantPassword
+    )
+    BEGIN
+        SELECT merchant_role
+        FROM tbl_merchants
+        WHERE merchant_id = @var_MerchantID;
+    END
 END

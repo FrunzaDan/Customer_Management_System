@@ -1,20 +1,27 @@
 CREATE PROCEDURE [dbo].[usp_deleteCustomer]
-  @var_Guid NVARCHAR(50)
+    @var_Guid NVARCHAR(50)
 AS
-SET NOCOUNT ON
-IF EXISTS ( SELECT 1
-FROM tbl_customers
-WHERE PK_customer_guid = @var_Guid)
 BEGIN
-  DELETE FROM tbl_addresses
-    WHERE  FK_customer_guid = @var_Guid
-END
-BEGIN
-  DELETE FROM tbl_customers
-    WHERE  PK_customer_guid = @var_Guid
+    SET NOCOUNT ON;
 
-  SELECT tbl_customers.PK_customer_guid
-  FROM tbl_customers
-  WHERE tbl_customers.PK_customer_guid = @var_Guid
+    -- Check if the customer exists
+    IF EXISTS (
+        SELECT 1
+        FROM tbl_customers
+        WHERE PK_customer_guid = @var_Guid
+    )
+    BEGIN
+        -- Delete related address records
+        DELETE FROM tbl_addresses
+        WHERE FK_customer_guid = @var_Guid;
 
+        -- Delete the customer record
+        DELETE FROM tbl_customers
+        WHERE PK_customer_guid = @var_Guid;
+
+        -- Verify deletion by checking if the customer record still exists
+        SELECT PK_customer_guid
+        FROM tbl_customers
+        WHERE PK_customer_guid = @var_Guid;
+    END
 END
