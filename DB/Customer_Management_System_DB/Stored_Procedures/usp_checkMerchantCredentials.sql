@@ -7,23 +7,26 @@ BEGIN
 
     DECLARE @currDate DATETIME = GETDATE();
 
-    -- Update last interaction timestamp
     UPDATE tbl_merchants
     SET last_interaction = @currDate
     WHERE merchant_id = @var_MerchantID;
 
-    -- Hash the provided password
     DECLARE @hashedMerchantPassword BINARY(32) = HASHBYTES('SHA2_256', @var_MerchantPassword);
 
-    -- Check credentials and return merchant role if valid
     IF EXISTS (
         SELECT 1
         FROM tbl_merchants
         WHERE merchant_id = @var_MerchantID AND merchant_password = @hashedMerchantPassword
     )
     BEGIN
+        -- Return the merchant role if credentials are valid
         SELECT merchant_role
         FROM tbl_merchants
         WHERE merchant_id = @var_MerchantID;
+    END
+    ELSE
+    BEGIN
+        -- If credentials are invalid, return NULL
+        SELECT NULL AS merchant_role;
     END
 END

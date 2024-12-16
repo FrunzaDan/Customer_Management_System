@@ -4,7 +4,9 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Check if the customer exists
+    DECLARE @result INT;
+    DECLARE @message NVARCHAR(255);
+
     IF EXISTS (
         SELECT 1
         FROM tbl_customers
@@ -13,16 +15,28 @@ BEGIN
     BEGIN
         DECLARE @currDate DATETIME = GETDATE();
 
-        -- Update the customer's status to deactivated
         UPDATE tbl_customers
         SET 
             interaction_Date = @currDate,
             customer_Status = 1903
-        WHERE PK_customer_guid = @var_Guid;
+        WHERE PK_customer_guid = @var_Guid AND customer_Status <> 1903; -- Prevent update if already deactivated
 
-        -- Return the updated customer status
-        SELECT customer_Status
-        FROM tbl_customers
-        WHERE PK_customer_guid = @var_Guid;
+        IF @@ROWCOUNT > 0
+        BEGIN
+            SET @result = 1;
+            SET @message = 'Customer deactivated successfully.';
+        END
+        ELSE
+        BEGIN
+            SET @result = 0;
+            SET @message = 'Customer already deactivated or update failed.';
+        END
     END
+    ELSE
+    BEGIN
+        SET @result = 0;
+        SET @message = 'Customer not found.';
+    END
+
+    SELECT @result AS result, @message AS message;
 END

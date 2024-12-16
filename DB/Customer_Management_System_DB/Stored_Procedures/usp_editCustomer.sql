@@ -16,7 +16,9 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Check if the customer exists
+    DECLARE @result INT;
+    DECLARE @message NVARCHAR(255);
+
     IF EXISTS (
         SELECT 1
         FROM tbl_customers
@@ -25,7 +27,6 @@ BEGIN
     BEGIN
         DECLARE @currDate DATETIME = GETDATE();
 
-        -- Update customer details
         UPDATE tbl_customers
         SET 
             interaction_Date = @currDate,
@@ -37,7 +38,6 @@ BEGIN
             birthdate = ISNULL(@var_Birthdate, birthdate)
         WHERE PK_customer_guid = @var_Guid;
 
-        -- Update address details
         UPDATE tbl_addresses
         SET 
             country = ISNULL(@var_Country, country),
@@ -48,9 +48,18 @@ BEGIN
             number = ISNULL(@var_Number, number)
         WHERE FK_customer_guid = @var_Guid;
 
-        -- Return the customer status
-        SELECT customer_Status
+        SET @result = 1;
+        SET @message = 'Customer details updated successfully.';
+
+        SELECT customer_Status AS status, @result AS result, @message AS message
         FROM tbl_customers
         WHERE PK_customer_guid = @var_Guid;
+    END
+    ELSE
+    BEGIN
+        SET @result = 0;
+        SET @message = 'Customer not found.';
+
+        SELECT @result AS result, @message AS message;
     END
 END
