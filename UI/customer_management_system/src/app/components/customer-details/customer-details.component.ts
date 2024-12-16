@@ -5,12 +5,13 @@ import {
   Customer,
 } from 'src/app/interfaces/get-customer-list-response';
 import { Router, ActivatedRoute } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-customer-details',
-    templateUrl: './customer-details.component.html',
-    styleUrls: ['./customer-details.component.css'],
-    standalone: false
+  selector: 'app-customer-details',
+  templateUrl: './customer-details.component.html',
+  styleUrls: ['./customer-details.component.css'],
+  imports: [CommonModule],
 })
 export class CustomerDetailsComponent {
   genderMap = new Map<Customer['gender'], string>([

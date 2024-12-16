@@ -1,24 +1,24 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FooterService } from 'src/app/services/footer.service';
 import { Subscription } from 'rxjs';
+import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-footer',
-    templateUrl: './footer.component.html',
-    styleUrls: ['./footer.component.css'],
-    standalone: false
+  selector: 'app-footer',
+  templateUrl: './footer.component.html',
+  styleUrls: ['./footer.component.css'],
+  imports: [CommonModule],
 })
 export class FooterComponent implements OnDestroy {
   showFooter: boolean = true;
   subscription: Subscription;
   constructor(private footerService: FooterService) {
-    this.subscription = this.footerService.showFooter.subscribe((value)=>{
+    this.subscription = this.footerService.showFooter.subscribe((value) => {
       this.showFooter = value;
     });
   }
 
   ngOnDestroy(): void {
-      this.subscription.unsubscribe();
+    this.subscription.unsubscribe();
   }
-
 }

@@ -3,11 +3,8 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-display-error',
-  standalone: true,
   imports: [CommonModule],
   templateUrl: './display-error.component.html',
-  styleUrl: './display-error.component.css'
+  styleUrl: './display-error.component.css',
 })
-export class DisplayErrorComponent {
-
-}
+export class DisplayErrorComponent {}

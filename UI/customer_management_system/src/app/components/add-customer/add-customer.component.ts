@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { AddCustomerService } from 'src/app/services/add-customer.service';
 import {
@@ -8,12 +13,13 @@ import {
   Address,
 } from 'src/app/interfaces/get-customer-list-response';
 import { environment } from '../../../environments/environment';
+import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-add-customer',
-    templateUrl: './add-customer.component.html',
-    styleUrls: ['./add-customer.component.css'],
-    standalone: false
+  selector: 'app-add-customer',
+  templateUrl: './add-customer.component.html',
+  styleUrls: ['./add-customer.component.css'],
+  imports: [CommonModule, ReactiveFormsModule],
 })
 export class AddCustomerComponent implements OnInit {
   form!: FormGroup;

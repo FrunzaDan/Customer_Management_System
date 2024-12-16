@@ -1,17 +1,23 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { GetCustomerService } from 'src/app/services/get-customer.service';
 import {
   Address,
   Customer,
 } from 'src/app/interfaces/get-customer-list-response';
 import { Router, ActivatedRoute } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-edit-customer',
-    templateUrl: './edit-customer.component.html',
-    styleUrls: ['./edit-customer.component.css'],
-    standalone: false
+  selector: 'app-edit-customer',
+  templateUrl: './edit-customer.component.html',
+  styleUrls: ['./edit-customer.component.css'],
+  imports: [CommonModule, ReactiveFormsModule],
 })
 export class EditCustomerComponent implements OnInit {
   form!: FormGroup;

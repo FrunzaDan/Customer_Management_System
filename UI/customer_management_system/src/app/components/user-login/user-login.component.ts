@@ -5,12 +5,13 @@ import { NavbarService } from 'src/app/services/navbar.service';
 import { FooterService } from 'src/app/services/footer.service';
 import { UserLoginRequest } from 'src/app/interfaces/user-login-request';
 import { environment } from '../../../environments/environment';
+import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-user-login',
-    templateUrl: './user-login.component.html',
-    styleUrls: ['./user-login.component.css'],
-    standalone: false
+  selector: 'app-user-login',
+  templateUrl: './user-login.component.html',
+  styleUrls: ['./user-login.component.css'],
+  imports: [CommonModule],
 })
 export class UserLoginComponent implements OnInit, OnDestroy {
   userLoginRequest = {} as UserLoginRequest;
