@@ -8,9 +8,10 @@ import {
 import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'app-edit-customer',
-  templateUrl: './edit-customer.component.html',
-  styleUrls: ['./edit-customer.component.css'],
+    selector: 'app-edit-customer',
+    templateUrl: './edit-customer.component.html',
+    styleUrls: ['./edit-customer.component.css'],
+    standalone: false
 })
 export class EditCustomerComponent implements OnInit {
   form!: FormGroup;

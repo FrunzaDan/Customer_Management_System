@@ -7,9 +7,10 @@ import {
 import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'app-customer-details',
-  templateUrl: './customer-details.component.html',
-  styleUrls: ['./customer-details.component.css'],
+    selector: 'app-customer-details',
+    templateUrl: './customer-details.component.html',
+    styleUrls: ['./customer-details.component.css'],
+    standalone: false
 })
 export class CustomerDetailsComponent {
   genderMap = new Map<Customer['gender'], string>([

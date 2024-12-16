@@ -7,9 +7,10 @@ import { UserLoginRequest } from 'src/app/interfaces/user-login-request';
 import { environment } from '../../../environments/environment';
 
 @Component({
-  selector: 'app-user-login',
-  templateUrl: './user-login.component.html',
-  styleUrls: ['./user-login.component.css'],
+    selector: 'app-user-login',
+    templateUrl: './user-login.component.html',
+    styleUrls: ['./user-login.component.css'],
+    standalone: false
 })
 export class UserLoginComponent implements OnInit, OnDestroy {
   userLoginRequest = {} as UserLoginRequest;

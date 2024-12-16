@@ -7,9 +7,10 @@ import { Customer } from 'src/app/interfaces/get-customer-list-response';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-customer-list',
-  templateUrl: './customer-list.component.html',
-  styleUrls: ['./customer-list.component.css'],
+    selector: 'app-customer-list',
+    templateUrl: './customer-list.component.html',
+    styleUrls: ['./customer-list.component.css'],
+    standalone: false
 })
 export class CustomerListComponent {
   getCustomerListResponse!: GetCustomerListResponse;

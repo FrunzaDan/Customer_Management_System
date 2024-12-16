@@ -3,9 +3,10 @@ import { NavbarService } from 'src/app/services/navbar.service';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-navigation-bar',
-  templateUrl: './navigation-bar.component.html',
-  styleUrls: ['./navigation-bar.component.css']
+    selector: 'app-navigation-bar',
+    templateUrl: './navigation-bar.component.html',
+    styleUrls: ['./navigation-bar.component.css'],
+    standalone: false
 })
 export class NavigationBarComponent implements OnDestroy {
   showNavbar: boolean = true;
