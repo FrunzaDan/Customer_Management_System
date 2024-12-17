@@ -6,6 +6,7 @@ import { FooterService } from 'src/app/services/footer.service';
 import { UserLoginRequest } from 'src/app/interfaces/user-login-request';
 import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
+import { SessionStorageService } from 'src/app/services/session-storage.service';
 
 @Component({
   selector: 'app-user-login',
@@ -24,13 +25,12 @@ export class UserLoginComponent implements OnInit, OnDestroy {
     private builder: FormBuilder,
     private userLoginSerivce: UserLoginService,
     private navbarService: NavbarService,
-    private footerService: FooterService
-  ) {
-    sessionStorage.clear();
-  }
+    private footerService: FooterService,
+    private sessionStorageService: SessionStorageService
+  ) {}
 
   ngOnInit(): void {
-    sessionStorage.clear();
+    this.sessionStorageService.removeSessionStorage();
     this.userLoginSerivce.errorSubject.subscribe((errorMessage) => {
       this.error = errorMessage;
     });

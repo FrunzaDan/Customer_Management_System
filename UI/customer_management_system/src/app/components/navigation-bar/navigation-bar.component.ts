@@ -1,5 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
-import { NavbarService } from 'src/app/services/navbar.service';
+import { NavbarService } from '../../services/navbar.service';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 

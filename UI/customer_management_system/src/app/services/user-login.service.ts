@@ -1,5 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams, HttpParamsOptions } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpHeaders,
+  HttpParams,
+  HttpParamsOptions,
+} from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -8,6 +13,7 @@ import { UserLoginRequest } from 'src/app/interfaces/user-login-request';
 import { GenericResponse } from 'src/app/interfaces/generic-response';
 import { BehaviorSubject, of } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { SessionStorageService } from './session-storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -27,7 +33,11 @@ export class UserLoginService {
   errorSubject = new BehaviorSubject<any>(null);
   errorMessage = this.errorSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private sessionStorageService: SessionStorageService
+  ) {}
 
   userLoginResponse!: UserLoginResponse;
   accessToken!: string;
@@ -46,7 +56,7 @@ export class UserLoginService {
       response.responseMessage == 'Success!' &&
       response.accessToken != null
     ) {
-      sessionStorage.setItem('accessToken', response.accessToken);
+      this.sessionStorageService.setSessionAccessToken(response.accessToken);
       this.router.navigateByUrl('customers');
     } else if (response.status == '403') {
       this.errorSubject.next(response.responseMessage);

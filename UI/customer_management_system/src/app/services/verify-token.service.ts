@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { GenericResponse } from 'src/app/interfaces/generic-response';
 import { Subject, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { SessionStorageService } from './session-storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +20,11 @@ export class VerifyTokenService {
     }),
   };
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private sessionStorageService: SessionStorageService
+  ) {}
 
   isTokenValid(): Observable<boolean> {
     const result = new Subject<boolean>();
@@ -49,7 +54,8 @@ export class VerifyTokenService {
   }
 
   verifyTokenViaAPI(): Observable<GenericResponse> {
-    let accessTokenFromSession = sessionStorage.getItem('accessToken') || '{}';
+    let accessTokenFromSession =
+      this.sessionStorageService.getSessionAccessToken();
 
     const headers = new HttpHeaders()
       .set('content-type', 'application/json')

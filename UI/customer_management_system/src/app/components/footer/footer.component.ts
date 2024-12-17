@@ -1,5 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
-import { FooterService } from 'src/app/services/footer.service';
+import { FooterService } from '../../services/footer.service';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 

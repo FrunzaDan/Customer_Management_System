@@ -1,8 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpHeaders,
+  HttpErrorResponse,
+} from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
 import { GetCustomerListResponse } from 'src/app/interfaces/get-customer-list-response';
 import { environment } from '../../environments/environment';
+import { SessionStorageService } from './session-storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,13 +16,19 @@ export class GetCustomersService {
   readonly APIURL =
     environment.CustomerManagementSystemAPI + '/api/Customer/all';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private sessionStorageService: SessionStorageService,
+    private http: HttpClient
+  ) {}
 
   refreshTable(): Observable<GetCustomerListResponse> {
     const headers = new HttpHeaders()
       .set('content-type', 'application/json')
       .set('Access-Control-Allow-Origin', '*')
-      .set('Authorization', 'Bearer ' + sessionStorage.getItem('accessToken'));
+      .set(
+        'Authorization',
+        'Bearer ' + this.sessionStorageService.getSessionAccessToken()
+      );
 
     return this.http
       .get<GetCustomerListResponse>(this.APIURL, { headers: headers })
