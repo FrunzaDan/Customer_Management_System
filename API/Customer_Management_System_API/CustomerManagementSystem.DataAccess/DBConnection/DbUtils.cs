@@ -276,9 +276,12 @@ public class DbUtils : IDbUtils
         await using var command = new SqlCommand(storedProcedure, connection);
         command.CommandType = CommandType.StoredProcedure;
 
+        // If the configureCommand delegate is provided, invoke it to allow for custom configuration of the SqlCommand
         configureCommand?.Invoke(command);
 
         await using var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
+        
+        // Pass the SqlDataReader to the handleReader function to process the data and return a result of type T.
         return await handleReader(reader);
     }
 }
