@@ -8,6 +8,7 @@ import { Observable, catchError, throwError } from 'rxjs';
 import { GetCustomerListResponse } from '../../../src/app/interfaces/get-customer-list-response';
 import { environment } from '../../environments/environment';
 import { SessionStorageService } from './session-storage.service';
+import { HttpHeaderService } from './http-header-service';
 
 @Injectable({
   providedIn: 'root',
@@ -18,17 +19,12 @@ export class GetCustomersService {
 
   constructor(
     private sessionStorageService: SessionStorageService,
-    private http: HttpClient
+    private http: HttpClient,
+    private httpHeaderService: HttpHeaderService
   ) {}
 
   refreshTable(): Observable<GetCustomerListResponse> {
-    const headers = new HttpHeaders()
-      .set('content-type', 'application/json')
-      .set('Access-Control-Allow-Origin', '*')
-      .set(
-        'Authorization',
-        'Bearer ' + this.sessionStorageService.getSessionAccessToken()
-      );
+    const headers = this.httpHeaderService.getHeaders();
 
     return this.http
       .get<GetCustomerListResponse>(this.APIURL, { headers: headers })

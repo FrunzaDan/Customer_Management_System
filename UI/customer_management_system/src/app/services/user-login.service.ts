@@ -7,6 +7,7 @@ import { UserLoginRequest } from '../../../src/app/interfaces/user-login-request
 import { BehaviorSubject, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { SessionStorageService } from './session-storage.service';
+import { HttpHeaderService } from './http-header-service';
 
 @Injectable({
   providedIn: 'root',
@@ -29,18 +30,18 @@ export class UserLoginService {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private sessionStorageService: SessionStorageService
+    private sessionStorageService: SessionStorageService,
+    private httpHeaderService: HttpHeaderService
   ) {}
 
   userLoginResponse!: UserLoginResponse;
   accessToken!: string;
 
   login(userLoginRequest: UserLoginRequest): Observable<UserLoginResponse> {
-    return this.http.post<UserLoginResponse>(
-      this.APIURL,
-      userLoginRequest,
-      this.httpOptions
-    );
+    const headers = this.httpHeaderService.getHeaders();
+    return this.http.post<UserLoginResponse>(this.APIURL, userLoginRequest, {
+      headers: headers,
+    });
   }
 
   checkcredentials(response: UserLoginResponse): void {

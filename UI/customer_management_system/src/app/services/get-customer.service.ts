@@ -8,7 +8,7 @@ import { HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Customer } from '../../../src/app/interfaces/get-customer-list-response';
 import { environment } from '../../environments/environment';
-import { SessionStorageService } from './session-storage.service';
+import { HttpHeaderService } from './http-header-service';
 
 @Injectable({
   providedIn: 'root',
@@ -18,19 +18,12 @@ export class GetCustomerService {
     environment.CustomerManagementSystemAPI + '/api/Customer/get';
 
   constructor(
-    private sessionStorageService: SessionStorageService,
+    private httpHeaderService: HttpHeaderService,
     private http: HttpClient
   ) {}
 
   getCustomer(queryString: string): Observable<Customer> {
-    const headers = new HttpHeaders()
-      .set('content-type', 'application/json')
-      .set('Access-Control-Allow-Origin', '*')
-      .set(
-        'Authorization',
-        'Bearer ' + this.sessionStorageService.getSessionAccessToken()
-      );
-
+    const headers = this.httpHeaderService.getHeaders();
     const params = new HttpParams().set('searchVariable', queryString);
 
     return this.http.get<Customer>(this.APIURL, {

@@ -22,7 +22,6 @@ export class VerifyTokenService {
 
   constructor(
     private http: HttpClient,
-    private router: Router,
     private sessionStorageService: SessionStorageService
   ) {}
 
@@ -54,14 +53,13 @@ export class VerifyTokenService {
   }
 
   verifyTokenViaAPI(): Observable<GenericResponse> {
-    let accessTokenFromSession =
-      this.sessionStorageService.getSessionAccessToken();
+    const sessionToken = this.sessionStorageService.getSessionAccessToken();
 
     const headers = new HttpHeaders()
       .set('content-type', 'application/json')
       .set('Access-Control-Allow-Origin', '*');
 
-    const params = new HttpParams().set('accessToken', accessTokenFromSession);
+    const params = new HttpParams().set('accessToken', sessionToken);
 
     return this.http.get<GenericResponse>(this.APIURL, {
       headers: headers,

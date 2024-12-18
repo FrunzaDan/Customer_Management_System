@@ -10,31 +10,23 @@ import { Customer } from '../../../src/app/interfaces/get-customer-list-response
 import { GenericResponse } from '../../../src/app/interfaces/generic-response';
 import { environment } from '../../environments/environment';
 import { SessionStorageService } from './session-storage.service';
+import { HttpHeaderService } from './http-header-service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AddCustomerService {
   constructor(
-    private sessionStorageService: SessionStorageService,
+    private httpHeaderService: HttpHeaderService,
     private http: HttpClient
   ) {}
   readonly APIURL =
     environment.CustomerManagementSystemAPI + '/api/Customer/register';
-  httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      Authorization:
-        'Bearer ' + this.sessionStorageService.getSessionAccessToken(),
-    }),
-  };
 
   addCustomer(customer: Customer): Observable<GenericResponse> {
-    return this.http.post<GenericResponse>(
-      this.APIURL,
-      customer,
-      this.httpOptions
-    );
+    const headers = this.httpHeaderService.getHeaders();
+    return this.http.post<GenericResponse>(this.APIURL, customer, {
+      headers: headers,
+    });
   }
 }

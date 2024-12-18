@@ -35,15 +35,49 @@ export class EditCustomerComponent implements OnInit {
   constructor(
     private getCustomerService: GetCustomerService,
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private fb: FormBuilder
   ) {}
 
   ngOnInit(): void {
+    this.form = this.fb.group({
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      msisdn: ['', Validators.required],
+      gender: ['', Validators.required],
+      birthYear: ['', Validators.required],
+      birthMonth: ['', Validators.required],
+      birthDay: ['', Validators.required],
+      country: ['', Validators.required],
+      county: ['', Validators.required],
+      town: ['', Validators.required],
+      street: ['', Validators.required],
+      number: ['', Validators.required],
+      zip: ['', Validators.required],
+    });
     this.loadCompleted = false;
     let paramID: string = this.activatedRoute.snapshot.queryParamMap.get('id')!;
     this.getCustomerService.getCustomer(paramID).subscribe({
       next: (response) => {
         this.customer = response;
+        console.log('Customer is ' + this.customer);
+        this.form.patchValue({
+          firstName: this.customer.firstName,
+          lastName: this.customer.lastName,
+          email: this.customer.email,
+          msisdn: this.customer.msisdn,
+          gender: this.customer.gender,
+          birthYear: this.customer.birthdate.split('-')[0],
+          birthMonth: this.customer.birthdate.split('-')[1],
+          birthDay: this.customer.birthdate.split('-')[2],
+          country: this.customer.address.country,
+          county: this.customer.address.county,
+          town: this.customer.address.town,
+          street: this.customer.address.street,
+          number: this.customer.address.number,
+          zip: this.customer.address.zip,
+        });
         this.loadCompleted = true;
       },
       error: (error) => {
@@ -57,9 +91,6 @@ export class EditCustomerComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
-
-    console.log('submitted');
-    console.log('submitted');
 
     // stop here if form is invalid
     if (this.form.invalid) {

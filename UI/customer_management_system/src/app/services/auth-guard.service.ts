@@ -16,28 +16,26 @@ export class AuthGuardService {
 
   canActivate(): Observable<boolean> {
     return this.verifyTokenService.isTokenValid().pipe(
-      map((isValid: boolean) => {
-        if (isValid) {
-          return true;
-        } else {
-          this.handleInvalidToken();
-          return false;
-        }
+      map((isTokenValid: boolean) => {
+        return isTokenValid ? true : this.redirectToLogin();
       }),
-      catchError((error) => {
-        console.error('Error verifying token:', error);
-        this.handleInvalidToken();
-        return of(false);
-      })
+      catchError((error) => this.handleError(error))
     );
   }
 
-  private handleInvalidToken(): void {
+  private redirectToLogin(): boolean {
     this.logout();
     this.router.navigate(['login'], { queryParams: { sessionExpired: true } });
+    return false;
   }
 
-  logout(): void {
+  private logout(): void {
     this.localStorageService.removeLocalAccessToken();
+  }
+
+  private handleError(error: any): Observable<boolean> {
+    console.error('Error verifying token:', error);
+    this.redirectToLogin();
+    return of(false);
   }
 }

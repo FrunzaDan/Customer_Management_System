@@ -17,7 +17,7 @@ export class EditCustomerService {
   ) {}
 
   readonly APIURL =
-    environment.CustomerManagementSystemAPI + '/Customer/EditCustomer';
+    environment.CustomerManagementSystemAPI + '/api/Customer/edit';
   httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json',
