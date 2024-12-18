@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { map, Observable } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import { VerifyTokenService } from '../../../src/app/services/verify-token.service';
 import { LocalStorageService } from './local-storage.service';
 
@@ -16,19 +16,28 @@ export class AuthGuardService {
 
   canActivate(): Observable<boolean> {
     return this.verifyTokenService.isTokenValid().pipe(
-      map((boolVal) => {
-        if (boolVal == true) {
+      map((isValid: boolean) => {
+        if (isValid) {
           return true;
         } else {
-          this.logout();
+          this.handleInvalidToken();
           return false;
         }
+      }),
+      catchError((error) => {
+        console.error('Error verifying token:', error);
+        this.handleInvalidToken();
+        return of(false);
       })
     );
   }
 
-  logout() {
+  private handleInvalidToken(): void {
+    this.logout();
+    this.router.navigate(['login'], { queryParams: { sessionExpired: true } });
+  }
+
+  logout(): void {
     this.localStorageService.removeLocalAccessToken();
-    this.router.navigateByUrl('login');
   }
 }
