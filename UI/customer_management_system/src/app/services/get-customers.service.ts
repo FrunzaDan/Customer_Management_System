@@ -5,7 +5,7 @@ import {
   HttpErrorResponse,
 } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
-import { GetCustomerListResponse } from 'src/app/interfaces/get-customer-list-response';
+import { GetCustomerListResponse } from '../../../src/app/interfaces/get-customer-list-response';
 import { environment } from '../../environments/environment';
 import { SessionStorageService } from './session-storage.service';
 

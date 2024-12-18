@@ -1,16 +1,9 @@
 import { Injectable } from '@angular/core';
-import {
-  HttpClient,
-  HttpHeaders,
-  HttpParams,
-  HttpParamsOptions,
-} from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, throwError } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
-import { UserLoginResponse } from 'src/app/interfaces/user-login-response';
-import { UserLoginRequest } from 'src/app/interfaces/user-login-request';
-import { GenericResponse } from 'src/app/interfaces/generic-response';
+import { Observable } from 'rxjs';
+import { UserLoginResponse } from '../../../src/app/interfaces/user-login-response';
+import { UserLoginRequest } from '../../../src/app/interfaces/user-login-request';
 import { BehaviorSubject, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { SessionStorageService } from './session-storage.service';

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { GenericResponse } from 'src/app/interfaces/generic-response';
+import { GenericResponse } from '../../../src/app/interfaces/generic-response';
 import { Subject, Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../../src/environments/environment';
 import { SessionStorageService } from './session-storage.service';
 
 @Injectable({

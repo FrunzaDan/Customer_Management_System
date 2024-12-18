@@ -5,11 +5,11 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { GetCustomerService } from 'src/app/services/get-customer.service';
+import { GetCustomerService } from '../../../../src/app/services/get-customer.service';
 import {
   Address,
   Customer,
-} from 'src/app/interfaces/get-customer-list-response';
+} from '../../../../src/app/interfaces/get-customer-list-response';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 

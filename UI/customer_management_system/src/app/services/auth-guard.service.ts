@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { map, Observable } from 'rxjs';
-import { VerifyTokenService } from 'src/app/services/verify-token.service';
+import { VerifyTokenService } from '../../../src/app/services/verify-token.service';
 import { LocalStorageService } from './local-storage.service';
 
 @Injectable({

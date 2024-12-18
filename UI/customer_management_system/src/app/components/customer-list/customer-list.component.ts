@@ -1,9 +1,9 @@
 import { Component, ElementRef, QueryList, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
-import { GetCustomersService } from 'src/app/services/get-customers.service';
-import { GetCustomerListResponse } from 'src/app/interfaces/get-customer-list-response';
-import { Customer } from 'src/app/interfaces/get-customer-list-response';
+import { GetCustomersService } from '../../../../src/app/services/get-customers.service';
+import { GetCustomerListResponse } from '../../../../src/app/interfaces/get-customer-list-response';
+import { Customer } from '../../../../src/app/interfaces/get-customer-list-response';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 

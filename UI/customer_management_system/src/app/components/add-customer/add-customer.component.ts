@@ -7,11 +7,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { first } from 'rxjs/operators';
-import { AddCustomerService } from 'src/app/services/add-customer.service';
+import { AddCustomerService } from '../../../../src/app/services/add-customer.service';
 import {
   Customer,
   Address,
-} from 'src/app/interfaces/get-customer-list-response';
+} from '../../../../src/app/interfaces/get-customer-list-response';
 import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
 

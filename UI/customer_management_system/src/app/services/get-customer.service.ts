@@ -6,7 +6,7 @@ import {
 } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Customer } from 'src/app/interfaces/get-customer-list-response';
+import { Customer } from '../../../src/app/interfaces/get-customer-list-response';
 import { environment } from '../../environments/environment';
 import { SessionStorageService } from './session-storage.service';
 
