@@ -24,24 +24,25 @@ import { CommonModule } from '@angular/common';
 export class AddCustomerComponent implements OnInit {
   form!: FormGroup;
   genderDropdown: any = ['unknown', 'male', 'female'];
-  loading = false;
-  submitted = false;
+  loading: boolean = false;
+  loadCompleted: boolean = false;
+  submitted: boolean = false;
   customer = {} as Customer;
-  customerAddress = {} as Address;
+  customerAddress: Address = {} as Address;
 
   get f() {
     return this.form.controls;
   }
 
   constructor(
-    private formBuilder: FormBuilder,
+    private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private addCustomerService: AddCustomerService
   ) {}
 
   ngOnInit() {
-    this.form = this.formBuilder.group({
+    this.form = this.fb.group({
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       email: [

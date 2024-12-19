@@ -11,7 +11,10 @@ import {
   Customer,
 } from '../../../../src/app/interfaces/get-customer-list-response';
 import { Router, ActivatedRoute } from '@angular/router';
+import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
+import { EditCustomerService } from '../../services/edit-customer.service';
+import { first } from 'rxjs/internal/operators/first';
 
 @Component({
   selector: 'app-edit-customer',
@@ -22,29 +25,37 @@ import { CommonModule } from '@angular/common';
 export class EditCustomerComponent implements OnInit {
   form!: FormGroup;
   genderDropdown: any = ['unknown', 'male', 'female'];
-  loading = false;
+  loading: boolean = false;
   loadCompleted: boolean = false;
-  submitted = false;
+  submitted: boolean = false;
   customer = {} as Customer;
-  customerAddress = {} as Address;
+  customerAddress: Address = {} as Address;
+  paramId: string = '';
 
   get f() {
     return this.form.controls;
   }
 
   constructor(
-    private getCustomerService: GetCustomerService,
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
     private router: Router,
-    private activatedRoute: ActivatedRoute,
-    private fb: FormBuilder
+    private getCustomerService: GetCustomerService,
+    private editCustomerService: EditCustomerService
   ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      msisdn: ['', Validators.required],
+      email: [
+        '',
+        [Validators.required, Validators.pattern(environment.EmailRegex)],
+      ],
+      msisdn: [
+        '',
+        [Validators.required, Validators.pattern(environment.PhoneRegex)],
+      ],
       gender: ['', Validators.required],
       birthYear: ['', Validators.required],
       birthMonth: ['', Validators.required],
@@ -56,9 +67,8 @@ export class EditCustomerComponent implements OnInit {
       number: ['', Validators.required],
       zip: ['', Validators.required],
     });
-    this.loadCompleted = false;
-    let paramID: string = this.activatedRoute.snapshot.queryParamMap.get('id')!;
-    this.getCustomerService.getCustomer(paramID).subscribe({
+    this.paramId = this.route.snapshot.queryParamMap.get('id')!;
+    this.getCustomerService.getCustomer(this.paramId).subscribe({
       next: (response) => {
         this.customer = response;
         this.form.patchValue({
@@ -98,6 +108,7 @@ export class EditCustomerComponent implements OnInit {
 
     this.loading = true;
 
+    this.customer.guid = this.paramId;
     this.customer.firstName = this.form.value.firstName;
     this.customer.lastName = this.form.value.lastName;
     this.customer.email = this.form.value.email;
@@ -118,5 +129,22 @@ export class EditCustomerComponent implements OnInit {
     this.customerAddress.zip = this.form.value.zip;
 
     this.customer.address = this.customerAddress;
+
+    this.editCustomerService
+      .editCustomer(this.customer)
+      .pipe(first())
+      .subscribe({
+        next: () => {
+          this.router.navigate(['../customers'], { relativeTo: this.route });
+        },
+        error: (error) => {
+          let errorStatusCode = error.status;
+          if (errorStatusCode == 403) {
+            this.router.navigate(['']);
+          } else if (errorStatusCode == 404) {
+          }
+          this.loading = false;
+        },
+      });
   }
 }

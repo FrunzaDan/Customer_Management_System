@@ -20,7 +20,7 @@ export class EditCustomerService {
 
   editCustomer(customer: Customer): Observable<GenericResponse> {
     const headers = this.httpHeaderService.getHeadersWithTokenSet();
-    return this.http.post<GenericResponse>(this.APIURL, customer, {
+    return this.http.patch<GenericResponse>(this.APIURL, customer, {
       headers: headers,
     });
   }
