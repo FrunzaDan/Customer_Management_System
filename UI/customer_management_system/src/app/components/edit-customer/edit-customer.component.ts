@@ -61,7 +61,6 @@ export class EditCustomerComponent implements OnInit {
     this.getCustomerService.getCustomer(paramID).subscribe({
       next: (response) => {
         this.customer = response;
-        console.log('Customer is ' + this.customer);
         this.form.patchValue({
           firstName: this.customer.firstName,
           lastName: this.customer.lastName,

@@ -68,9 +68,6 @@ export class AddCustomerComponent implements OnInit {
   onSubmit() {
     this.submitted = true;
 
-    console.log('submitted');
-    console.log('submitted');
-
     // stop here if form is invalid
     if (this.form.invalid) {
       return;

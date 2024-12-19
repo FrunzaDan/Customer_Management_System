@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Router } from '@angular/router';
 import { GenericResponse } from '../../../src/app/interfaces/generic-response';
 import { Subject, Observable } from 'rxjs';
 import { environment } from '../../../src/environments/environment';
@@ -30,9 +29,9 @@ export class VerifyTokenService {
 
     this.verifyTokenViaAPI().subscribe({
       next: (response) => {
-        if (response.status == '200') {
+        if (response.status == 200) {
           result.next(true);
-        } else if (response.status == '403') {
+        } else if (response.status == 403) {
           result.next(false);
           result.complete();
         } else {

@@ -4,7 +4,10 @@ import {
   withInterceptorsFromDi,
 } from '@angular/common/http';
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideClientHydration } from '@angular/platform-browser';
+import {
+  provideClientHydration,
+  withEventReplay,
+} from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import {
   provideRouter,
@@ -16,7 +19,7 @@ import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideAnimations(),
+    provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(
       routes,
       withComponentInputBinding(),
@@ -26,8 +29,8 @@ export const appConfig: ApplicationConfig = {
       }),
       withViewTransitions()
     ),
-    provideClientHydration(),
+    provideClientHydration(withEventReplay()),
     provideHttpClient(withFetch(), withInterceptorsFromDi()),
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideAnimations(),
   ],
 };

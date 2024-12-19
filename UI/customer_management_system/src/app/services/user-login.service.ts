@@ -45,7 +45,7 @@ export class UserLoginService {
   }
 
   checkCredentials(response: UserLoginResponse): string {
-    if (response.accessToken != null && response.status == '200') {
+    if (response.accessToken != null && response.status == 200) {
       this.sessionStorageService.setSessionAccessToken(response.accessToken);
       this.router.navigateByUrl('customers');
     }
