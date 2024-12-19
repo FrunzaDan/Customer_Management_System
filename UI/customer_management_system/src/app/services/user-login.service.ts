@@ -38,26 +38,17 @@ export class UserLoginService {
   accessToken!: string;
 
   login(userLoginRequest: UserLoginRequest): Observable<UserLoginResponse> {
-    const headers = this.httpHeaderService.getHeaders();
+    const headers = this.httpHeaderService.getHeadersWithTokenSet();
     return this.http.post<UserLoginResponse>(this.APIURL, userLoginRequest, {
       headers: headers,
     });
   }
 
-  checkcredentials(response: UserLoginResponse): void {
-    if (
-      response.status == '200' &&
-      response.responseMessage == 'Success!' &&
-      response.accessToken != null
-    ) {
+  checkCredentials(response: UserLoginResponse): string {
+    if (response.accessToken != null && response.status == '200') {
       this.sessionStorageService.setSessionAccessToken(response.accessToken);
       this.router.navigateByUrl('customers');
-    } else if (response.status == '403') {
-      this.errorSubject.next(response.responseMessage);
-    } else if (response.status == '404') {
-      this.errorSubject.next(response.responseMessage);
-    } else {
-      this.errorSubject.next('Our servers are down!');
     }
+    return response.responseMessage;
   }
 }

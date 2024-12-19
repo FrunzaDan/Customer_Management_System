@@ -8,7 +8,7 @@ import { SessionStorageService } from '../services/session-storage.service';
 export class HttpHeaderService {
   constructor(private sessionStorageService: SessionStorageService) {}
 
-  getHeaders(): HttpHeaders {
+  getHeadersWithTokenSet(): HttpHeaders {
     const token = this.sessionStorageService.getSessionAccessToken();
     let headers = new HttpHeaders().set('Content-Type', 'application/json');
 

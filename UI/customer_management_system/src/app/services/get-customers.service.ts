@@ -1,13 +1,8 @@
 import { Injectable } from '@angular/core';
-import {
-  HttpClient,
-  HttpHeaders,
-  HttpErrorResponse,
-} from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
 import { GetCustomerListResponse } from '../../../src/app/interfaces/get-customer-list-response';
 import { environment } from '../../environments/environment';
-import { SessionStorageService } from './session-storage.service';
 import { HttpHeaderService } from './http-header-service';
 
 @Injectable({
@@ -18,13 +13,12 @@ export class GetCustomersService {
     environment.CustomerManagementSystemAPI + '/api/Customer/all';
 
   constructor(
-    private sessionStorageService: SessionStorageService,
     private http: HttpClient,
     private httpHeaderService: HttpHeaderService
   ) {}
 
   refreshTable(): Observable<GetCustomerListResponse> {
-    const headers = this.httpHeaderService.getHeaders();
+    const headers = this.httpHeaderService.getHeadersWithTokenSet();
 
     return this.http
       .get<GetCustomerListResponse>(this.APIURL, { headers: headers })

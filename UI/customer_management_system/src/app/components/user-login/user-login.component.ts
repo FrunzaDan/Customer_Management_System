@@ -45,11 +45,7 @@ export class UserLoginComponent implements OnInit, OnDestroy {
     this.sessionStorageService.removeSessionStorage();
     this.navbarService.hideNavbar();
     this.footerService.hideFooter();
-
-    // Subscribe to login error messages
-    this.userLoginService.errorSubject.subscribe((message) => {
-      this.errorMessage = message;
-    });
+    this.errorMessage = null;
   }
 
   get usernameControl() {
@@ -73,15 +69,17 @@ export class UserLoginComponent implements OnInit, OnDestroy {
 
       this.userLoginService.login(loginRequest).subscribe({
         next: (response) => {
-          this.userLoginService.checkcredentials(response);
+          let test = this.userLoginService.checkCredentials(response);
+          if (test == 'Success!') {
+            this.errorMessage = null;
+          } else {
+            this.errorMessage = test;
+          }
         },
         error: (error) => {
           this.handleLoginError(error.status);
         },
       });
-    } else {
-      this.errorMessage =
-        'Please fill out all required fields with valid data.';
     }
   }
 
@@ -100,8 +98,8 @@ export class UserLoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Restore UI visibility
     this.navbarService.displayNavbar();
     this.footerService.displayFooter();
+    this.errorMessage = null;
   }
 }
