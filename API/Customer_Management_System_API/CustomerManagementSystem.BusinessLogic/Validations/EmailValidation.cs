@@ -3,14 +3,15 @@ using CustomerManagementSystem.BusinessLogic.Constants;
 
 namespace CustomerManagementSystem.BusinessLogic.Validations;
 
-public static class EmailValidation
+public static partial class EmailValidation
 {
     public static bool ValidateEmail(string email)
     {
         if (string.IsNullOrEmpty(email)) return false;
-
-        var pattern = RegexConstants.EmailRegex;
-        var regexMatch = Regex.Match(email, pattern, RegexOptions.IgnoreCase);
+        var regexMatch = MyRegex().Match(email);
         return regexMatch.Success;
     }
+
+    [GeneratedRegex(RegexConstants.EmailRegex, RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex MyRegex();
 }

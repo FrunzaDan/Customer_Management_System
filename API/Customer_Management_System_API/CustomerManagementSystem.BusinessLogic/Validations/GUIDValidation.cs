@@ -3,13 +3,15 @@ using CustomerManagementSystem.BusinessLogic.Constants;
 
 namespace CustomerManagementSystem.BusinessLogic.Validations;
 
-public class GuidValidation
+public static partial class GuidValidation
 {
     public static bool ValidateGuid(string guid)
     {
         if (string.IsNullOrEmpty(guid)) return false;
-        var pattern = RegexConstants.GuidRegex;
-        var regexMatch = Regex.Match(guid, pattern, RegexOptions.IgnoreCase);
+        var regexMatch = GuidRegex().Match(guid);
         return regexMatch.Success;
     }
+
+    [GeneratedRegex(RegexConstants.GuidRegex, RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex GuidRegex();
 }

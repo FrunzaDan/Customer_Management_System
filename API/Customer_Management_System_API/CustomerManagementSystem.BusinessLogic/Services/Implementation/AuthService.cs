@@ -56,16 +56,23 @@ public class AuthService(IHttpContextAccessor httpContextAccessor, IHttpClientFa
 
     public ResponseModel VerifyToken(string accessToken)
     {
+        var response = new ResponseModel();
         var httpContext = httpContextAccessor.HttpContext;
         if (httpContext is null)
-            throw new ArgumentNullException(nameof(httpContext));
+        {
+            response.Status = StatusCodes.Status500InternalServerError;
+            response.ResponseMessage = "failed to initialize the http context!" ;
+        }
         ArgumentNullException.ThrowIfNull(httpContext);
         if (string.IsNullOrEmpty(accessToken))
-            throw new ArgumentNullException(nameof(accessToken));
+        {
+            response.Status = StatusCodes.Status500InternalServerError;
+            response.ResponseMessage = "No Access Token provided!" ;
+        }
+            
+            
         ArgumentNullException.ThrowIfNull(httpContext);
-
-        var response = new ResponseModel();
-
+        
         try
         {
             var jwtValidation = new JwtValidation();
