@@ -15,37 +15,34 @@ public class DbUtils(IDalConfig configuration) : IDbUtils
         return await ExecuteStoredProcedureAsync<ResponseModel>(storedProcedure,
             command =>
             {
-                DbHelper.AddCustomerParameters(command, customer); // Assuming this method adds all necessary parameters
+                DbHelper.AddCustomerParameters(command, customer);
             },
             async reader =>
             {
-                if (await reader.ReadAsync().ConfigureAwait(false))
-                {
-                    // Check return value and handle accordingly
-                    if (reader["ReturnValue"] is int returnValue)
-                        return returnValue switch
-                        {
-                            200 => new ResponseModel
-                            {
-                                Status = 200, ResponseMessage = "Customer created successfully!"
-                            },
-                            4001 => new ResponseModel { Status = 400, ResponseMessage = "MSISDN already exists." },
-                            4002 => new ResponseModel { Status = 400, ResponseMessage = "Email already exists." },
-                            _ => new ResponseModel { Status = 500, ResponseMessage = "Internal error occurred." }
-                        };
-
+                if (!await reader.ReadAsync().ConfigureAwait(false))
                     return new ResponseModel
                     {
                         Status = 500,
-                        ResponseMessage = "Failed to create customer."
+                        ResponseMessage = "No data returned or failed to process request."
                     };
-                }
+                if (reader["ReturnValue"] is int returnValue)
+                    return returnValue switch
+                    {
+                        200 => new ResponseModel
+                        {
+                            Status = 200, ResponseMessage = "Customer created successfully!"
+                        },
+                        4001 => new ResponseModel { Status = 400, ResponseMessage = "MSISDN already exists." },
+                        4002 => new ResponseModel { Status = 400, ResponseMessage = "Email already exists." },
+                        _ => new ResponseModel { Status = 500, ResponseMessage = "Internal error occurred." }
+                    };
 
                 return new ResponseModel
                 {
                     Status = 500,
-                    ResponseMessage = "No data returned or failed to process request."
+                    ResponseMessage = "Failed to create customer."
                 };
+
             });
     }
 
@@ -88,29 +85,27 @@ public class DbUtils(IDalConfig configuration) : IDbUtils
             command => { DbHelper.AddCustomerParameters(command, customer); },
             async reader =>
             {
-                if (await reader.ReadAsync().ConfigureAwait(false))
-                {
-                    var message = reader["message"] as string;
-
-                    if (reader["result"] is 1)
-                        return new ResponseModel
-                        {
-                            Status = 200,
-                            ResponseMessage = message ?? "Customer details updated successfully!"
-                        };
-
+                if (!await reader.ReadAsync().ConfigureAwait(false))
                     return new ResponseModel
                     {
                         Status = 500,
-                        ResponseMessage = message ?? "Failed to update customer."
+                        ResponseMessage = "No data returned or customer update failed."
                     };
-                }
+                var message = reader["message"] as string;
+
+                if (reader["result"] is 1)
+                    return new ResponseModel
+                    {
+                        Status = 200,
+                        ResponseMessage = message ?? "Customer details updated successfully!"
+                    };
 
                 return new ResponseModel
                 {
                     Status = 500,
-                    ResponseMessage = "No data returned or customer update failed."
+                    ResponseMessage = message ?? "Failed to update customer."
                 };
+
             });
     }
 
@@ -121,29 +116,27 @@ public class DbUtils(IDalConfig configuration) : IDbUtils
         return await ExecuteStoredProcedureAsync<ResponseModel>(storedProcedure,
             command => { command.Parameters.AddWithValue("@var_Guid", customerGuid); }, async reader =>
             {
-                if (await reader.ReadAsync().ConfigureAwait(false))
-                {
-                    var message = reader["message"] as string;
-
-                    if (reader["result"] is 1)
-                        return new ResponseModel
-                        {
-                            Status = 200,
-                            ResponseMessage = message ?? "Failed to deactivate customer!"
-                        };
-
+                if (!await reader.ReadAsync().ConfigureAwait(false))
                     return new ResponseModel
                     {
                         Status = 500,
-                        ResponseMessage = "Failed to deactivate customer!"
+                        ResponseMessage = "Customer not found or no data returned from the procedure."
                     };
-                }
+                var message = reader["message"] as string;
+
+                if (reader["result"] is 1)
+                    return new ResponseModel
+                    {
+                        Status = 200,
+                        ResponseMessage = message ?? "Failed to deactivate customer!"
+                    };
 
                 return new ResponseModel
                 {
                     Status = 500,
-                    ResponseMessage = "Customer not found or no data returned from the procedure."
+                    ResponseMessage = "Failed to deactivate customer!"
                 };
+
             });
     }
 
@@ -153,29 +146,27 @@ public class DbUtils(IDalConfig configuration) : IDbUtils
         return await ExecuteStoredProcedureAsync<ResponseModel>(storedProcedure,
             command => { command.Parameters.AddWithValue("@var_Guid", customerGuid); }, async reader =>
             {
-                if (await reader.ReadAsync().ConfigureAwait(false))
-                {
-                    var message = reader["message"] as string;
-
-                    if (reader["result"] is 1)
-                        return new ResponseModel
-                        {
-                            Status = 200,
-                            ResponseMessage = message ?? "Customer deleted successfully!"
-                        };
-
+                if (!await reader.ReadAsync().ConfigureAwait(false))
                     return new ResponseModel
                     {
                         Status = 500,
-                        ResponseMessage = message ?? "Failed to delete customer."
+                        ResponseMessage = "Customer not found or no data returned from the procedure."
                     };
-                }
+                var message = reader["message"] as string;
+
+                if (reader["result"] is 1)
+                    return new ResponseModel
+                    {
+                        Status = 200,
+                        ResponseMessage = message ?? "Customer deleted successfully!"
+                    };
 
                 return new ResponseModel
                 {
                     Status = 500,
-                    ResponseMessage = "Customer not found or no data returned from the procedure."
+                    ResponseMessage = message ?? "Failed to delete customer."
                 };
+
             });
     }
 
@@ -191,17 +182,15 @@ public class DbUtils(IDalConfig configuration) : IDbUtils
         {
             var result = new ResultValidityCheck { IsValid = false };
 
-            if (await reader.ReadAsync().ConfigureAwait(false))
+            if (!await reader.ReadAsync().ConfigureAwait(false)) return result;
+            if (reader["merchant_role"] is int role)
             {
-                if (reader["merchant_role"] is int role)
-                {
-                    result.IsValid = (int?)role == 1801;
-                    if (!result.IsValid) result.ErrorMessage = "The provided merchant credentials have invalid roles!";
-                }
-                else
-                {
-                    result.ErrorMessage = "Invalid merchant credentials or no matching merchant found!";
-                }
+                result.IsValid = (int?)role == 1801;
+                if (!result.IsValid) result.ErrorMessage = "The provided merchant credentials have invalid roles!";
+            }
+            else
+            {
+                result.ErrorMessage = "Invalid merchant credentials or no matching merchant found!";
             }
 
             return result;
