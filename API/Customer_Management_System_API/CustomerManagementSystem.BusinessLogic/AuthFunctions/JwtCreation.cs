@@ -74,12 +74,11 @@ public class JwtCreation
     {
         return new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(new[]
-            {
+            Subject = new ClaimsIdentity([
                 new Claim(ClaimTypes.Sid, merchantId),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString("o"))
-            }),
+            ]),
             Expires = DateTime.UtcNow.AddMinutes(double.Parse(_configuration.AccessTokenTimeout)),
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(_jwtKey), SecurityAlgorithms.HmacSha256Signature),
@@ -88,7 +87,7 @@ public class JwtCreation
         };
     }
 
-    private AccessTokenResponse CreateErrorResponse(int statusCode, string message)
+    private static AccessTokenResponse CreateErrorResponse(int statusCode, string message)
     {
         return new AccessTokenResponse
         {

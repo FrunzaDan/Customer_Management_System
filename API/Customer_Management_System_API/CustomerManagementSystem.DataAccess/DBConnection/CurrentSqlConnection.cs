@@ -4,14 +4,10 @@ using Microsoft.Data.SqlClient;
 
 namespace CustomerManagementSystem.DataAccess.DBConnection;
 
-public class CurrentSqlConnection
+public class CurrentSqlConnection(IDalConfig configuration)
 {
-    private readonly IDalConfig _configuration;
-
-    public CurrentSqlConnection(IDalConfig configuration)
-    {
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-    }
+    private readonly IDalConfig _configuration =
+        configuration ?? throw new ArgumentNullException(nameof(configuration));
 
     public string? GetCorrectSqlConnectionString()
     {
@@ -22,11 +18,7 @@ public class CurrentSqlConnection
 
     private static string? GetValidConnectionString(params string?[] connectionStrings)
     {
-        foreach (var connectionString in connectionStrings)
-            if (IsConnectionValid(connectionString))
-                return connectionString;
-
-        return null;
+        return connectionStrings.FirstOrDefault(IsConnectionValid);
     }
 
     private static bool IsConnectionValid(string? connectionString)

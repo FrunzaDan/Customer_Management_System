@@ -8,12 +8,11 @@ namespace CustomerManagementSystem.BusinessLogic;
 
 public static class BusinessLogicDependencyInjection
 {
-    public static IServiceCollection AddBusinessLogic(this IServiceCollection services)
+    public static void AddBusinessLogic(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddSingleton<IDbUtils, DbUtils>();
         services.AddSingleton<IBllConfig, BllConfig>();
-        return services;
     }
 }

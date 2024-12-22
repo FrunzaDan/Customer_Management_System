@@ -5,77 +5,49 @@ using Microsoft.Data.SqlClient;
 
 namespace CustomerManagementSystem.DataAccess.DBConnection;
 
-public class DbUtils : IDbUtils
+public class DbUtils(IDalConfig configuration) : IDbUtils
 {
-    private readonly IDalConfig _configuration;
-
-    public DbUtils(IDalConfig configuration)
-    {
-        _configuration = configuration;
-    }
-
     private string? CurrentConnectionString { get; set; }
 
     public async Task<ResponseModel> RegisterCustomer(CustomerModel customer)
-{
-    const string storedProcedure = "dbo.usp_createCustomer";
-    return await ExecuteStoredProcedureAsync<ResponseModel>(storedProcedure,
-        command =>
-        {
-            DbHelper.AddCustomerParameters(command, customer);  // Assuming this method adds all necessary parameters
-        },
-        async reader =>
-        {
-            if (await reader.ReadAsync().ConfigureAwait(false))
+    {
+        const string storedProcedure = "dbo.usp_createCustomer";
+        return await ExecuteStoredProcedureAsync<ResponseModel>(storedProcedure,
+            command =>
             {
-                var returnValue = reader["ReturnValue"] as int?;
-
-                // Check return value and handle accordingly
-                if (returnValue.HasValue)
+                DbHelper.AddCustomerParameters(command, customer); // Assuming this method adds all necessary parameters
+            },
+            async reader =>
+            {
+                if (await reader.ReadAsync().ConfigureAwait(false))
                 {
-                    switch (returnValue.Value)
+                    // Check return value and handle accordingly
+                    if (reader["ReturnValue"] is int returnValue)
+                        return returnValue switch
+                        {
+                            200 => new ResponseModel
+                            {
+                                Status = 200, ResponseMessage = "Customer created successfully!"
+                            },
+                            4001 => new ResponseModel { Status = 400, ResponseMessage = "MSISDN already exists." },
+                            4002 => new ResponseModel { Status = 400, ResponseMessage = "Email already exists." },
+                            _ => new ResponseModel { Status = 500, ResponseMessage = "Internal error occurred." }
+                        };
+
+                    return new ResponseModel
                     {
-                        case 200:
-                            return new ResponseModel
-                            {
-                                Status = 200,
-                                ResponseMessage = "Customer created successfully!"
-                            };
-                        case 4001:
-                            return new ResponseModel
-                            {
-                                Status = 400,
-                                ResponseMessage = "MSISDN already exists."
-                            };
-                        case 4002:
-                            return new ResponseModel
-                            {
-                                Status = 400,
-                                ResponseMessage = "Email already exists."
-                            };
-                        default:
-                            return new ResponseModel
-                            {
-                                Status = 500,
-                                ResponseMessage = "Internal error occurred."
-                            };
-                    }
+                        Status = 500,
+                        ResponseMessage = "Failed to create customer."
+                    };
                 }
 
                 return new ResponseModel
                 {
                     Status = 500,
-                    ResponseMessage = "Failed to create customer."
+                    ResponseMessage = "No data returned or failed to process request."
                 };
-            }
-
-            return new ResponseModel
-            {
-                Status = 500,
-                ResponseMessage = "No data returned or failed to process request."
-            };
-        });
-}
+            });
+    }
 
 
     public async Task<CustomerModel> GetCustomer(GetCustomerRequest request)
@@ -86,12 +58,9 @@ public class DbUtils : IDbUtils
                 command.Parameters.AddWithValue("@var_SearchOption", request.SearchOption);
                 command.Parameters.AddWithValue("@var_SearchVariable", request.SearchVariable ?? (object)DBNull.Value);
             },
-            async reader =>
-            {
-                return await reader.ReadAsync().ConfigureAwait(false)
-                    ? DbHelper.MapCustomerFromReader(reader)
-                    : new CustomerModel { Status = 404, ResponseMessage = "Customer not found" };
-            });
+            async reader => await reader.ReadAsync().ConfigureAwait(false)
+                ? DbHelper.MapCustomerFromReader(reader)
+                : new CustomerModel { Status = 404, ResponseMessage = "Customer not found" });
     }
 
     public async Task<CustomerListModel> GetCustomers()
@@ -116,25 +85,19 @@ public class DbUtils : IDbUtils
     {
         const string storedProcedure = "dbo.usp_editCustomer";
         return await ExecuteStoredProcedureAsync<ResponseModel>(storedProcedure,
-            command =>
-            {
-                DbHelper.AddCustomerParameters(command, customer); 
-            },
+            command => { DbHelper.AddCustomerParameters(command, customer); },
             async reader =>
             {
                 if (await reader.ReadAsync().ConfigureAwait(false))
                 {
-                    var result = reader["result"] as int?;
                     var message = reader["message"] as string;
 
-                    if (result.HasValue && result.Value == 1)
-                    {
+                    if (reader["result"] is 1)
                         return new ResponseModel
                         {
                             Status = 200,
                             ResponseMessage = message ?? "Customer details updated successfully!"
                         };
-                    }
 
                     return new ResponseModel
                     {
@@ -151,7 +114,7 @@ public class DbUtils : IDbUtils
             });
     }
 
-    
+
     public async Task<ResponseModel> DeactivateCustomer(string customerGuid)
     {
         const string storedProcedure = "dbo.usp_deactivateCustomer";
@@ -160,17 +123,14 @@ public class DbUtils : IDbUtils
             {
                 if (await reader.ReadAsync().ConfigureAwait(false))
                 {
-                    var result = reader["result"] as int?;
                     var message = reader["message"] as string;
 
-                    if (result.HasValue && result.Value == 1)
-                    {
+                    if (reader["result"] is 1)
                         return new ResponseModel
                         {
                             Status = 200,
                             ResponseMessage = message ?? "Failed to deactivate customer!"
                         };
-                    }
 
                     return new ResponseModel
                     {
@@ -186,7 +146,7 @@ public class DbUtils : IDbUtils
                 };
             });
     }
-    
+
     public async Task<ResponseModel> DeleteCustomer(string customerGuid)
     {
         const string storedProcedure = "dbo.usp_deleteCustomer";
@@ -195,17 +155,14 @@ public class DbUtils : IDbUtils
             {
                 if (await reader.ReadAsync().ConfigureAwait(false))
                 {
-                    var result = reader["result"] as int?;
                     var message = reader["message"] as string;
 
-                    if (result.HasValue && result.Value == 1)
-                    {
+                    if (reader["result"] is 1)
                         return new ResponseModel
                         {
                             Status = 200,
                             ResponseMessage = message ?? "Customer deleted successfully!"
                         };
-                    }
 
                     return new ResponseModel
                     {
@@ -223,7 +180,6 @@ public class DbUtils : IDbUtils
     }
 
 
-
     public async Task<ResultValidityCheck> CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials)
     {
         const string storedProcedure = "dbo.usp_checkMerchantCredentials";
@@ -237,15 +193,10 @@ public class DbUtils : IDbUtils
 
             if (await reader.ReadAsync().ConfigureAwait(false))
             {
-                var role = reader["merchant_role"] as int?;
-
-                if (role.HasValue)
+                if (reader["merchant_role"] is int role)
                 {
-                    result.IsValid = role == 1801;
-                    if (!result.IsValid)
-                    {
-                        result.ErrorMessage = "The provided merchant credentials have invalid roles!";
-                    }
+                    result.IsValid = (int?)role == 1801;
+                    if (!result.IsValid) result.ErrorMessage = "The provided merchant credentials have invalid roles!";
                 }
                 else
                 {
@@ -261,7 +212,7 @@ public class DbUtils : IDbUtils
     private void CheckConnectionString()
     {
         if (!string.IsNullOrEmpty(CurrentConnectionString)) return;
-        var currentSqlConnection = new CurrentSqlConnection(_configuration);
+        var currentSqlConnection = new CurrentSqlConnection(configuration);
         CurrentConnectionString = currentSqlConnection.GetCorrectSqlConnectionString();
     }
 
@@ -280,7 +231,7 @@ public class DbUtils : IDbUtils
         configureCommand?.Invoke(command);
 
         await using var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
-        
+
         // Pass the SqlDataReader to the handleReader function to process the data and return a result of type T.
         return await handleReader(reader);
     }

@@ -25,7 +25,7 @@ public class CustomerRegistration
                 return response;
             }
 
-            if (MSISDNValidation.ValidateMsisdn(customerRqst.Msisdn) == false)
+            if (MsisdnValidation.ValidateMsisdn(customerRqst.Msisdn) == false)
             {
                 response.Status = 409;
                 response.ResponseMessage = "Invalid or empty MSISDN";

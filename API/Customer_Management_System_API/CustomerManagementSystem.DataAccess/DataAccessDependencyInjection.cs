@@ -5,9 +5,8 @@ namespace CustomerManagementSystem.DataAccess;
 
 public static class DataAccessDependencyInjection
 {
-    public static IServiceCollection AddDataAccess(this IServiceCollection services)
+    public static void AddDataAccess(this IServiceCollection services)
     {
         services.AddSingleton<IDalConfig, DalConfig>();
-        return services;
     }
 }
