@@ -8,9 +8,14 @@ public class CustomerGetting
 {
     private readonly IDbUtils _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
 
-    public async Task<CustomerModel> GetCustomerFunction(GetCustomerRequest getCustomerRqst)
+    public async Task<ResponseModel<CustomerModel>> GetCustomerFunction(GetCustomerRequest getCustomerRqst)
     {
-        if (string.IsNullOrEmpty(getCustomerRqst.SearchVariable)) return new CustomerModel { Status = 404 };
+        if (string.IsNullOrEmpty(getCustomerRqst.SearchVariable))
+            return new ResponseModel<CustomerModel>
+            {
+                Status = 404,
+                ResponseMessage = "Search variable is required."
+            };
 
         var searchOptions = new (Func<string, bool> validation, int searchOption)[]
         {
@@ -20,18 +25,19 @@ public class CustomerGetting
         };
 
         foreach (var (validation, searchOption) in searchOptions)
+        {
             if (validation(getCustomerRqst.SearchVariable))
             {
                 getCustomerRqst.SearchOption = searchOption;
                 break;
             }
+        }
 
         if (getCustomerRqst.SearchOption == 0)
-            return new CustomerModel
+            return new ResponseModel<CustomerModel>
             {
                 Status = 400,
-                ResponseMessage =
-                    "No valid search variable was provided! Search variables can be GUID, MSISDN or Email!"
+                ResponseMessage = "No valid search variable was provided! It must be GUID, MSISDN, or Email."
             };
 
         try
@@ -40,7 +46,7 @@ public class CustomerGetting
         }
         catch (Exception ex)
         {
-            return new CustomerModel
+            return new ResponseModel<CustomerModel>
             {
                 Status = 500,
                 ResponseMessage = ex.Message
@@ -48,7 +54,7 @@ public class CustomerGetting
         }
     }
 
-    public async Task<CustomerListModel> GetCustomersFunction()
+    public async Task<ResponseModel<CustomerListModel>> GetCustomersFunction()
     {
         return await _dbUtils.GetCustomers();
     }

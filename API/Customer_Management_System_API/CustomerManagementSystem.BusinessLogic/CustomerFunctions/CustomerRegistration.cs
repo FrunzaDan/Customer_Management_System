@@ -13,9 +13,9 @@ public class CustomerRegistration
         _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
     }
 
-    public async Task<ResponseModel> RegisterCustomerFunction(CustomerModel customerRqst)
+    public async Task<ResponseModel<object>> RegisterCustomerFunction(CustomerModel customerRqst)
     {
-        var response = new ResponseModel();
+        var response = new ResponseModel<object>();
         if (customerRqst.Email is not null && customerRqst.Msisdn is not null)
         {
             if (EmailValidation.ValidateEmail(customerRqst.Email) == false)

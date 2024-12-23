@@ -1,6 +1,6 @@
 ﻿namespace CustomerManagementSystem.Domain.Models;
 
-public class CustomerModel : ResponseModel
+public class CustomerModel
 {
     public string? Guid { get; set; }
 

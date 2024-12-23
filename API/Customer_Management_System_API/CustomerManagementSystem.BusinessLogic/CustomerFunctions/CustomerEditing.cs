@@ -12,9 +12,9 @@ public class CustomerEditing
         _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
     }
 
-    public async Task<ResponseModel> EditCustomerFunction(CustomerModel editCustomerRqst)
+    public async Task<ResponseModel<object>> EditCustomerFunction(CustomerModel editCustomerRqst)
     {
-        var response = new ResponseModel();
+        var response = new ResponseModel<object>();
         try
         {
             response = await _dbUtils.EditCustomer(editCustomerRqst);

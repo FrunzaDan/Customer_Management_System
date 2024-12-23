@@ -22,7 +22,7 @@ public class JwtCreation
         _jwtKey = Encoding.ASCII.GetBytes(_configuration.SecureJwtKey);
     }
 
-    public async Task<AccessTokenResponse> GenerateBearerJwt(string merchantId, string merchantPassword)
+    public async Task<ResponseModel<AccessTokenResponse>> GenerateBearerJwt(string merchantId, string merchantPassword)
     {
         if (string.IsNullOrWhiteSpace(merchantId) || string.IsNullOrWhiteSpace(merchantPassword))
             return CreateErrorResponse(StatusCodes.Status400BadRequest, "Merchant ID and Password cannot be empty.");
@@ -31,18 +31,47 @@ public class JwtCreation
         {
             // Validate merchant credentials
             var credentialsCheck = await ValidateMerchantCredentials(merchantId, merchantPassword);
-            if (credentialsCheck is { IsValid: false, ErrorMessage: not null })
-                return CreateErrorResponse(StatusCodes.Status403Forbidden, credentialsCheck.ErrorMessage);
+            if (credentialsCheck is { Data.IsValid: false, Data.ErrorMessage: not null })
+                return CreateErrorResponse(StatusCodes.Status403Forbidden, credentialsCheck.Data.ErrorMessage);
 
             // Generate token
             var token = GenerateJwtToken(merchantId);
-
-            return new AccessTokenResponse
+            if (string.IsNullOrEmpty(token))
             {
-                AccessToken = token,
-                ValidUntil = DateTime.UtcNow.AddMinutes(double.Parse(_configuration.AccessTokenTimeout)).ToString("o"),
+                return new ResponseModel<AccessTokenResponse>
+                {
+                    Status = StatusCodes.Status500InternalServerError,
+                    ResponseMessage = "Failed to generate JWT token."
+                };
+            }
+            
+            if (string.IsNullOrEmpty(_configuration.AccessTokenTimeout))
+            {
+                return new ResponseModel<AccessTokenResponse>
+                {
+                    Status = StatusCodes.Status500InternalServerError,
+                    ResponseMessage = "Configuration error: AccessTokenTimeout is missing."
+                };
+            }
+            
+            if (!double.TryParse(_configuration.AccessTokenTimeout, out var timeoutMinutes))
+            {
+                return new ResponseModel<AccessTokenResponse>
+                {
+                    Status = StatusCodes.Status500InternalServerError,
+                    ResponseMessage = "Invalid AccessTokenTimeout configuration."
+                };
+            }
+
+            return new ResponseModel<AccessTokenResponse>
+            {
                 Status = StatusCodes.Status200OK,
-                ResponseMessage = "Success!"
+                ResponseMessage = "Success!",
+                Data = new AccessTokenResponse
+                {
+                    AccessToken = token,
+                    ValidUntil = DateTime.UtcNow.AddMinutes(timeoutMinutes).ToString("o")
+                }
             };
         }
         catch (Exception ex)
@@ -51,7 +80,7 @@ public class JwtCreation
         }
     }
 
-    private async Task<ResultValidityCheck> ValidateMerchantCredentials(string merchantId, string merchantPassword)
+    private async Task<ResponseModel<ResultValidityCheck>> ValidateMerchantCredentials(string merchantId, string merchantPassword)
     {
         var merchantCredentials = new MerchantCredentials
         {
@@ -87,14 +116,13 @@ public class JwtCreation
         };
     }
 
-    private static AccessTokenResponse CreateErrorResponse(int statusCode, string message)
+    private static ResponseModel<AccessTokenResponse> CreateErrorResponse(int statusCode, string message)
     {
-        return new AccessTokenResponse
+        return new ResponseModel<AccessTokenResponse>
         {
-            AccessToken = null,
-            ValidUntil = null,
             Status = statusCode,
-            ResponseMessage = message
+            ResponseMessage = message,
+            Data = null
         };
     }
 }

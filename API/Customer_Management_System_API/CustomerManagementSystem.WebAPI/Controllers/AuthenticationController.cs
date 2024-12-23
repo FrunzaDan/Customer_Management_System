@@ -9,7 +9,7 @@ namespace CustomerManagementSystem.WebAPI.Controllers;
 public class AuthenticationController(IAuthService authService) : ControllerBase
 {
     [HttpPost("access-token")]
-    public async Task<ActionResult<ResponseModel>> GetAccessToken([FromBody] MerchantCredentials merchantCredentials)
+    public async Task<IActionResult> GetAccessToken([FromBody] MerchantCredentials merchantCredentials)
     {
         try
         {
@@ -24,7 +24,7 @@ public class AuthenticationController(IAuthService authService) : ControllerBase
     }
 
     [HttpGet("verify-token")]
-    public ActionResult<ResponseModel> VerifyToken([FromQuery] string accessToken)
+    public ActionResult<ResponseModel<object>> VerifyToken([FromQuery] string accessToken)
     {
         if (string.IsNullOrEmpty(accessToken))
             return BadRequest(new { Message = "Access token cannot be null or empty." });

@@ -8,19 +8,19 @@ namespace CustomerManagementSystem.BusinessLogic.Services.Implementation;
 public class AuthService(IHttpContextAccessor httpContextAccessor, IHttpClientFactory httpClientFactory)
     : IAuthService
 {
-    public async Task<AccessTokenResponse> GetAccessToken(MerchantCredentials merchantCredentials)
+    public async Task<ResponseModel<AccessTokenResponse>> GetAccessToken(MerchantCredentials merchantCredentials)
     {
         ArgumentNullException.ThrowIfNull(merchantCredentials);
         var httpClient = httpClientFactory.CreateClient();
 
-        var response = new AccessTokenResponse();
+        var response = new ResponseModel<AccessTokenResponse>();
 
         try
         {
             var jwtCreation = new JwtCreation();
             if (string.IsNullOrEmpty(merchantCredentials.MerchantId) ||
                 string.IsNullOrEmpty(merchantCredentials.MerchantPassword))
-                return new AccessTokenResponse
+                return new ResponseModel<AccessTokenResponse>
                 {
                     Status = StatusCodes.Status400BadRequest,
                     ResponseMessage = "Invalid Merchant Credentials"
@@ -29,19 +29,18 @@ public class AuthService(IHttpContextAccessor httpContextAccessor, IHttpClientFa
             response = await jwtCreation.GenerateBearerJwt(merchantCredentials.MerchantId,
                 merchantCredentials.MerchantPassword);
 
-            if (response.Status == StatusCodes.Status200OK && !string.IsNullOrEmpty(response.AccessToken))
+            if (response is { Status: StatusCodes.Status200OK, Data: not null } && !string.IsNullOrEmpty(response.Data.AccessToken))
             {
-                if (VerifyToken(response.AccessToken).Status == StatusCodes.Status200OK)
+                if (VerifyToken(response.Data.AccessToken).Status == StatusCodes.Status200OK)
                 {
                     httpClient.DefaultRequestHeaders.Authorization =
-                        new AuthenticationHeaderValue("Bearer", response.AccessToken);
+                        new AuthenticationHeaderValue("Bearer", response.Data.AccessToken);
                 }
                 else
                 {
-                    response.AccessToken = null;
-                    response.ValidUntil = null;
                     response.Status = StatusCodes.Status500InternalServerError;
                     response.ResponseMessage = "Token generated but could not be verified!";
+                    response.Data = null;
                 }
             }
         }
@@ -54,14 +53,14 @@ public class AuthService(IHttpContextAccessor httpContextAccessor, IHttpClientFa
         return response;
     }
 
-    public ResponseModel VerifyToken(string accessToken)
+    public ResponseModel<object> VerifyToken(string accessToken)
     {
-        var response = new ResponseModel();
+        var response = new ResponseModel<object>();
         var httpContext = httpContextAccessor.HttpContext;
         if (httpContext is null)
         {
             response.Status = StatusCodes.Status500InternalServerError;
-            response.ResponseMessage = "failed to initialize the http context!" ;
+            response.ResponseMessage = "Failed to initialize the http context!" ;
         }
         ArgumentNullException.ThrowIfNull(httpContext);
         if (string.IsNullOrEmpty(accessToken))

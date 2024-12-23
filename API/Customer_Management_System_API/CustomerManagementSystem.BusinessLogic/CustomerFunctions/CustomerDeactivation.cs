@@ -12,9 +12,9 @@ public class CustomerDeactivation
         _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
     }
 
-    public async Task<ResponseModel> DeactivateCustomer(string customerGuid)
+    public async Task<ResponseModel<object>> DeactivateCustomer(string customerGuid)
     {
-        var response = new ResponseModel();
+        var response = new ResponseModel<object>();
         try
         {
             response = await _dbUtils.DeactivateCustomer(customerGuid);

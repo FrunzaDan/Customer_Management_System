@@ -12,9 +12,9 @@ public class CustomerDeletion
         _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
     }
 
-    public async Task<ResponseModel> DeleteCustomer(string customerGuid)
+    public async Task<ResponseModel<object>> DeleteCustomer(string customerGuid)
     {
-        var response = new ResponseModel();
+        var response = new ResponseModel<object>();
         try
         {
             response = await _dbUtils.DeleteCustomer(customerGuid);

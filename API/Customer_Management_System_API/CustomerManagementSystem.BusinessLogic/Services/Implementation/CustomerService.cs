@@ -15,85 +15,81 @@ public class CustomerService : ICustomerService
         _isAuthorized = jwtValidation.Authorize(httpContextAccessor.HttpContext, null);
     }
 
-    public async Task<ResponseModel> DeactivateCustomer(string customerGuid)
+    public async Task<ResponseModel<object>> DeactivateCustomer(string customerGuid)
     {
         if (!_isAuthorized)
-            return new ResponseModel
+            return new ResponseModel<object>
             {
                 Status = 403,
                 ResponseMessage = "No access rights for this request!"
             };
 
         var customerDeactivation = new CustomerDeactivation();
-        var response = await customerDeactivation.DeactivateCustomer(customerGuid);
-        return response;
+        return await customerDeactivation.DeactivateCustomer(customerGuid);
     }
 
-    public async Task<ResponseModel> DeleteCustomer(string customerGuid)
+    public async Task<ResponseModel<object>> DeleteCustomer(string customerGuid)
     {
         if (!_isAuthorized)
-            return new ResponseModel
+            return new ResponseModel<object>
             {
                 Status = 403,
                 ResponseMessage = "No access rights for this request!"
             };
 
         var customerDeletion = new CustomerDeletion();
-        var response = await customerDeletion.DeleteCustomer(customerGuid);
-        return response;
+        return await customerDeletion.DeleteCustomer(customerGuid);
     }
 
-    public async Task<ResponseModel> EditCustomer(CustomerModel editCustomerRequest)
+    public async Task<ResponseModel<object>> EditCustomer(CustomerModel editCustomerRequest)
     {
         if (!_isAuthorized)
-            return new ResponseModel
+            return new ResponseModel<object>
             {
                 Status = 403,
                 ResponseMessage = "No access rights for this request!"
             };
 
         var customerEditing = new CustomerEditing();
-        var response = await customerEditing.EditCustomerFunction(editCustomerRequest);
-        return response;
+        return await customerEditing.EditCustomerFunction(editCustomerRequest);
     }
 
-    public async Task<CustomerModel> GetCustomer(GetCustomerRequest getCustomerRqst)
+    public async Task<ResponseModel<CustomerModel>> GetCustomer(GetCustomerRequest getCustomerRqst)
     {
         if (!_isAuthorized)
-            return new CustomerModel
+            return new ResponseModel<CustomerModel>
             {
                 Status = 403,
                 ResponseMessage = "No access rights for this request!"
             };
 
         var customerGetting = new CustomerGetting();
-        var response = await customerGetting.GetCustomerFunction(getCustomerRqst);
-        return response;
+        return await customerGetting.GetCustomerFunction(getCustomerRqst);
     }
 
-    public async Task<CustomerListModel> GetCustomers()
+    public async Task<ResponseModel<CustomerListModel>> GetCustomers()
     {
         if (!_isAuthorized)
-            return new CustomerListModel
+            return new ResponseModel<CustomerListModel>
             {
                 Status = 403,
                 ResponseMessage = "No access rights for this request!"
             };
+
         var customerGetting = new CustomerGetting();
-        var response = await customerGetting.GetCustomersFunction();
-        return response;
+        return await customerGetting.GetCustomersFunction();
     }
 
-    public async Task<ResponseModel> RegisterCustomer(CustomerModel customerRqst)
+    public async Task<ResponseModel<object>> RegisterCustomer(CustomerModel customerRqst)
     {
         if (!_isAuthorized)
-            return new ResponseModel
+            return new ResponseModel<object>
             {
                 Status = 403,
                 ResponseMessage = "No access rights for this request!"
             };
+
         var customerRegistration = new CustomerRegistration();
-        var response = await customerRegistration.RegisterCustomerFunction(customerRqst);
-        return response;
+        return await customerRegistration.RegisterCustomerFunction(customerRqst);
     }
 }

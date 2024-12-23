@@ -5,14 +5,16 @@ using Microsoft.Data.SqlClient;
 
 namespace CustomerManagementSystem.DataAccess.DBConnection;
 
+
+
 public class DbUtils(IDalConfig configuration) : IDbUtils
 {
     private string? CurrentConnectionString { get; set; }
 
-    public async Task<ResponseModel> RegisterCustomer(CustomerModel customer)
+    public async Task<ResponseModel<object>> RegisterCustomer(CustomerModel customer)
     {
         const string storedProcedure = "dbo.usp_createCustomer";
-        return await ExecuteStoredProcedureAsync<ResponseModel>(storedProcedure,
+        return await ExecuteStoredProcedureAsync<ResponseModel<object>>(storedProcedure,
             command =>
             {
                 DbHelper.AddCustomerParameters(command, customer);
@@ -20,7 +22,7 @@ public class DbUtils(IDalConfig configuration) : IDbUtils
             async reader =>
             {
                 if (!await reader.ReadAsync().ConfigureAwait(false))
-                    return new ResponseModel
+                    return new ResponseModel<object>
                     {
                         Status = 500,
                         ResponseMessage = "No data returned or failed to process request."
@@ -28,16 +30,16 @@ public class DbUtils(IDalConfig configuration) : IDbUtils
                 if (reader["ReturnValue"] is int returnValue)
                     return returnValue switch
                     {
-                        200 => new ResponseModel
+                        200 => new ResponseModel<object>
                         {
                             Status = 200, ResponseMessage = "Customer created successfully!"
                         },
-                        4001 => new ResponseModel { Status = 400, ResponseMessage = "MSISDN already exists." },
-                        4002 => new ResponseModel { Status = 400, ResponseMessage = "Email already exists." },
-                        _ => new ResponseModel { Status = 500, ResponseMessage = "Internal error occurred." }
+                        4001 => new ResponseModel<object> { Status = 400, ResponseMessage = "MSISDN already exists." },
+                        4002 => new ResponseModel<object> { Status = 400, ResponseMessage = "Email already exists." },
+                        _ => new ResponseModel<object> { Status = 500, ResponseMessage = "Internal error occurred." }
                     };
 
-                return new ResponseModel
+                return new ResponseModel<object>
                 {
                     Status = 500,
                     ResponseMessage = "Failed to create customer."
@@ -46,47 +48,56 @@ public class DbUtils(IDalConfig configuration) : IDbUtils
             });
     }
 
-
-    public async Task<CustomerModel> GetCustomer(GetCustomerRequest request)
+    public async Task<ResponseModel<CustomerModel>> GetCustomer(GetCustomerRequest request)
     {
         const string storedProcedure = "dbo.usp_getCustomer";
-        return await ExecuteStoredProcedureAsync<CustomerModel>(storedProcedure, command =>
+        return await ExecuteStoredProcedureAsync<ResponseModel<CustomerModel>>(storedProcedure, command =>
             {
                 command.Parameters.AddWithValue("@var_SearchOption", request.SearchOption);
                 command.Parameters.AddWithValue("@var_SearchVariable", request.SearchVariable ?? (object)DBNull.Value);
             },
             async reader => await reader.ReadAsync().ConfigureAwait(false)
-                ? DbHelper.MapCustomerFromReader(reader)
-                : new CustomerModel { Status = 404, ResponseMessage = "Customer not found" });
+                ? new ResponseModel<CustomerModel>
+                {
+                    Status = 200,
+                    ResponseMessage = "Customer found.",
+                    Data = DbHelper.MapCustomerFromReader(reader)
+                }
+                : new ResponseModel<CustomerModel>
+                {
+                    Status = 404,
+                    ResponseMessage = "Customer not found",
+                    Data = null
+                });
     }
 
-    public async Task<CustomerListModel> GetCustomers()
+    public async Task<ResponseModel<CustomerListModel>> GetCustomers()
     {
         const string storedProcedure = "dbo.usp_getCustomers";
-        return await ExecuteStoredProcedureAsync<CustomerListModel>(storedProcedure, null, async reader =>
+        return await ExecuteStoredProcedureAsync<ResponseModel<CustomerListModel>>(storedProcedure, null, async reader =>
         {
             var customers = new List<CustomerModel>();
             while (await reader.ReadAsync().ConfigureAwait(false))
                 customers.Add(DbHelper.MapCustomerFromReader(reader));
 
-            return new CustomerListModel
+            return new ResponseModel<CustomerListModel>
             {
-                CustomerList = customers,
                 Status = 200,
-                ResponseMessage = $"{customers.Count} customers found."
+                ResponseMessage = $"{customers.Count} customers found.",
+                Data = new CustomerListModel { CustomerList = customers }
             };
         });
     }
 
-    public async Task<ResponseModel> EditCustomer(CustomerModel customer)
+    public async Task<ResponseModel<object>> EditCustomer(CustomerModel customer)
     {
         const string storedProcedure = "dbo.usp_editCustomer";
-        return await ExecuteStoredProcedureAsync<ResponseModel>(storedProcedure,
+        return await ExecuteStoredProcedureAsync<ResponseModel<object>>(storedProcedure,
             command => { DbHelper.AddCustomerParameters(command, customer); },
             async reader =>
             {
                 if (!await reader.ReadAsync().ConfigureAwait(false))
-                    return new ResponseModel
+                    return new ResponseModel<object>
                     {
                         Status = 500,
                         ResponseMessage = "No data returned or customer update failed."
@@ -94,13 +105,13 @@ public class DbUtils(IDalConfig configuration) : IDbUtils
                 var message = reader["message"] as string;
 
                 if (reader["result"] is 1)
-                    return new ResponseModel
+                    return new ResponseModel<object>
                     {
                         Status = 200,
                         ResponseMessage = message ?? "Customer details updated successfully!"
                     };
 
-                return new ResponseModel
+                return new ResponseModel<object>
                 {
                     Status = 500,
                     ResponseMessage = message ?? "Failed to update customer."
@@ -109,15 +120,14 @@ public class DbUtils(IDalConfig configuration) : IDbUtils
             });
     }
 
-
-    public async Task<ResponseModel> DeactivateCustomer(string customerGuid)
+    public async Task<ResponseModel<object>> DeactivateCustomer(string customerGuid)
     {
         const string storedProcedure = "dbo.usp_deactivateCustomer";
-        return await ExecuteStoredProcedureAsync<ResponseModel>(storedProcedure,
+        return await ExecuteStoredProcedureAsync<ResponseModel<object>>(storedProcedure,
             command => { command.Parameters.AddWithValue("@var_Guid", customerGuid); }, async reader =>
             {
                 if (!await reader.ReadAsync().ConfigureAwait(false))
-                    return new ResponseModel
+                    return new ResponseModel<object>
                     {
                         Status = 500,
                         ResponseMessage = "Customer not found or no data returned from the procedure."
@@ -125,29 +135,29 @@ public class DbUtils(IDalConfig configuration) : IDbUtils
                 var message = reader["message"] as string;
 
                 if (reader["result"] is 1)
-                    return new ResponseModel
+                    return new ResponseModel<object>
                     {
                         Status = 200,
-                        ResponseMessage = message ?? "Failed to deactivate customer!"
+                        ResponseMessage = message ?? "Customer deactivated successfully!"
                     };
 
-                return new ResponseModel
+                return new ResponseModel<object>
                 {
                     Status = 500,
-                    ResponseMessage = "Failed to deactivate customer!"
+                    ResponseMessage = message ?? "Failed to deactivate customer!"
                 };
 
             });
     }
 
-    public async Task<ResponseModel> DeleteCustomer(string customerGuid)
+    public async Task<ResponseModel<object>> DeleteCustomer(string customerGuid)
     {
         const string storedProcedure = "dbo.usp_deleteCustomer";
-        return await ExecuteStoredProcedureAsync<ResponseModel>(storedProcedure,
+        return await ExecuteStoredProcedureAsync<ResponseModel<object>>(storedProcedure,
             command => { command.Parameters.AddWithValue("@var_Guid", customerGuid); }, async reader =>
             {
                 if (!await reader.ReadAsync().ConfigureAwait(false))
-                    return new ResponseModel
+                    return new ResponseModel<object>
                     {
                         Status = 500,
                         ResponseMessage = "Customer not found or no data returned from the procedure."
@@ -155,13 +165,13 @@ public class DbUtils(IDalConfig configuration) : IDbUtils
                 var message = reader["message"] as string;
 
                 if (reader["result"] is 1)
-                    return new ResponseModel
+                    return new ResponseModel<object>
                     {
                         Status = 200,
                         ResponseMessage = message ?? "Customer deleted successfully!"
                     };
 
-                return new ResponseModel
+                return new ResponseModel<object>
                 {
                     Status = 500,
                     ResponseMessage = message ?? "Failed to delete customer."
@@ -170,11 +180,10 @@ public class DbUtils(IDalConfig configuration) : IDbUtils
             });
     }
 
-
-    public async Task<ResultValidityCheck> CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials)
+    public async Task<ResponseModel<ResultValidityCheck>> CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials)
     {
         const string storedProcedure = "dbo.usp_checkMerchantCredentials";
-        return await ExecuteStoredProcedureAsync<ResultValidityCheck>(storedProcedure, command =>
+        return await ExecuteStoredProcedureAsync<ResponseModel<ResultValidityCheck>>(storedProcedure, command =>
         {
             command.Parameters.AddWithValue("@var_MerchantID", merchantCredentials.MerchantId);
             command.Parameters.AddWithValue("@var_MerchantPassword", merchantCredentials.MerchantPassword);
@@ -182,7 +191,14 @@ public class DbUtils(IDalConfig configuration) : IDbUtils
         {
             var result = new ResultValidityCheck { IsValid = false };
 
-            if (!await reader.ReadAsync().ConfigureAwait(false)) return result;
+            if (!await reader.ReadAsync().ConfigureAwait(false))
+                return new ResponseModel<ResultValidityCheck>
+                {
+                    Status = 404,
+                    ResponseMessage = "Invalid merchant credentials or no matching merchant found!",
+                    Data = result
+                };
+
             if (reader["merchant_role"] is int role)
             {
                 result.IsValid = (int?)role == 1801;
@@ -193,10 +209,14 @@ public class DbUtils(IDalConfig configuration) : IDbUtils
                 result.ErrorMessage = "Invalid merchant credentials or no matching merchant found!";
             }
 
-            return result;
+            return new ResponseModel<ResultValidityCheck>
+            {
+                Status = result.IsValid ? 200 : 400,
+                ResponseMessage = result.IsValid ? "Valid merchant credentials." : result.ErrorMessage,
+                Data = result
+            };
         });
     }
-
 
     private void CheckConnectionString()
     {
