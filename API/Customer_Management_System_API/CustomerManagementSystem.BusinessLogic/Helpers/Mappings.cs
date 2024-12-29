@@ -2,13 +2,6 @@
 
 public class Mappings
 {
-    public static readonly Dictionary<int, string> SqlResponseDictionary = new()
-    {
-        { 200, "Success!" },
-        { 4001, "MSISDN already exists!" },
-        { 4002, "Email already exists!" }
-    };
-
     public static readonly Dictionary<int, string> ErrorCodes = new()
     {
         { 200, "Success!" },

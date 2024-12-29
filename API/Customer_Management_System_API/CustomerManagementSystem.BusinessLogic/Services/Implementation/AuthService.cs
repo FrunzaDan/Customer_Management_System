@@ -10,7 +10,13 @@ public class AuthService(IHttpContextAccessor httpContextAccessor, IHttpClientFa
 {
     public async Task<ResponseModel<AccessTokenResponse>> GetAccessToken(MerchantCredentials merchantCredentials)
     {
-        ArgumentNullException.ThrowIfNull(merchantCredentials);
+        if (string.IsNullOrEmpty(merchantCredentials.MerchantId) ||
+            string.IsNullOrEmpty(merchantCredentials.MerchantPassword))
+            return new ResponseModel<AccessTokenResponse>
+            {
+                Status = StatusCodes.Status400BadRequest,
+                ResponseMessage = "Invalid Merchant Credentials"
+            };
         var httpClient = httpClientFactory.CreateClient();
 
         var response = new ResponseModel<AccessTokenResponse>();
@@ -18,14 +24,6 @@ public class AuthService(IHttpContextAccessor httpContextAccessor, IHttpClientFa
         try
         {
             var jwtCreation = new JwtCreation();
-            if (string.IsNullOrEmpty(merchantCredentials.MerchantId) ||
-                string.IsNullOrEmpty(merchantCredentials.MerchantPassword))
-                return new ResponseModel<AccessTokenResponse>
-                {
-                    Status = StatusCodes.Status400BadRequest,
-                    ResponseMessage = "Invalid Merchant Credentials"
-                };
-
             response = await jwtCreation.GenerateBearerJwt(merchantCredentials.MerchantId,
                 merchantCredentials.MerchantPassword);
 
@@ -55,27 +53,25 @@ public class AuthService(IHttpContextAccessor httpContextAccessor, IHttpClientFa
 
     public ResponseModel<object> VerifyToken(string accessToken)
     {
+        
         var response = new ResponseModel<object>();
+        if (string.IsNullOrEmpty(accessToken))
+        {
+            response.Status = StatusCodes.Status500InternalServerError;
+            response.ResponseMessage = "No Access Token provided!" ;
+        }
+        
         var httpContext = httpContextAccessor.HttpContext;
         if (httpContext is null)
         {
             response.Status = StatusCodes.Status500InternalServerError;
             response.ResponseMessage = "Failed to initialize the http context!" ;
         }
-        ArgumentNullException.ThrowIfNull(httpContext);
-        if (string.IsNullOrEmpty(accessToken))
-        {
-            response.Status = StatusCodes.Status500InternalServerError;
-            response.ResponseMessage = "No Access Token provided!" ;
-        }
-            
-            
-        ArgumentNullException.ThrowIfNull(httpContext);
         
         try
         {
             var jwtValidation = new JwtValidation();
-            var isAuthorized = jwtValidation.Authorize(httpContext, accessToken);
+            var isAuthorized = httpContext != null && jwtValidation.Authorize(httpContext, accessToken);
 
             response.Status = isAuthorized
                 ? StatusCodes.Status200OK
