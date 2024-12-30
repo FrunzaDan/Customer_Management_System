@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using CustomerManagementSystem.BusinessLogic;
-using CustomerManagementSystem.DataAccess;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
@@ -11,9 +10,6 @@ builder.Services.AddHttpContextAccessor();
 
 // Adds the Business Logic Layer
 builder.Services.AddBusinessLogic();
-
-// Adds the Data Access Layer
-builder.Services.AddDataAccess();
 
 // Add services to the container.
 builder.Services.AddControllers();

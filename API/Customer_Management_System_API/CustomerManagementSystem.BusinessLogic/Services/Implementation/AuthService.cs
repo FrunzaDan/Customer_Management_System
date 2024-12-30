@@ -27,7 +27,8 @@ public class AuthService(IHttpContextAccessor httpContextAccessor, IHttpClientFa
             response = await jwtCreation.GenerateBearerJwt(merchantCredentials.MerchantId,
                 merchantCredentials.MerchantPassword);
 
-            if (response is { Status: StatusCodes.Status200OK, Data: not null } && !string.IsNullOrEmpty(response.Data.AccessToken))
+            if (response is { Status: StatusCodes.Status200OK, Data: not null } &&
+                !string.IsNullOrEmpty(response.Data.AccessToken))
             {
                 if (VerifyToken(response.Data.AccessToken).Status == StatusCodes.Status200OK)
                 {
@@ -53,21 +54,20 @@ public class AuthService(IHttpContextAccessor httpContextAccessor, IHttpClientFa
 
     public ResponseModel<object> VerifyToken(string accessToken)
     {
-        
         var response = new ResponseModel<object>();
         if (string.IsNullOrEmpty(accessToken))
         {
             response.Status = StatusCodes.Status500InternalServerError;
-            response.ResponseMessage = "No Access Token provided!" ;
+            response.ResponseMessage = "No Access Token provided!";
         }
-        
+
         var httpContext = httpContextAccessor.HttpContext;
         if (httpContext is null)
         {
             response.Status = StatusCodes.Status500InternalServerError;
-            response.ResponseMessage = "Failed to initialize the http context!" ;
+            response.ResponseMessage = "Failed to initialize the http context!";
         }
-        
+
         try
         {
             var jwtValidation = new JwtValidation();

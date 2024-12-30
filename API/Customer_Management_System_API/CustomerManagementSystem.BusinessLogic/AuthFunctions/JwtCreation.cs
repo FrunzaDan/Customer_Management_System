@@ -1,8 +1,8 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using CustomerManagementSystem.BusinessLogic.Configuration;
 using CustomerManagementSystem.DataAccess.DBConnection;
+using CustomerManagementSystem.Domain.Configuration;
 using CustomerManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
@@ -11,13 +11,13 @@ namespace CustomerManagementSystem.BusinessLogic.AuthFunctions;
 
 public class JwtCreation
 {
-    private readonly IBllConfig _configuration;
+    private readonly IAppSettingsConfig _configuration;
     private readonly IDbUtils _dbUtils;
     private readonly byte[] _jwtKey;
 
     public JwtCreation()
     {
-        _configuration = ServiceLocator.GetServiceFromServiceProvider<IBllConfig>();
+        _configuration = ServiceLocator.GetServiceFromServiceProvider<IAppSettingsConfig>();
         _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
         _jwtKey = Encoding.ASCII.GetBytes(_configuration.SecureJwtKey);
     }
@@ -37,31 +37,25 @@ public class JwtCreation
             // Generate token
             var token = GenerateJwtToken(merchantId);
             if (string.IsNullOrEmpty(token))
-            {
                 return new ResponseModel<AccessTokenResponse>
                 {
                     Status = StatusCodes.Status500InternalServerError,
                     ResponseMessage = "Failed to generate JWT token."
                 };
-            }
-            
+
             if (string.IsNullOrEmpty(_configuration.AccessTokenTimeout))
-            {
                 return new ResponseModel<AccessTokenResponse>
                 {
                     Status = StatusCodes.Status500InternalServerError,
                     ResponseMessage = "Configuration error: AccessTokenTimeout is missing."
                 };
-            }
-            
+
             if (!double.TryParse(_configuration.AccessTokenTimeout, out var timeoutMinutes))
-            {
                 return new ResponseModel<AccessTokenResponse>
                 {
                     Status = StatusCodes.Status500InternalServerError,
                     ResponseMessage = "Invalid AccessTokenTimeout configuration."
                 };
-            }
 
             return new ResponseModel<AccessTokenResponse>
             {
@@ -80,7 +74,8 @@ public class JwtCreation
         }
     }
 
-    private async Task<ResponseModel<ResultValidityCheck>> ValidateMerchantCredentials(string merchantId, string merchantPassword)
+    private async Task<ResponseModel<ResultValidityCheck>> ValidateMerchantCredentials(string merchantId,
+        string merchantPassword)
     {
         var merchantCredentials = new MerchantCredentials
         {

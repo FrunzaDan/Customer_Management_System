@@ -1,5 +1,5 @@
 ﻿using System.Data;
-using CustomerManagementSystem.DataAccess.Configuration;
+using CustomerManagementSystem.Domain.Configuration;
 using CustomerManagementSystem.Domain.Models;
 using Microsoft.Data.SqlClient;
 
@@ -7,13 +7,14 @@ namespace CustomerManagementSystem.DataAccess.DBConnection;
 
 public class DbUtils : IDbUtils
 {
-    private string? CurrentConnectionString { get; set; }
-    private readonly IDalConfig _configuration;
+    private readonly IAppSettingsConfig _configuration;
 
-    public DbUtils(IDalConfig configuration)
+    public DbUtils(IAppSettingsConfig configuration)
     {
         _configuration = configuration;
     }
+
+    private string? CurrentConnectionString { get; set; }
 
     public async Task<ResponseModel<object>> RegisterCustomer(CustomerModel customer)
     {
@@ -25,17 +26,17 @@ public class DbUtils : IDbUtils
             async reader =>
             {
                 if (!await reader.ReadAsync().ConfigureAwait(false))
-                {
                     return new ResponseModel<object>(500, "No data returned or failed to process request.");
-                }
 
-                return reader["ReturnValue"] is int returnValue ? returnValue switch
-                {
-                    200 => new ResponseModel<object>(200, "Customer created successfully!"),
-                    4001 => new ResponseModel<object>(400, "MSISDN already exists."),
-                    4002 => new ResponseModel<object>(400, "Email already exists."),
-                    _ => new ResponseModel<object>(500, "Internal error occurred.")
-                } : new ResponseModel<object>(500, "Failed to create customer.");
+                return reader["ReturnValue"] is int returnValue
+                    ? returnValue switch
+                    {
+                        200 => new ResponseModel<object>(200, "Customer created successfully!"),
+                        4001 => new ResponseModel<object>(400, "MSISDN already exists."),
+                        4002 => new ResponseModel<object>(400, "Email already exists."),
+                        _ => new ResponseModel<object>(500, "Internal error occurred.")
+                    }
+                    : new ResponseModel<object>(500, "Failed to create customer.");
             });
     }
 
@@ -53,9 +54,7 @@ public class DbUtils : IDbUtils
             async reader =>
             {
                 if (!await reader.ReadAsync().ConfigureAwait(false))
-                {
                     return new ResponseModel<CustomerModel>(404, "Customer not found");
-                }
 
                 return new ResponseModel<CustomerModel>(200, "Customer found.", DbHelper.MapCustomerFromReader(reader));
             });
@@ -73,11 +72,9 @@ public class DbUtils : IDbUtils
                 var customers = new List<CustomerModel>();
 
                 while (await reader.ReadAsync().ConfigureAwait(false))
-                {
                     customers.Add(DbHelper.MapCustomerFromReader(reader));
-                }
 
-                return new ResponseModel<CustomerListModel>(200, $"{customers.Count} customers found.", 
+                return new ResponseModel<CustomerListModel>(200, $"{customers.Count} customers found.",
                     new CustomerListModel { CustomerList = customers });
             });
     }
@@ -92,9 +89,7 @@ public class DbUtils : IDbUtils
             async reader =>
             {
                 if (!await reader.ReadAsync().ConfigureAwait(false))
-                {
                     return new ResponseModel<object>(500, "No data returned or customer update failed.");
-                }
 
                 var message = reader["message"] as string;
 
@@ -114,9 +109,7 @@ public class DbUtils : IDbUtils
             async reader =>
             {
                 if (!await reader.ReadAsync().ConfigureAwait(false))
-                {
                     return new ResponseModel<object>(500, "Customer not found or no data returned from the procedure.");
-                }
 
                 var message = reader["message"] as string;
 
@@ -136,9 +129,7 @@ public class DbUtils : IDbUtils
             async reader =>
             {
                 if (!await reader.ReadAsync().ConfigureAwait(false))
-                {
                     return new ResponseModel<object>(500, "Customer not found or no data returned from the procedure.");
-                }
 
                 var message = reader["message"] as string;
 
@@ -148,7 +139,8 @@ public class DbUtils : IDbUtils
             });
     }
 
-    public async Task<ResponseModel<ResultValidityCheck>> CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials)
+    public async Task<ResponseModel<ResultValidityCheck>> CheckMerchantCredentialsFromDb(
+        MerchantCredentials merchantCredentials)
     {
         const string storedProcedure = "dbo.usp_checkMerchantCredentials";
 
@@ -164,10 +156,8 @@ public class DbUtils : IDbUtils
                 var result = new ResultValidityCheck { IsValid = false };
 
                 if (!await reader.ReadAsync().ConfigureAwait(false))
-                {
-                    return new ResponseModel<ResultValidityCheck>(404, 
+                    return new ResponseModel<ResultValidityCheck>(404,
                         "Invalid merchant credentials or no matching merchant found!", result);
-                }
 
                 if (reader["merchant_role"] is int role)
                 {

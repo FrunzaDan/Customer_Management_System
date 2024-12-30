@@ -1,12 +1,12 @@
 ﻿using System.Data;
-using CustomerManagementSystem.DataAccess.Configuration;
+using CustomerManagementSystem.Domain.Configuration;
 using Microsoft.Data.SqlClient;
 
 namespace CustomerManagementSystem.DataAccess.DBConnection;
 
-public class CurrentSqlConnection(IDalConfig configuration)
+public class CurrentSqlConnection(IAppSettingsConfig configuration)
 {
-    private readonly IDalConfig _configuration =
+    private readonly IAppSettingsConfig _configuration =
         configuration ?? throw new ArgumentNullException(nameof(configuration));
 
     public string? GetCorrectSqlConnectionString()

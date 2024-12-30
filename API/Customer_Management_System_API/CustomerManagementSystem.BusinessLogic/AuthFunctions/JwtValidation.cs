@@ -1,7 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using CustomerManagementSystem.BusinessLogic.Configuration;
+using CustomerManagementSystem.Domain.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 
@@ -15,7 +15,7 @@ public class JwtValidation
 
     public JwtValidation()
     {
-        var configuration = ServiceLocator.GetServiceFromServiceProvider<IBllConfig>();
+        var configuration = ServiceLocator.GetServiceFromServiceProvider<IAppSettingsConfig>();
         _jwtKey = configuration.SecureJwtKey;
         _jwtIssuer = configuration.JwtIssuer;
         _jwtAudience = configuration.JwtAudience;

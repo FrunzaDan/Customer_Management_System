@@ -25,13 +25,11 @@ public class CustomerGetting
         };
 
         foreach (var (validation, searchOption) in searchOptions)
-        {
             if (validation(getCustomerRqst.SearchVariable))
             {
                 getCustomerRqst.SearchOption = searchOption;
                 break;
             }
-        }
 
         if (getCustomerRqst.SearchOption == 0)
             return new ResponseModel<CustomerModel>

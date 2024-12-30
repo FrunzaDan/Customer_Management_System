@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-namespace CustomerManagementSystem.BusinessLogic.Configuration;
+namespace CustomerManagementSystem.Domain.Configuration;
 
-public class BllConfig(IConfiguration configuration) : IBllConfig
+public class AppSettingsConfig(IConfiguration configuration) : IAppSettingsConfig
 {
     public string SecureJwtKey => configuration["Auth:SecureJWTKey"] ??
                                   throw new ArgumentNullException(nameof(SecureJwtKey),
@@ -19,4 +19,14 @@ public class BllConfig(IConfiguration configuration) : IBllConfig
     public string AccessTokenTimeout => configuration["Auth:AccessTokenTimeout"] ??
                                         throw new ArgumentNullException(nameof(AccessTokenTimeout),
                                             "The config value AccessTokenTimeout cannot be null.");
+
+    public string CustomerManagementSystemDbWindows =>
+        configuration["ConnectionStrings:CustomerManagementSystemDB_Windows"] ?? throw new ArgumentNullException(
+            nameof(CustomerManagementSystemDbWindows),
+            "The config value CustomerManagementSystemDB_Windows cannot be null.");
+
+    public string CustomerManagementSystemDbDocker =>
+        configuration["ConnectionStrings:CustomerManagementSystemDB_Docker"] ?? throw new ArgumentNullException(
+            nameof(CustomerManagementSystemDbDocker),
+            "The config value CustomerManagementSystemDB_Docker cannot be null.");
 }
