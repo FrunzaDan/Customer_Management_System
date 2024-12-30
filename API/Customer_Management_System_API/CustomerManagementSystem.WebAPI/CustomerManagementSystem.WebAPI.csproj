@@ -4,7 +4,6 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
-    <PropertyGroup Condition=" '$(RunConfiguration)' == 'https' "/>
     <ItemGroup>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0"/>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />

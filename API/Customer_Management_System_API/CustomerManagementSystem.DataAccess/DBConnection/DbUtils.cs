@@ -5,15 +5,8 @@ using Microsoft.Data.SqlClient;
 
 namespace CustomerManagementSystem.DataAccess.DBConnection;
 
-public class DbUtils : IDbUtils
+public class DbUtils(IAppSettingsConfig configuration) : IDbUtils
 {
-    private readonly IAppSettingsConfig _configuration;
-
-    public DbUtils(IAppSettingsConfig configuration)
-    {
-        _configuration = configuration;
-    }
-
     private string? CurrentConnectionString { get; set; }
 
     public async Task<ResponseModel<object>> RegisterCustomer(CustomerModel customer)
@@ -180,7 +173,7 @@ public class DbUtils : IDbUtils
     private void CheckConnectionString()
     {
         if (!string.IsNullOrEmpty(CurrentConnectionString)) return;
-        var currentSqlConnection = new CurrentSqlConnection(_configuration);
+        var currentSqlConnection = new CurrentSqlConnection(configuration);
         CurrentConnectionString = currentSqlConnection.GetCorrectSqlConnectionString();
     }
 

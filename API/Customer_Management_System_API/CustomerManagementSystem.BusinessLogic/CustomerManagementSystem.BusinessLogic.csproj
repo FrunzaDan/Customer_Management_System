@@ -9,18 +9,13 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0"/>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.0"/>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\CustomerManagementSystem.DataAccess\CustomerManagementSystem.DataAccess.csproj"/>
         <ProjectReference Include="..\CustomerManagementSystem.Domain\CustomerManagementSystem.Domain.csproj"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Reference Include="Microsoft.Extensions.Http">
-            <HintPath>..\..\..\..\..\..\..\..\usr\local\share\dotnet\shared\Microsoft.AspNetCore.App\8.0.8\Microsoft.Extensions.Http.dll</HintPath>
-        </Reference>
     </ItemGroup>
 
 </Project>
