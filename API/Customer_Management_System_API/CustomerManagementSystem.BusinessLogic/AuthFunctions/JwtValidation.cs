@@ -9,16 +9,17 @@ namespace CustomerManagementSystem.BusinessLogic.AuthFunctions;
 
 public class JwtValidation
 {
+    private readonly IAppSettingsConfig _configuration;
     private readonly string _jwtAudience;
     private readonly string _jwtIssuer;
     private readonly string _jwtKey;
 
-    public JwtValidation()
+    public JwtValidation(IAppSettingsConfig appSettingsConfig)
     {
-        var configuration = ServiceLocator.GetServiceFromServiceProvider<IAppSettingsConfig>();
-        _jwtKey = configuration.SecureJwtKey;
-        _jwtIssuer = configuration.JwtIssuer;
-        _jwtAudience = configuration.JwtAudience;
+        _configuration = appSettingsConfig;
+        _jwtKey = _configuration.SecureJwtKey;
+        _jwtIssuer = _configuration.JwtIssuer;
+        _jwtAudience = _configuration.JwtAudience;
     }
 
     public bool Authorize(HttpContext httpContext, string? bearerToken)

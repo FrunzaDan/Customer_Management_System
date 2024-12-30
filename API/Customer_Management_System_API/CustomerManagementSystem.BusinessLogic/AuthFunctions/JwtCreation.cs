@@ -15,10 +15,10 @@ public class JwtCreation
     private readonly IDbUtils _dbUtils;
     private readonly byte[] _jwtKey;
 
-    public JwtCreation()
+    public JwtCreation(IAppSettingsConfig appSettingsConfig, IDbUtils dbUtils)
     {
-        _configuration = ServiceLocator.GetServiceFromServiceProvider<IAppSettingsConfig>();
-        _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
+        _dbUtils = dbUtils;
+        _configuration = appSettingsConfig;
         _jwtKey = Encoding.ASCII.GetBytes(_configuration.SecureJwtKey);
     }
 

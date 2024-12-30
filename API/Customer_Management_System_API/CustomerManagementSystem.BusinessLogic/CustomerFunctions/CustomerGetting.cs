@@ -6,7 +6,11 @@ namespace CustomerManagementSystem.BusinessLogic.CustomerFunctions;
 
 public class CustomerGetting
 {
-    private readonly IDbUtils _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
+    private readonly IDbUtils _dbUtils;
+    public CustomerGetting(IDbUtils dbUtils)
+    {
+        _dbUtils = dbUtils;
+    }
 
     public async Task<ResponseModel<CustomerModel>> GetCustomerFunction(GetCustomerRequest getCustomerRqst)
     {

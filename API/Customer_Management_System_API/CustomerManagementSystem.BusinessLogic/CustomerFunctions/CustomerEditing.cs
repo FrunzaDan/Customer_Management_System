@@ -7,9 +7,9 @@ public class CustomerEditing
 {
     private readonly IDbUtils _dbUtils;
 
-    public CustomerEditing()
+    public CustomerEditing(IDbUtils dbUtils)
     {
-        _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
+        _dbUtils = dbUtils;
     }
 
     public async Task<ResponseModel<object>> EditCustomerFunction(CustomerModel editCustomerRqst)

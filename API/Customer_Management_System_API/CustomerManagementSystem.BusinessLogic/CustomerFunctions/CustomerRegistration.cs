@@ -8,9 +8,9 @@ public class CustomerRegistration
 {
     private readonly IDbUtils _dbUtils;
 
-    public CustomerRegistration()
+    public CustomerRegistration(IDbUtils dbUtils)
     {
-        _dbUtils = ServiceLocator.GetServiceFromServiceProvider<IDbUtils>();
+        _dbUtils = dbUtils;
     }
 
     public async Task<ResponseModel<object>> RegisterCustomerFunction(CustomerModel customerRqst)

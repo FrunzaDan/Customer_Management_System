@@ -1,11 +1,13 @@
 ﻿using System.Net.Http.Headers;
 using CustomerManagementSystem.BusinessLogic.AuthFunctions;
+using CustomerManagementSystem.DataAccess.DBConnection;
+using CustomerManagementSystem.Domain.Configuration;
 using CustomerManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace CustomerManagementSystem.BusinessLogic.Services.Implementation;
 
-public class AuthService(IHttpContextAccessor httpContextAccessor, IHttpClientFactory httpClientFactory)
+public class AuthService(IHttpContextAccessor httpContextAccessor, IHttpClientFactory httpClientFactory, IAppSettingsConfig appSettingsConfig, IDbUtils dbUtils)
     : IAuthService
 {
     public async Task<ResponseModel<AccessTokenResponse>> GetAccessToken(MerchantCredentials merchantCredentials)
@@ -23,7 +25,7 @@ public class AuthService(IHttpContextAccessor httpContextAccessor, IHttpClientFa
 
         try
         {
-            var jwtCreation = new JwtCreation();
+            var jwtCreation = new JwtCreation(appSettingsConfig, dbUtils);
             response = await jwtCreation.GenerateBearerJwt(merchantCredentials.MerchantId,
                 merchantCredentials.MerchantPassword);
 
@@ -70,7 +72,7 @@ public class AuthService(IHttpContextAccessor httpContextAccessor, IHttpClientFa
 
         try
         {
-            var jwtValidation = new JwtValidation();
+            var jwtValidation = new JwtValidation(appSettingsConfig);
             var isAuthorized = httpContext != null && jwtValidation.Authorize(httpContext, accessToken);
 
             response.Status = isAuthorized

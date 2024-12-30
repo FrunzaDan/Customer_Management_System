@@ -53,8 +53,6 @@ builder.Services.AddHttpsRedirection(options =>
 
 var app = builder.Build();
 
-ServiceLocator.SetLocatorProvider(app.Services);
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
