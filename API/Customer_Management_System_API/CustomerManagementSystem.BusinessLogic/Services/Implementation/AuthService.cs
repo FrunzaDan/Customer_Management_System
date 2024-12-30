@@ -7,7 +7,11 @@ using Microsoft.AspNetCore.Http;
 
 namespace CustomerManagementSystem.BusinessLogic.Services.Implementation;
 
-public class AuthService(IHttpContextAccessor httpContextAccessor, IHttpClientFactory httpClientFactory, IAppSettingsConfig appSettingsConfig, IDbUtils dbUtils)
+public class AuthService(
+    IHttpContextAccessor httpContextAccessor,
+    IHttpClientFactory httpClientFactory,
+    IAppSettingsConfig appSettingsConfig,
+    IDbUtils dbUtils)
     : IAuthService
 {
     public async Task<ResponseModel<AccessTokenResponse>> GetAccessToken(MerchantCredentials merchantCredentials)

@@ -7,6 +7,7 @@ namespace CustomerManagementSystem.BusinessLogic.CustomerFunctions;
 public class CustomerGetting
 {
     private readonly IDbUtils _dbUtils;
+
     public CustomerGetting(IDbUtils dbUtils)
     {
         _dbUtils = dbUtils;

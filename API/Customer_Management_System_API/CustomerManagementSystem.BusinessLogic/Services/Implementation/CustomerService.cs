@@ -12,7 +12,8 @@ public class CustomerService : ICustomerService
     private readonly IDbUtils _dbUtils;
     private readonly bool _isAuthorized;
 
-    public CustomerService(IHttpContextAccessor httpContextAccessor, IDbUtils dbUtils, IAppSettingsConfig appSettingsConfig)
+    public CustomerService(IHttpContextAccessor httpContextAccessor, IDbUtils dbUtils,
+        IAppSettingsConfig appSettingsConfig)
     {
         _dbUtils = dbUtils;
 
