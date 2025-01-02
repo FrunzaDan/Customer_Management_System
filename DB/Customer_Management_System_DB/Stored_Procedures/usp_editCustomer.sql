@@ -48,7 +48,7 @@ BEGIN
             number = ISNULL(@var_Number, number)
         WHERE FK_customer_guid = @var_Guid;
 
-        SET @result = 1;
+        SET @result = 0;
         SET @message = 'Customer details updated successfully.';
 
         SELECT customer_Status AS status, @result AS result, @message AS message
@@ -57,7 +57,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        SET @result = 0;
+        SET @result = 404;
         SET @message = 'Customer not found.';
 
         SELECT @result AS result, @message AS message;

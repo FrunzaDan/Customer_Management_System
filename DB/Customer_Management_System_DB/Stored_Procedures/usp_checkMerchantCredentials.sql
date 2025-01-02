@@ -6,6 +6,8 @@ BEGIN
     SET NOCOUNT ON;
 
     DECLARE @currDate DATETIME = GETDATE();
+    DECLARE @result INT;
+    DECLARE @message NVARCHAR(255);
 
     UPDATE tbl_merchants
     SET last_interaction = @currDate
@@ -19,14 +21,17 @@ BEGIN
         WHERE merchant_id = @var_MerchantID AND merchant_password = @hashedMerchantPassword
     )
     BEGIN
-        -- Return the merchant role if credentials are valid
-        SELECT merchant_role
+        SELECT 
+            0 AS result, -- Success
+            'Credentials validated successfully.' AS message,
+            merchant_role
         FROM tbl_merchants
         WHERE merchant_id = @var_MerchantID;
     END
     ELSE
     BEGIN
-        -- If credentials are invalid, return NULL
-        SELECT NULL AS merchant_role;
+        SET @result = 4001; -- Invalid credentials
+        SET @message = 'Invalid Merchant ID or Password.';
+        SELECT @result AS result, @message AS message, NULL AS merchant_role;
     END
-END
+END;

@@ -25,18 +25,18 @@ BEGIN
             WHERE PK_customer_guid = @var_Guid
         )
         BEGIN
-            SET @result = 1;
+            SET @result = 0;
             SET @message = 'Customer deleted successfully.';
         END
         ELSE
         BEGIN
-            SET @result = 0;
+            SET @result = 409;
             SET @message = 'Failed to delete customer. Deletion may not have been successful.';
         END
     END
     ELSE
     BEGIN
-        SET @result = 0;
+        SET @result = 404;
         SET @message = 'Customer not found.';
     END
 

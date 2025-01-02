@@ -17,22 +17,6 @@ public static class DbHelper
         AddAddressParameters(command, customer.Address);
     }
 
-    public static async Task<ResponseModel<object>> HandleResponseWithReturnValue(SqlDataReader reader)
-    {
-        if (!await reader.ReadAsync().ConfigureAwait(false))
-            return new ResponseModel<object>(500, "No data returned or failed to process request.");
-
-        return reader["ReturnValue"] is int returnValue
-            ? returnValue switch
-            {
-                200 => new ResponseModel<object>(200, "Operation successful!"),
-                4001 => new ResponseModel<object>(400, "MSISDN already exists."),
-                4002 => new ResponseModel<object>(400, "Email already exists."),
-                _ => new ResponseModel<object>(500, "Internal error occurred.")
-            }
-            : new ResponseModel<object>(500, "Failed to process request.");
-    }
-
     public static async Task<ResponseModel<object>> HandleResponseWithCustomerMapping(SqlDataReader reader,
         string successMessage, string failureMessage)
     {
@@ -65,26 +49,20 @@ public static class DbHelper
 
     public static async Task<ResponseModel<object>> HandleMerchantCredentialsResponse(SqlDataReader reader)
     {
-        var result = new ResultValidityCheck { IsValid = false };
-
         if (!await reader.ReadAsync().ConfigureAwait(false))
-            return new ResponseModel<object>(404, "Invalid merchant credentials or no matching merchant found!",
-                result);
+            return new ResponseModel<object>(404, "Invalid merchant credentials or no matching merchant found!");
 
-        if (reader["merchant_role"] is int role)
-        {
-            result.IsValid = role == 1801;
-            result.ErrorMessage = result.IsValid ? null : "The provided merchant credentials have invalid roles!";
-        }
-        else
-        {
-            result.ErrorMessage = "Invalid merchant credentials or no matching merchant found!";
-        }
+        var result = reader["result"] is int resultCode ? resultCode : 500;
+        var message = reader["message"] as string ?? "Operation failed.";
 
-        return result.IsValid
-            ? new ResponseModel<object>(200, "Valid merchant credentials.", result)
-            : new ResponseModel<object>(400, result.ErrorMessage, result);
+        if (result != 0) return new ResponseModel<object>(400, message);
+
+        var role = reader["merchant_role"]?.ToString();
+        return role == "1801"
+            ? new ResponseModel<object>(200, $"{message} Role: {role}.")
+            : new ResponseModel<object>(403, $"The provided merchant role ({role}) is not valid.");
     }
+
 
     private static CustomerModel MapCustomerFromReader(SqlDataReader reader)
     {
@@ -95,6 +73,8 @@ public static class DbHelper
             LastName = reader["last_name"].ToString(),
             Email = reader["email"].ToString(),
             Msisdn = reader["msisdn"].ToString(),
+            CreationDate = reader["creation_Date"].ToString(),
+            InteractionDate = reader["interaction_Date"].ToString(),
             Birthdate = reader["birthDate"].ToString(),
             Address = new AddressModel
             {

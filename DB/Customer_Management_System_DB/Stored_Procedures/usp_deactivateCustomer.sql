@@ -23,18 +23,18 @@ BEGIN
 
         IF @@ROWCOUNT > 0
         BEGIN
-            SET @result = 1;
+            SET @result = 0;
             SET @message = 'Customer deactivated successfully.';
         END
         ELSE
         BEGIN
-            SET @result = 0;
+            SET @result = 409;
             SET @message = 'Customer already deactivated or update failed.';
         END
     END
     ELSE
     BEGIN
-        SET @result = 0;
+        SET @result = 404;
         SET @message = 'Customer not found.';
     END
 

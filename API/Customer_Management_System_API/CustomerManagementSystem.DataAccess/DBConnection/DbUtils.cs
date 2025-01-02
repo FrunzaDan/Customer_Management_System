@@ -14,7 +14,7 @@ public class DbUtils(IAppSettingsConfig configuration) : IDbUtils
         return await ExecuteStoredProcedureAsync(
             "dbo.usp_createCustomer",
             command => DbHelper.AddCustomerParameters(command, customer),
-            DbHelper.HandleResponseWithReturnValue
+            DbHelper.HandleResponseWithMessage
         );
     }
 

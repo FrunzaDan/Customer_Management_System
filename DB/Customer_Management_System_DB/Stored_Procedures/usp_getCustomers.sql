@@ -12,6 +12,8 @@ BEGIN
         c.gender, 
         c.birthdate,
         c.customer_Status,
+        c.creation_Date,
+        c.interaction_Date,
         a.country, 
         a.county, 
         a.town, 

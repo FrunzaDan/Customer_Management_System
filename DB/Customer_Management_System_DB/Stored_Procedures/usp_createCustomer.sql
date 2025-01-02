@@ -16,16 +16,19 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    DECLARE @returnValue INT;
+    DECLARE @result INT;
+    DECLARE @message NVARCHAR(255);
     DECLARE @currentDateTime DATETIME = GETDATE();
 
     IF EXISTS (SELECT 1 FROM tbl_customers WHERE msisdn = @var_MSISDN)
     BEGIN
-        SET @returnValue = 4001;  -- MSISDN already exists
+        SET @result = 4001;  -- MSISDN already exists
+        SET @message = 'MSISDN already exists.';
     END
     ELSE IF EXISTS (SELECT 1 FROM tbl_customers WHERE email = @var_Email)
     BEGIN
-        SET @returnValue = 4002;  -- Email already exists
+        SET @result = 4002;  -- Email already exists
+        SET @message = 'Email already exists.';
     END
     ELSE
     BEGIN
@@ -49,8 +52,9 @@ BEGIN
             @var_Guid, @var_Country, @var_County, @var_Town, @var_ZIP, @var_Street, @var_Number
         );
 
-        SET @returnValue = 200;  -- Success
+        SET @result = 0; 
+        SET @message = CONCAT('Customer created successfully. GUID: ', @var_Guid);
     END
 
-    SELECT @returnValue AS ReturnValue;
+    SELECT @result AS result, @message AS message;
 END

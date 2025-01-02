@@ -3,17 +3,10 @@ using CustomerManagementSystem.Domain.Models;
 
 namespace CustomerManagementSystem.BusinessLogic.CustomerFunctions;
 
-public class CustomerDeactivation
+public class CustomerDeactivation(IDbUtils dbUtils)
 {
-    private readonly IDbUtils _dbUtils;
-
-    public CustomerDeactivation(IDbUtils dbUtils)
-    {
-        _dbUtils = dbUtils;
-    }
-
     public async Task<ResponseModel<object>> DeactivateCustomer(string guid)
     {
-        return await _dbUtils.DeactivateCustomer(guid);
+        return await dbUtils.DeactivateCustomer(guid);
     }
 }

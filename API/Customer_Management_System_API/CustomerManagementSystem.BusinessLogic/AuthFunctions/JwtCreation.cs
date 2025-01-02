@@ -25,34 +25,19 @@ public class JwtCreation
     public async Task<ResponseModel<object>> GenerateBearerJwt(MerchantCredentials merchantCredentials)
     {
         if (string.IsNullOrWhiteSpace(merchantCredentials.MerchantId))
-        {
             return new ResponseModel<object>(403, "Invalid or empty merchant ID.");
-        }
-        
+
         try
         {
             // Validate merchant credentials
             var credentialsCheck = await _dbUtils.CheckMerchantCredentialsFromDb(merchantCredentials);
 
-            if (credentialsCheck.Data is ResultValidityCheck resultValidityCheck)
-            {
-                if (resultValidityCheck is { IsValid: false, ErrorMessage: not null })
-                    return new ResponseModel<object>(404, resultValidityCheck.ErrorMessage);
-            }
-            else
-            {
-                return new ResponseModel<object>(500,
-                    "Invalid response format from credential validation.");
-            }
+            if (credentialsCheck.Status != 200)
+                return new ResponseModel<object>(403,
+                    credentialsCheck.ResponseMessage);
 
             // Generate token
             var token = GenerateJwtToken(merchantCredentials.MerchantId);
-            if (string.IsNullOrEmpty(token))
-                return new ResponseModel<object>(500, "Failed to generate JWT token.");
-
-            if (string.IsNullOrEmpty(_configuration.AccessTokenTimeout))
-                return new ResponseModel<object>(500,
-                    "Configuration error: AccessTokenTimeout is missing.");
 
             if (!double.TryParse(_configuration.AccessTokenTimeout, out var timeoutMinutes))
                 return new ResponseModel<object>(500, "Invalid AccessTokenTimeout configuration.");
