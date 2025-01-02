@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 using CustomerManagementSystem.Domain.Configuration;
+using CustomerManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 
@@ -20,7 +21,7 @@ public class JwtValidation
         _jwtAudience = appSettingsConfig.JwtAudience;
     }
 
-    public bool Authorize(HttpContext httpContext, string? bearerToken)
+    public ResponseModel<object> Authorize(HttpContext httpContext, string? bearerToken)
     {
         string authHeader;
         if (string.IsNullOrEmpty(bearerToken))
@@ -28,17 +29,17 @@ public class JwtValidation
         else
             authHeader = "Bearer " + bearerToken;
 
-        if (string.IsNullOrEmpty(authHeader)) return false;
+        if (string.IsNullOrEmpty(authHeader)) return new ResponseModel<object>(500, "Empty auth header.");
 
-        if (!authHeader.StartsWith("Bearer ")) return false;
+        if (!authHeader.StartsWith("Bearer ")) return new ResponseModel<object>(500, "No Bearer header identified.");
 
         var jwt = authHeader.Split(' ')[1];
-        return !string.IsNullOrEmpty(jwt) && ValidateToken(jwt);
+        return string.IsNullOrEmpty(jwt) ? new ResponseModel<object>(500, "Empty JWT.") : ValidateToken(jwt);
     }
 
-    private bool ValidateToken(string? token)
+    private ResponseModel<object> ValidateToken(string? token)
     {
-        if (token == null) return false;
+        if (token == null) return new ResponseModel<object>(500, "Empty JWT.");
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_jwtKey);
         try
@@ -56,13 +57,14 @@ public class JwtValidation
 
             var jwtToken = (JwtSecurityToken)validatedToken;
 
-            var claimsAreValid = VerifyClaims(jwtToken);
-
-            return claimsAreValid;
+            return !VerifyClaims(jwtToken)
+                ? new ResponseModel<object>(500, "Invalid claims.")
+                : new ResponseModel<object>(200, "Valid claims.");
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return false;
+            return new ResponseModel<object>(StatusCodes.Status500InternalServerError,
+                $"An error occurred while validating the access token: {ex.Message}");
         }
     }
 

@@ -16,13 +16,11 @@ public class AuthService(
 {
     public async Task<ResponseModel<AccessTokenResponse>> GetAccessToken(MerchantCredentials merchantCredentials)
     {
-        if (string.IsNullOrEmpty(merchantCredentials.MerchantId) ||
-            string.IsNullOrEmpty(merchantCredentials.MerchantPassword))
+        if (string.IsNullOrWhiteSpace(merchantCredentials.MerchantId) ||
+            string.IsNullOrWhiteSpace(merchantCredentials.MerchantPassword))
             return new ResponseModel<AccessTokenResponse>(403, "Invalid or empty merchant credentials.");
-        
-        var httpClient = httpClientFactory.CreateClient();
 
-        var response = new ResponseModel<AccessTokenResponse>();
+        ResponseModel<AccessTokenResponse> response;
 
         try
         {
@@ -30,25 +28,30 @@ public class AuthService(
             response = await jwtCreation.GenerateBearerJwt(merchantCredentials.MerchantId,
                 merchantCredentials.MerchantPassword);
 
-            if (response is { Status: StatusCodes.Status200OK, Data: not null } &&
-                !string.IsNullOrEmpty(response.Data.AccessToken))
+            if (response is { Status: StatusCodes.Status200OK, Data: { AccessToken: { Length: > 0 } } })
             {
-                if (VerifyToken(response.Data.AccessToken).Status == StatusCodes.Status200OK)
+                var tokenVerification = VerifyToken(response.Data.AccessToken);
+                if (tokenVerification.Status == StatusCodes.Status200OK)
                 {
+                    var httpClient = httpClientFactory.CreateClient();
                     httpClient.DefaultRequestHeaders.Authorization =
                         new AuthenticationHeaderValue("Bearer", response.Data.AccessToken);
                 }
                 else
                 {
-                    response.Status = StatusCodes.Status500InternalServerError;
-                    response.ResponseMessage = "Token generated but could not be verified!";
-                    response.Data = null;
+                    return new ResponseModel<AccessTokenResponse>(
+                        StatusCodes.Status500InternalServerError,
+                        tokenVerification.ResponseMessage
+                    );
                 }
             }
         }
         catch (Exception ex)
         {
-            return new ResponseModel<AccessTokenResponse>(500, "An error occurred on our side while generating the access token: " + ex.Message);
+            return new ResponseModel<AccessTokenResponse>(
+                StatusCodes.Status500InternalServerError,
+                $"An error occurred while generating the access token: {ex.Message}"
+            );
         }
 
         return response;
@@ -56,36 +59,23 @@ public class AuthService(
 
     public ResponseModel<object> VerifyToken(string accessToken)
     {
-        var response = new ResponseModel<object>();
-        if (string.IsNullOrEmpty(accessToken))
-        {
-            return new ResponseModel<object>(500, "No Access Token provided!");
-        }
+        if (string.IsNullOrWhiteSpace(accessToken)) return new ResponseModel<object>(500, "No Access Token provided!");
 
         var httpContext = httpContextAccessor.HttpContext;
-        if (httpContext is null)
-        {
-            return new ResponseModel<object>(500, "Failed to initialize the http context!");
-        }
+        if (httpContext is null) return new ResponseModel<object>(500, "Failed to initialize the HTTP context!");
 
         try
         {
             var jwtValidation = new JwtValidation(appSettingsConfig);
             var isAuthorized = jwtValidation.Authorize(httpContext, accessToken);
 
-            response.Status = isAuthorized
-                ? StatusCodes.Status200OK
-                : StatusCodes.Status403Forbidden;
-
-            response.ResponseMessage = isAuthorized
-                ? "You Have Access Rights!"
-                : "No Access Rights!";
+            return isAuthorized;
         }
         catch (Exception ex)
         {
-            return new ResponseModel<object>(500, "An error occurred on our side while verifying the access token: " + ex.Message);
+            return new ResponseModel<object>(StatusCodes.Status500InternalServerError,
+                $"An error occurred while verifying the access token: {ex.Message}"
+            );
         }
-
-        return response;
     }
 }

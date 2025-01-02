@@ -16,7 +16,7 @@ public static class DbHelper
         command.Parameters.AddWithValue("@var_Birthdate", customer.Birthdate);
         AddAddressParameters(command, customer.Address);
     }
-    
+
     public static async Task<ResponseModel<object>> HandleResponseWithReturnValue(SqlDataReader reader)
     {
         if (!await reader.ReadAsync().ConfigureAwait(false))
@@ -33,7 +33,8 @@ public static class DbHelper
             : new ResponseModel<object>(500, "Failed to process request.");
     }
 
-    public static async Task<ResponseModel<object>> HandleResponseWithCustomerMapping(SqlDataReader reader, string successMessage, string failureMessage)
+    public static async Task<ResponseModel<object>> HandleResponseWithCustomerMapping(SqlDataReader reader,
+        string successMessage, string failureMessage)
     {
         if (!await reader.ReadAsync().ConfigureAwait(false))
             return new ResponseModel<object>(404, failureMessage);
@@ -84,7 +85,7 @@ public static class DbHelper
             ? new ResponseModel<object>(200, "Valid merchant credentials.", result)
             : new ResponseModel<object>(400, result.ErrorMessage, result);
     }
-    
+
     private static CustomerModel MapCustomerFromReader(SqlDataReader reader)
     {
         var customer = new CustomerModel

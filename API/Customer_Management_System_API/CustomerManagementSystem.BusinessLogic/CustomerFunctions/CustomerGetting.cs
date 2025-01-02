@@ -16,16 +16,13 @@ public class CustomerGetting
     public async Task<ResponseModel<object>> GetCustomerFunction(GetCustomerRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.SearchVariable))
-        {
             return new ResponseModel<object>(404, "Search variable is required.");
-        }
 
         request.SearchOption = DetermineSearchOption(request.SearchVariable);
 
         if (request.SearchOption == 0)
-        {
-            return new ResponseModel<object>(404, "No valid search variable was provided! It must be a GUID, MSISDN, or Email.");
-        }
+            return new ResponseModel<object>(404,
+                "No valid search variable was provided! It must be a GUID, MSISDN, or Email.");
 
         return await _dbUtils.GetCustomer(request);
     }

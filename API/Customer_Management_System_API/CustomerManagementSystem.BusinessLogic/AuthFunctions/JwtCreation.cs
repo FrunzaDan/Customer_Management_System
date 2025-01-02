@@ -25,9 +25,7 @@ public class JwtCreation
     public async Task<ResponseModel<AccessTokenResponse>> GenerateBearerJwt(string merchantId, string merchantPassword)
     {
         if (string.IsNullOrWhiteSpace(merchantId) || string.IsNullOrWhiteSpace(merchantPassword))
-        {
             return new ResponseModel<AccessTokenResponse>(404, "Merchant ID and Password cannot be empty.");
-        }
 
         try
         {
@@ -38,11 +36,11 @@ public class JwtCreation
             {
                 if (resultValidityCheck is { IsValid: false, ErrorMessage: not null })
                     return new ResponseModel<AccessTokenResponse>(404, resultValidityCheck.ErrorMessage);
-
             }
             else
             {
-                return new ResponseModel<AccessTokenResponse>(500, "Invalid response format from credential validation.");
+                return new ResponseModel<AccessTokenResponse>(500,
+                    "Invalid response format from credential validation.");
             }
 
             // Generate token
@@ -51,7 +49,8 @@ public class JwtCreation
                 return new ResponseModel<AccessTokenResponse>(500, "Failed to generate JWT token.");
 
             if (string.IsNullOrEmpty(_configuration.AccessTokenTimeout))
-                return new ResponseModel<AccessTokenResponse>(500, "Configuration error: AccessTokenTimeout is missing.");
+                return new ResponseModel<AccessTokenResponse>(500,
+                    "Configuration error: AccessTokenTimeout is missing.");
 
             if (!double.TryParse(_configuration.AccessTokenTimeout, out var timeoutMinutes))
                 return new ResponseModel<AccessTokenResponse>(500, "Invalid AccessTokenTimeout configuration.");
