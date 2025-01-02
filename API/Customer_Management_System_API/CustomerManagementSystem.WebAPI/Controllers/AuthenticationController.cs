@@ -24,7 +24,7 @@ public class AuthenticationController(IAuthService authService) : ControllerBase
     }
 
     [HttpGet("verify-token")]
-    public ActionResult<ResponseModel<object>> VerifyToken([FromQuery] string accessToken)
+    public ActionResult<ResponseModel<object>> VerifyToken([FromQuery] string? accessToken)
     {
         if (string.IsNullOrEmpty(accessToken))
             return BadRequest(new { Message = "Access token cannot be null or empty." });

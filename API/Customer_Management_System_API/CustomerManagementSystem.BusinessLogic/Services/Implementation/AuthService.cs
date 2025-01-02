@@ -20,66 +20,37 @@ public class AuthService(
             string.IsNullOrWhiteSpace(merchantCredentials.MerchantPassword))
             return new ResponseModel<object>(403, "Invalid or empty merchant credentials.");
 
-        ResponseModel<object> response;
+        var jwtCreation = new JwtCreation(appSettingsConfig, dbUtils);
+        var response = await jwtCreation.GenerateBearerJwt(merchantCredentials);
 
-        try
-        {
-            var jwtCreation = new JwtCreation(appSettingsConfig, dbUtils);
-            response = await jwtCreation.GenerateBearerJwt(merchantCredentials);
+        if (response is not { Status: 200, Data: AccessTokenResponse accessTokenResponse }) return response;
 
-            if (response is { Status: 200, Data: AccessTokenResponse })
-            {
-                var accessToken = (AccessTokenResponse)response.Data;
-                var accessTokenString = accessToken.AccessToken;
-                if (!string.IsNullOrEmpty(accessTokenString))
-                {
-                    var tokenVerification = VerifyToken(accessTokenString);
-                    if (tokenVerification.Status == StatusCodes.Status200OK)
-                    {
-                        var httpClient = httpClientFactory.CreateClient();
-                        httpClient.DefaultRequestHeaders.Authorization =
-                            new AuthenticationHeaderValue("Bearer", accessTokenString);
-                    }
-                    else
-                    {
-                        return new ResponseModel<object>(
-                            StatusCodes.Status500InternalServerError,
-                            tokenVerification.ResponseMessage
-                        );
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
+        var tokenVerification = VerifyToken(accessTokenResponse.AccessToken);
+
+        if (tokenVerification.Status != StatusCodes.Status200OK)
             return new ResponseModel<object>(
                 StatusCodes.Status500InternalServerError,
-                $"An error occurred while generating the access token: {ex.Message}"
+                tokenVerification.ResponseMessage
             );
-        }
+        
+        var httpClient = httpClientFactory.CreateClient();
+        httpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", accessTokenResponse.AccessToken);
+
 
         return response;
     }
 
-    public ResponseModel<object> VerifyToken(string accessToken)
+    public ResponseModel<object> VerifyToken(string? accessToken)
     {
         if (string.IsNullOrWhiteSpace(accessToken)) return new ResponseModel<object>(500, "No Access Token provided!");
 
         var httpContext = httpContextAccessor.HttpContext;
         if (httpContext is null) return new ResponseModel<object>(500, "Failed to initialize the HTTP context!");
 
-        try
-        {
-            var jwtValidation = new JwtValidation(appSettingsConfig);
-            var isAuthorized = jwtValidation.Authorize(httpContext, accessToken);
+        var jwtValidation = new JwtValidation(appSettingsConfig);
+        var isAuthorized = jwtValidation.Authorize(httpContext, accessToken);
 
-            return isAuthorized;
-        }
-        catch (Exception ex)
-        {
-            return new ResponseModel<object>(StatusCodes.Status500InternalServerError,
-                $"An error occurred while verifying the access token: {ex.Message}"
-            );
-        }
+        return isAuthorized;
     }
 }

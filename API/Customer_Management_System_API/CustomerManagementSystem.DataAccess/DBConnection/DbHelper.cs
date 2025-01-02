@@ -57,7 +57,7 @@ public static class DbHelper
 
         if (result != 0) return new ResponseModel<object>(400, message);
 
-        var role = reader["merchant_role"]?.ToString();
+        var role = reader["merchant_role"].ToString();
         return role == "1801"
             ? new ResponseModel<object>(200, $"{message} Role: {role}.")
             : new ResponseModel<object>(403, $"The provided merchant role ({role}) is not valid.");
