@@ -14,41 +14,45 @@ public class AuthService(
     IDbUtils dbUtils)
     : IAuthService
 {
-    public async Task<ResponseModel<AccessTokenResponse>> GetAccessToken(MerchantCredentials merchantCredentials)
+    public async Task<ResponseModel<object>> GetAccessToken(MerchantCredentials merchantCredentials)
     {
         if (string.IsNullOrWhiteSpace(merchantCredentials.MerchantId) ||
             string.IsNullOrWhiteSpace(merchantCredentials.MerchantPassword))
-            return new ResponseModel<AccessTokenResponse>(403, "Invalid or empty merchant credentials.");
+            return new ResponseModel<object>(403, "Invalid or empty merchant credentials.");
 
-        ResponseModel<AccessTokenResponse> response;
+        ResponseModel<object> response;
 
         try
         {
             var jwtCreation = new JwtCreation(appSettingsConfig, dbUtils);
-            response = await jwtCreation.GenerateBearerJwt(merchantCredentials.MerchantId,
-                merchantCredentials.MerchantPassword);
+            response = await jwtCreation.GenerateBearerJwt(merchantCredentials);
 
-            if (response is { Status: StatusCodes.Status200OK, Data: { AccessToken: { Length: > 0 } } })
+            if (response is { Status: 200, Data: AccessTokenResponse })
             {
-                var tokenVerification = VerifyToken(response.Data.AccessToken);
-                if (tokenVerification.Status == StatusCodes.Status200OK)
+                var accessToken = (AccessTokenResponse)response.Data;
+                var accessTokenString = accessToken.AccessToken;
+                if (!string.IsNullOrEmpty(accessTokenString))
                 {
-                    var httpClient = httpClientFactory.CreateClient();
-                    httpClient.DefaultRequestHeaders.Authorization =
-                        new AuthenticationHeaderValue("Bearer", response.Data.AccessToken);
-                }
-                else
-                {
-                    return new ResponseModel<AccessTokenResponse>(
-                        StatusCodes.Status500InternalServerError,
-                        tokenVerification.ResponseMessage
-                    );
+                    var tokenVerification = VerifyToken(accessTokenString);
+                    if (tokenVerification.Status == StatusCodes.Status200OK)
+                    {
+                        var httpClient = httpClientFactory.CreateClient();
+                        httpClient.DefaultRequestHeaders.Authorization =
+                            new AuthenticationHeaderValue("Bearer", accessTokenString);
+                    }
+                    else
+                    {
+                        return new ResponseModel<object>(
+                            StatusCodes.Status500InternalServerError,
+                            tokenVerification.ResponseMessage
+                        );
+                    }
                 }
             }
         }
         catch (Exception ex)
         {
-            return new ResponseModel<AccessTokenResponse>(
+            return new ResponseModel<object>(
                 StatusCodes.Status500InternalServerError,
                 $"An error occurred while generating the access token: {ex.Message}"
             );
