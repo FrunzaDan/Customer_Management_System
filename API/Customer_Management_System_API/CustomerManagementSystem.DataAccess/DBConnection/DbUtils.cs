@@ -33,7 +33,7 @@ public class DbUtils(IAppSettingsConfig configuration) : IDbUtils
             });
     }
 
-    public async Task<ResponseModel<CustomerModel>> GetCustomer(GetCustomerRequest request)
+    public async Task<ResponseModel<object>> GetCustomer(GetCustomerRequest request)
     {
         const string storedProcedure = "dbo.usp_getCustomer";
 
@@ -47,13 +47,13 @@ public class DbUtils(IAppSettingsConfig configuration) : IDbUtils
             async reader =>
             {
                 if (!await reader.ReadAsync().ConfigureAwait(false))
-                    return new ResponseModel<CustomerModel>(404, "Customer not found");
+                    return new ResponseModel<object>(404, "Customer not found");
 
-                return new ResponseModel<CustomerModel>(200, "Customer found.", DbHelper.MapCustomerFromReader(reader));
+                return new ResponseModel<object>(200, "Customer found.", DbHelper.MapCustomerFromReader(reader));
             });
     }
 
-    public async Task<ResponseModel<CustomerListModel>> GetCustomers()
+    public async Task<ResponseModel<object>> GetCustomers()
     {
         const string storedProcedure = "dbo.usp_getCustomers";
 
@@ -67,7 +67,7 @@ public class DbUtils(IAppSettingsConfig configuration) : IDbUtils
                 while (await reader.ReadAsync().ConfigureAwait(false))
                     customers.Add(DbHelper.MapCustomerFromReader(reader));
 
-                return new ResponseModel<CustomerListModel>(200, $"{customers.Count} customers found.",
+                return new ResponseModel<object>(200, $"{customers.Count} customers found.",
                     new CustomerListModel { CustomerList = customers });
             });
     }
@@ -132,7 +132,7 @@ public class DbUtils(IAppSettingsConfig configuration) : IDbUtils
             });
     }
 
-    public async Task<ResponseModel<ResultValidityCheck>> CheckMerchantCredentialsFromDb(
+    public async Task<ResponseModel<object>> CheckMerchantCredentialsFromDb(
         MerchantCredentials merchantCredentials)
     {
         const string storedProcedure = "dbo.usp_checkMerchantCredentials";
@@ -149,7 +149,7 @@ public class DbUtils(IAppSettingsConfig configuration) : IDbUtils
                 var result = new ResultValidityCheck { IsValid = false };
 
                 if (!await reader.ReadAsync().ConfigureAwait(false))
-                    return new ResponseModel<ResultValidityCheck>(404,
+                    return new ResponseModel<object>(404,
                         "Invalid merchant credentials or no matching merchant found!", result);
 
                 if (reader["merchant_role"] is int role)
@@ -165,8 +165,8 @@ public class DbUtils(IAppSettingsConfig configuration) : IDbUtils
                 }
 
                 return result.IsValid
-                    ? new ResponseModel<ResultValidityCheck>(200, "Valid merchant credentials.", result)
-                    : new ResponseModel<ResultValidityCheck>(400, result.ErrorMessage, result);
+                    ? new ResponseModel<object>(200, "Valid merchant credentials.", result)
+                    : new ResponseModel<object>(400, result.ErrorMessage, result);
             });
     }
 

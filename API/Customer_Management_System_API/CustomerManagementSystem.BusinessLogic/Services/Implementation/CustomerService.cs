@@ -60,10 +60,10 @@ public class CustomerService : ICustomerService
         return await customerEditing.EditCustomerFunction(editCustomerRequest);
     }
 
-    public async Task<ResponseModel<CustomerModel>> GetCustomer(GetCustomerRequest getCustomerRqst)
+    public async Task<ResponseModel<object>> GetCustomer(GetCustomerRequest getCustomerRqst)
     {
         if (!_isAuthorized)
-            return new ResponseModel<CustomerModel>
+            return new ResponseModel<object>
             {
                 Status = 403,
                 ResponseMessage = "No access rights for this request!"
@@ -73,10 +73,10 @@ public class CustomerService : ICustomerService
         return await customerGetting.GetCustomerFunction(getCustomerRqst);
     }
 
-    public async Task<ResponseModel<CustomerListModel>> GetCustomers()
+    public async Task<ResponseModel<object>> GetCustomers()
     {
         if (!_isAuthorized)
-            return new ResponseModel<CustomerListModel>
+            return new ResponseModel<object>
             {
                 Status = 403,
                 ResponseMessage = "No access rights for this request!"

@@ -31,8 +31,18 @@ public class JwtCreation
         {
             // Validate merchant credentials
             var credentialsCheck = await ValidateMerchantCredentials(merchantId, merchantPassword);
-            if (credentialsCheck is { Data.IsValid: false, Data.ErrorMessage: not null })
-                return CreateErrorResponse(StatusCodes.Status403Forbidden, credentialsCheck.Data.ErrorMessage);
+
+            if (credentialsCheck.Data is ResultValidityCheck resultValidityCheck)
+            {
+                if (resultValidityCheck is { IsValid: false, ErrorMessage: not null })
+                {
+                    return CreateErrorResponse(StatusCodes.Status403Forbidden, resultValidityCheck.ErrorMessage);
+                }
+            }
+            else
+            {
+                return CreateErrorResponse(StatusCodes.Status500InternalServerError, "Invalid response format from credential validation.");
+            }
 
             // Generate token
             var token = GenerateJwtToken(merchantId);
@@ -74,7 +84,7 @@ public class JwtCreation
         }
     }
 
-    private async Task<ResponseModel<ResultValidityCheck>> ValidateMerchantCredentials(string merchantId,
+    private async Task<ResponseModel<object>> ValidateMerchantCredentials(string merchantId,
         string merchantPassword)
     {
         var merchantCredentials = new MerchantCredentials
