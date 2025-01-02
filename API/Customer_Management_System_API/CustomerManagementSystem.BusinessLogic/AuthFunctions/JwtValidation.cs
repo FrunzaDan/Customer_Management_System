@@ -29,21 +29,26 @@ public class JwtValidation
         else
             authHeader = "Bearer " + bearerToken;
 
-        if (string.IsNullOrEmpty(authHeader)) return new ResponseModel<object>(500, "Empty auth header.");
+        if (string.IsNullOrEmpty(authHeader)) return new ResponseModel<object>(500, "Unauthorized: Empty auth header.");
 
-        if (!authHeader.StartsWith("Bearer ")) return new ResponseModel<object>(500, "No Bearer header identified.");
+        if (!authHeader.StartsWith("Bearer "))
+            return new ResponseModel<object>(500, "Unauthorized: No Bearer header identified.");
 
         var jwt = authHeader.Split(' ')[1];
-        return string.IsNullOrEmpty(jwt) ? new ResponseModel<object>(500, "Empty JWT.") : ValidateToken(jwt);
+        return string.IsNullOrEmpty(jwt)
+            ? new ResponseModel<object>(500, "Unauthorized: Empty JWT.")
+            : ValidateToken(jwt);
     }
 
     private ResponseModel<object> ValidateToken(string? token)
     {
-        if (token == null) return new ResponseModel<object>(500, "Empty JWT.");
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_jwtKey);
         try
         {
+            if (!tokenHandler.CanReadToken(token))
+                return new ResponseModel<object>(500, "Unauthorized: No JWT of a valid format was provided.");
+
             tokenHandler.ValidateToken(token, new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
@@ -58,13 +63,13 @@ public class JwtValidation
             var jwtToken = (JwtSecurityToken)validatedToken;
 
             return !VerifyClaims(jwtToken)
-                ? new ResponseModel<object>(500, "Invalid claims.")
-                : new ResponseModel<object>(200, "Valid claims.");
+                ? new ResponseModel<object>(500, "Unauthorized: Invalid claims.")
+                : new ResponseModel<object>(200, "Authorized: Valid claims.");
         }
         catch (Exception ex)
         {
             return new ResponseModel<object>(StatusCodes.Status500InternalServerError,
-                $"An error occurred while validating the access token: {ex.Message}");
+                $"Unauthorized: An error occurred while validating the access token: {ex.Message}");
         }
     }
 
