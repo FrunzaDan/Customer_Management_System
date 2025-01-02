@@ -23,7 +23,7 @@ public class CustomerRegistration
             if (MsisdnValidation.ValidateMsisdn(customerRqst.Msisdn) == false)
                 return new ResponseModel<object>(409, "Invalid or empty MSISDN.");
         }
-        
+
         return await _dbUtils.RegisterCustomer(customerRqst);
     }
 }

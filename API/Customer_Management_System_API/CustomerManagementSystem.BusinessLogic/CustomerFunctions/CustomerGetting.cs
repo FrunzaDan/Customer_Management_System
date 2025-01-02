@@ -38,7 +38,7 @@ public class CustomerGetting
                 Status = 400,
                 ResponseMessage = "No valid search variable was provided! It must be GUID, MSISDN, or Email."
             };
-        
+
         return await _dbUtils.GetCustomer(getCustomerRqst);
     }
 
