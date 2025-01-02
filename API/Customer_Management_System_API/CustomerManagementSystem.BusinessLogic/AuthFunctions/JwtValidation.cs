@@ -33,10 +33,7 @@ public class JwtValidation
         if (!authHeader.StartsWith("Bearer ")) return false;
 
         var jwt = authHeader.Split(' ')[1];
-        if (string.IsNullOrEmpty(jwt))
-            throw new SecurityTokenException("Missing JWT Token in Authorization HTTP Header");
-
-        return ValidateToken(jwt);
+        return !string.IsNullOrEmpty(jwt) && ValidateToken(jwt);
     }
 
     private bool ValidateToken(string? token)

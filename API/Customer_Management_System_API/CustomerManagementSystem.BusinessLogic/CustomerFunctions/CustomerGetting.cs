@@ -13,37 +13,33 @@ public class CustomerGetting
         _dbUtils = dbUtils;
     }
 
-    public async Task<ResponseModel<object>> GetCustomerFunction(GetCustomerRequest getCustomerRqst)
+    public async Task<ResponseModel<object>> GetCustomerFunction(GetCustomerRequest request)
     {
-        if (string.IsNullOrEmpty(getCustomerRqst.SearchVariable))
-            return new ResponseModel<object>(404, "Search variable is required.");
-
-        var searchOptions = new (Func<string, bool> validation, int searchOption)[]
+        if (string.IsNullOrWhiteSpace(request.SearchVariable))
         {
-            (GuidValidation.ValidateGuid, 1),
-            (MsisdnValidation.ValidateMsisdn, 2),
-            (EmailValidation.ValidateEmail, 3)
-        };
+            return new ResponseModel<object>(404, "Search variable is required.");
+        }
 
-        foreach (var (validation, searchOption) in searchOptions)
-            if (validation(getCustomerRqst.SearchVariable))
-            {
-                getCustomerRqst.SearchOption = searchOption;
-                break;
-            }
+        request.SearchOption = DetermineSearchOption(request.SearchVariable);
 
-        if (getCustomerRqst.SearchOption == 0)
-            return new ResponseModel<object>
-            {
-                Status = 400,
-                ResponseMessage = "No valid search variable was provided! It must be GUID, MSISDN, or Email."
-            };
+        if (request.SearchOption == 0)
+        {
+            return new ResponseModel<object>(404, "No valid search variable was provided! It must be a GUID, MSISDN, or Email.");
+        }
 
-        return await _dbUtils.GetCustomer(getCustomerRqst);
+        return await _dbUtils.GetCustomer(request);
     }
 
     public async Task<ResponseModel<object>> GetCustomersFunction()
     {
         return await _dbUtils.GetCustomers();
+    }
+
+    private static int DetermineSearchOption(string searchVariable)
+    {
+        return GuidValidation.ValidateGuid(searchVariable) ? 1 :
+            MsisdnValidation.ValidateMsisdn(searchVariable) ? 2 :
+            EmailValidation.ValidateEmail(searchVariable) ? 3 :
+            0;
     }
 }

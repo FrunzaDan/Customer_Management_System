@@ -13,17 +13,14 @@ public class CustomerRegistration
         _dbUtils = dbUtils;
     }
 
-    public async Task<ResponseModel<object>> RegisterCustomerFunction(CustomerModel customerRqst)
+    public async Task<ResponseModel<object>> RegisterCustomerFunction(CustomerModel request)
     {
-        if (customerRqst.Email is not null && customerRqst.Msisdn is not null)
-        {
-            if (EmailValidation.ValidateEmail(customerRqst.Email) == false)
-                return new ResponseModel<object>(409, "Invalid or empty Email.");
+        if (string.IsNullOrEmpty(request.Email) || EmailValidation.ValidateEmail(request.Email) == false)
+            return new ResponseModel<object>(404, "Invalid or empty Email.");
 
-            if (MsisdnValidation.ValidateMsisdn(customerRqst.Msisdn) == false)
-                return new ResponseModel<object>(409, "Invalid or empty MSISDN.");
-        }
+        if (string.IsNullOrEmpty(request.Msisdn) || MsisdnValidation.ValidateMsisdn(request.Msisdn) == false)
+            return new ResponseModel<object>(404, "Invalid or empty MSISDN.");
 
-        return await _dbUtils.RegisterCustomer(customerRqst);
+        return await _dbUtils.RegisterCustomer(request);
     }
 }

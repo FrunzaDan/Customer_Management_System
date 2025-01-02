@@ -12,8 +12,8 @@ public class CustomerDeletion
         _dbUtils = dbUtils;
     }
 
-    public async Task<ResponseModel<object>> DeleteCustomer(string customerGuid)
+    public async Task<ResponseModel<object>> DeleteCustomer(string guid)
     {
-        return await _dbUtils.DeleteCustomer(customerGuid);
+        return await _dbUtils.DeleteCustomer(guid);
     }
 }

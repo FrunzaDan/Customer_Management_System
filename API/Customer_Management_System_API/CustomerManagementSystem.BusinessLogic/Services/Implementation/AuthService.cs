@@ -18,11 +18,8 @@ public class AuthService(
     {
         if (string.IsNullOrEmpty(merchantCredentials.MerchantId) ||
             string.IsNullOrEmpty(merchantCredentials.MerchantPassword))
-            return new ResponseModel<AccessTokenResponse>
-            {
-                Status = StatusCodes.Status400BadRequest,
-                ResponseMessage = "Invalid Merchant Credentials"
-            };
+            return new ResponseModel<AccessTokenResponse>(403, "Invalid or empty merchant credentials.");
+        
         var httpClient = httpClientFactory.CreateClient();
 
         var response = new ResponseModel<AccessTokenResponse>();
@@ -51,8 +48,7 @@ public class AuthService(
         }
         catch (Exception ex)
         {
-            response.Status = StatusCodes.Status500InternalServerError;
-            response.ResponseMessage = "An error occurred on our side while generating the access token: " + ex.Message;
+            return new ResponseModel<AccessTokenResponse>(500, "An error occurred on our side while generating the access token: " + ex.Message);
         }
 
         return response;
@@ -63,21 +59,19 @@ public class AuthService(
         var response = new ResponseModel<object>();
         if (string.IsNullOrEmpty(accessToken))
         {
-            response.Status = StatusCodes.Status500InternalServerError;
-            response.ResponseMessage = "No Access Token provided!";
+            return new ResponseModel<object>(500, "No Access Token provided!");
         }
 
         var httpContext = httpContextAccessor.HttpContext;
         if (httpContext is null)
         {
-            response.Status = StatusCodes.Status500InternalServerError;
-            response.ResponseMessage = "Failed to initialize the http context!";
+            return new ResponseModel<object>(500, "Failed to initialize the http context!");
         }
 
         try
         {
             var jwtValidation = new JwtValidation(appSettingsConfig);
-            var isAuthorized = httpContext != null && jwtValidation.Authorize(httpContext, accessToken);
+            var isAuthorized = jwtValidation.Authorize(httpContext, accessToken);
 
             response.Status = isAuthorized
                 ? StatusCodes.Status200OK
@@ -89,8 +83,7 @@ public class AuthService(
         }
         catch (Exception ex)
         {
-            response.Status = StatusCodes.Status500InternalServerError;
-            response.ResponseMessage = "An error occurred while verifying the token: " + ex.Message;
+            return new ResponseModel<object>(500, "An error occurred on our side while verifying the access token: " + ex.Message);
         }
 
         return response;

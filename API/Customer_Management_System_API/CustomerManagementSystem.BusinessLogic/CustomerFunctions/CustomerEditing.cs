@@ -12,8 +12,8 @@ public class CustomerEditing
         _dbUtils = dbUtils;
     }
 
-    public async Task<ResponseModel<object>> EditCustomerFunction(CustomerModel editCustomerRqst)
+    public async Task<ResponseModel<object>> EditCustomerFunction(CustomerModel request)
     {
-        return await _dbUtils.EditCustomer(editCustomerRqst);
+        return await _dbUtils.EditCustomer(request);
     }
 }

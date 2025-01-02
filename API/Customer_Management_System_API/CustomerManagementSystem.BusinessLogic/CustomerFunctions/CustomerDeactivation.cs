@@ -12,8 +12,8 @@ public class CustomerDeactivation
         _dbUtils = dbUtils;
     }
 
-    public async Task<ResponseModel<object>> DeactivateCustomer(string customerGuid)
+    public async Task<ResponseModel<object>> DeactivateCustomer(string guid)
     {
-        return await _dbUtils.DeactivateCustomer(customerGuid);
+        return await _dbUtils.DeactivateCustomer(guid);
     }
 }

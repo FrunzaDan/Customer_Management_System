@@ -25,7 +25,9 @@ public class JwtCreation
     public async Task<ResponseModel<AccessTokenResponse>> GenerateBearerJwt(string merchantId, string merchantPassword)
     {
         if (string.IsNullOrWhiteSpace(merchantId) || string.IsNullOrWhiteSpace(merchantPassword))
-            return CreateErrorResponse(StatusCodes.Status400BadRequest, "Merchant ID and Password cannot be empty.");
+        {
+            return new ResponseModel<AccessTokenResponse>(404, "Merchant ID and Password cannot be empty.");
+        }
 
         try
         {
@@ -35,36 +37,24 @@ public class JwtCreation
             if (credentialsCheck.Data is ResultValidityCheck resultValidityCheck)
             {
                 if (resultValidityCheck is { IsValid: false, ErrorMessage: not null })
-                    return CreateErrorResponse(StatusCodes.Status403Forbidden, resultValidityCheck.ErrorMessage);
+                    return new ResponseModel<AccessTokenResponse>(404, resultValidityCheck.ErrorMessage);
+
             }
             else
             {
-                return CreateErrorResponse(StatusCodes.Status500InternalServerError,
-                    "Invalid response format from credential validation.");
+                return new ResponseModel<AccessTokenResponse>(500, "Invalid response format from credential validation.");
             }
 
             // Generate token
             var token = GenerateJwtToken(merchantId);
             if (string.IsNullOrEmpty(token))
-                return new ResponseModel<AccessTokenResponse>
-                {
-                    Status = StatusCodes.Status500InternalServerError,
-                    ResponseMessage = "Failed to generate JWT token."
-                };
+                return new ResponseModel<AccessTokenResponse>(500, "Failed to generate JWT token.");
 
             if (string.IsNullOrEmpty(_configuration.AccessTokenTimeout))
-                return new ResponseModel<AccessTokenResponse>
-                {
-                    Status = StatusCodes.Status500InternalServerError,
-                    ResponseMessage = "Configuration error: AccessTokenTimeout is missing."
-                };
+                return new ResponseModel<AccessTokenResponse>(500, "Configuration error: AccessTokenTimeout is missing.");
 
             if (!double.TryParse(_configuration.AccessTokenTimeout, out var timeoutMinutes))
-                return new ResponseModel<AccessTokenResponse>
-                {
-                    Status = StatusCodes.Status500InternalServerError,
-                    ResponseMessage = "Invalid AccessTokenTimeout configuration."
-                };
+                return new ResponseModel<AccessTokenResponse>(500, "Invalid AccessTokenTimeout configuration.");
 
             return new ResponseModel<AccessTokenResponse>
             {
@@ -79,7 +69,7 @@ public class JwtCreation
         }
         catch (Exception ex)
         {
-            return CreateErrorResponse(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
+            return new ResponseModel<AccessTokenResponse>(500, $"An error occurred: {ex.Message}");
         }
     }
 
@@ -117,16 +107,6 @@ public class JwtCreation
                 new SymmetricSecurityKey(_jwtKey), SecurityAlgorithms.HmacSha256Signature),
             Issuer = _configuration.JwtIssuer,
             Audience = _configuration.JwtAudience
-        };
-    }
-
-    private static ResponseModel<AccessTokenResponse> CreateErrorResponse(int statusCode, string message)
-    {
-        return new ResponseModel<AccessTokenResponse>
-        {
-            Status = statusCode,
-            ResponseMessage = message,
-            Data = null
         };
     }
 }
