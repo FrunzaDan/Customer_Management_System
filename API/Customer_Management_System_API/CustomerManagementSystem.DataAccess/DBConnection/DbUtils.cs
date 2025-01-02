@@ -9,17 +9,17 @@ public class DbUtils(IAppSettingsConfig configuration) : IDbUtils
 {
     private string? CurrentConnectionString { get; set; }
 
-    public Task<ResponseModel<object>> RegisterCustomer(CustomerModel customer)
+    public async Task<ResponseModel<object>> RegisterCustomer(CustomerModel customer)
     {
-        return ExecuteStoredProcedureAsync(
+        return await ExecuteStoredProcedureAsync(
             "dbo.usp_createCustomer",
             command => DbHelper.AddCustomerParameters(command, customer),
             async reader => await HandleRegisterCustomerResponse(reader));
     }
 
-    public Task<ResponseModel<object>> GetCustomer(GetCustomerRequest request)
+    public async Task<ResponseModel<object>> GetCustomer(GetCustomerRequest request)
     {
-        return ExecuteStoredProcedureAsync(
+        return await ExecuteStoredProcedureAsync(
             "dbo.usp_getCustomer",
             command =>
             {
@@ -29,41 +29,41 @@ public class DbUtils(IAppSettingsConfig configuration) : IDbUtils
             async reader => await HandleGetCustomerResponse(reader));
     }
 
-    public Task<ResponseModel<object>> GetCustomers()
+    public async Task<ResponseModel<object>> GetCustomers()
     {
-        return ExecuteStoredProcedureAsync(
+        return await ExecuteStoredProcedureAsync(
             "dbo.usp_getCustomers",
             null,
             async reader => await HandleGetCustomersResponse(reader));
     }
 
-    public Task<ResponseModel<object>> EditCustomer(CustomerModel customer)
+    public async Task<ResponseModel<object>> EditCustomer(CustomerModel customer)
     {
-        return ExecuteStoredProcedureAsync(
+        return await ExecuteStoredProcedureAsync(
             "dbo.usp_editCustomer",
             command => DbHelper.AddCustomerParameters(command, customer),
             async reader => await HandleEditCustomerResponse(reader));
     }
 
-    public Task<ResponseModel<object>> DeactivateCustomer(string customerGuid)
+    public async Task<ResponseModel<object>> DeactivateCustomer(string customerGuid)
     {
-        return ExecuteStoredProcedureAsync(
+        return await ExecuteStoredProcedureAsync(
             "dbo.usp_deactivateCustomer",
             command => command.Parameters.AddWithValue("@var_Guid", customerGuid),
             async reader => await HandleDeactivateOrDeleteCustomerResponse(reader));
     }
 
-    public Task<ResponseModel<object>> DeleteCustomer(string customerGuid)
+    public async Task<ResponseModel<object>> DeleteCustomer(string customerGuid)
     {
-        return ExecuteStoredProcedureAsync(
+        return await ExecuteStoredProcedureAsync(
             "dbo.usp_deleteCustomer",
             command => command.Parameters.AddWithValue("@var_Guid", customerGuid),
             async reader => await HandleDeactivateOrDeleteCustomerResponse(reader));
     }
 
-    public Task<ResponseModel<object>> CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials)
+    public async Task<ResponseModel<object>> CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials)
     {
-        return ExecuteStoredProcedureAsync(
+        return await ExecuteStoredProcedureAsync(
             "dbo.usp_checkMerchantCredentials",
             command =>
             {
