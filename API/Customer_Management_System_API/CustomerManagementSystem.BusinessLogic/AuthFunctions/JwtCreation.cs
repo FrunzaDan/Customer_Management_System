@@ -35,13 +35,12 @@ public class JwtCreation
             if (credentialsCheck.Data is ResultValidityCheck resultValidityCheck)
             {
                 if (resultValidityCheck is { IsValid: false, ErrorMessage: not null })
-                {
                     return CreateErrorResponse(StatusCodes.Status403Forbidden, resultValidityCheck.ErrorMessage);
-                }
             }
             else
             {
-                return CreateErrorResponse(StatusCodes.Status500InternalServerError, "Invalid response format from credential validation.");
+                return CreateErrorResponse(StatusCodes.Status500InternalServerError,
+                    "Invalid response format from credential validation.");
             }
 
             // Generate token

@@ -14,17 +14,6 @@ public class CustomerEditing
 
     public async Task<ResponseModel<object>> EditCustomerFunction(CustomerModel editCustomerRqst)
     {
-        var response = new ResponseModel<object>();
-        try
-        {
-            response = await _dbUtils.EditCustomer(editCustomerRqst);
-        }
-        catch (Exception ex)
-        {
-            response.Status = 500;
-            response.ResponseMessage = ex.ToString();
-        }
-
-        return response;
+        return await _dbUtils.EditCustomer(editCustomerRqst);
     }
 }

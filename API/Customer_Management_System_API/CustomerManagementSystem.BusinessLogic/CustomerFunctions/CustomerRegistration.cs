@@ -15,34 +15,15 @@ public class CustomerRegistration
 
     public async Task<ResponseModel<object>> RegisterCustomerFunction(CustomerModel customerRqst)
     {
-        var response = new ResponseModel<object>();
         if (customerRqst.Email is not null && customerRqst.Msisdn is not null)
         {
             if (EmailValidation.ValidateEmail(customerRqst.Email) == false)
-            {
-                response.Status = 409;
-                response.ResponseMessage = "Invalid or empty Email";
-                return response;
-            }
+                return new ResponseModel<object>(409, "Invalid or empty Email.");
 
             if (MsisdnValidation.ValidateMsisdn(customerRqst.Msisdn) == false)
-            {
-                response.Status = 409;
-                response.ResponseMessage = "Invalid or empty MSISDN";
-                return response;
-            }
+                return new ResponseModel<object>(409, "Invalid or empty MSISDN.");
         }
-
-        try
-        {
-            response = await _dbUtils.RegisterCustomer(customerRqst);
-        }
-        catch (Exception ex)
-        {
-            response.Status = 500;
-            response.ResponseMessage = ex.ToString();
-        }
-
-        return response;
+        
+        return await _dbUtils.RegisterCustomer(customerRqst);
     }
 }

@@ -14,17 +14,6 @@ public class CustomerDeactivation
 
     public async Task<ResponseModel<object>> DeactivateCustomer(string customerGuid)
     {
-        var response = new ResponseModel<object>();
-        try
-        {
-            response = await _dbUtils.DeactivateCustomer(customerGuid);
-        }
-        catch (Exception ex)
-        {
-            response.Status = 500;
-            response.ResponseMessage = ex.ToString();
-        }
-
-        return response;
+        return await _dbUtils.DeactivateCustomer(customerGuid);
     }
 }

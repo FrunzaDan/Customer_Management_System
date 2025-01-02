@@ -16,11 +16,7 @@ public class CustomerGetting
     public async Task<ResponseModel<object>> GetCustomerFunction(GetCustomerRequest getCustomerRqst)
     {
         if (string.IsNullOrEmpty(getCustomerRqst.SearchVariable))
-            return new ResponseModel<object>
-            {
-                Status = 404,
-                ResponseMessage = "Search variable is required."
-            };
+            return new ResponseModel<object>(404, "Search variable is required.");
 
         var searchOptions = new (Func<string, bool> validation, int searchOption)[]
         {
@@ -42,19 +38,8 @@ public class CustomerGetting
                 Status = 400,
                 ResponseMessage = "No valid search variable was provided! It must be GUID, MSISDN, or Email."
             };
-
-        try
-        {
-            return await _dbUtils.GetCustomer(getCustomerRqst);
-        }
-        catch (Exception ex)
-        {
-            return new ResponseModel<object>
-            {
-                Status = 500,
-                ResponseMessage = ex.Message
-            };
-        }
+        
+        return await _dbUtils.GetCustomer(getCustomerRqst);
     }
 
     public async Task<ResponseModel<object>> GetCustomersFunction()

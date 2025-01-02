@@ -23,12 +23,7 @@ public class CustomerService : ICustomerService
 
     public async Task<ResponseModel<object>> DeactivateCustomer(string customerGuid)
     {
-        if (!_isAuthorized)
-            return new ResponseModel<object>
-            {
-                Status = 403,
-                ResponseMessage = "No access rights for this request!"
-            };
+        if (!_isAuthorized) return new ResponseModel<object>(403, "No access rights for this request!");
 
         var customerDeactivation = new CustomerDeactivation(_dbUtils);
         return await customerDeactivation.DeactivateCustomer(customerGuid);
@@ -36,12 +31,7 @@ public class CustomerService : ICustomerService
 
     public async Task<ResponseModel<object>> DeleteCustomer(string customerGuid)
     {
-        if (!_isAuthorized)
-            return new ResponseModel<object>
-            {
-                Status = 403,
-                ResponseMessage = "No access rights for this request!"
-            };
+        if (!_isAuthorized) return new ResponseModel<object>(403, "No access rights for this request!");
 
         var customerDeletion = new CustomerDeletion(_dbUtils);
         return await customerDeletion.DeleteCustomer(customerGuid);
@@ -49,12 +39,7 @@ public class CustomerService : ICustomerService
 
     public async Task<ResponseModel<object>> EditCustomer(CustomerModel editCustomerRequest)
     {
-        if (!_isAuthorized)
-            return new ResponseModel<object>
-            {
-                Status = 403,
-                ResponseMessage = "No access rights for this request!"
-            };
+        if (!_isAuthorized) return new ResponseModel<object>(403, "No access rights for this request!");
 
         var customerEditing = new CustomerEditing(_dbUtils);
         return await customerEditing.EditCustomerFunction(editCustomerRequest);
@@ -62,12 +47,7 @@ public class CustomerService : ICustomerService
 
     public async Task<ResponseModel<object>> GetCustomer(GetCustomerRequest getCustomerRqst)
     {
-        if (!_isAuthorized)
-            return new ResponseModel<object>
-            {
-                Status = 403,
-                ResponseMessage = "No access rights for this request!"
-            };
+        if (!_isAuthorized) return new ResponseModel<object>(403, "No access rights for this request!");
 
         var customerGetting = new CustomerGetting(_dbUtils);
         return await customerGetting.GetCustomerFunction(getCustomerRqst);
@@ -75,12 +55,7 @@ public class CustomerService : ICustomerService
 
     public async Task<ResponseModel<object>> GetCustomers()
     {
-        if (!_isAuthorized)
-            return new ResponseModel<object>
-            {
-                Status = 403,
-                ResponseMessage = "No access rights for this request!"
-            };
+        if (!_isAuthorized) return new ResponseModel<object>(403, "No access rights for this request!");
 
         var customerGetting = new CustomerGetting(_dbUtils);
         return await customerGetting.GetCustomersFunction();
@@ -88,12 +63,7 @@ public class CustomerService : ICustomerService
 
     public async Task<ResponseModel<object>> RegisterCustomer(CustomerModel customerRqst)
     {
-        if (!_isAuthorized)
-            return new ResponseModel<object>
-            {
-                Status = 403,
-                ResponseMessage = "No access rights for this request!"
-            };
+        if (!_isAuthorized) return new ResponseModel<object>(403, "No access rights for this request!");
 
         var customerRegistration = new CustomerRegistration(_dbUtils);
         return await customerRegistration.RegisterCustomerFunction(customerRqst);

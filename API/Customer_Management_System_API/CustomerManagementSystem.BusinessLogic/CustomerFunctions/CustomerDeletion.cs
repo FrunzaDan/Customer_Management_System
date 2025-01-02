@@ -14,17 +14,6 @@ public class CustomerDeletion
 
     public async Task<ResponseModel<object>> DeleteCustomer(string customerGuid)
     {
-        var response = new ResponseModel<object>();
-        try
-        {
-            response = await _dbUtils.DeleteCustomer(customerGuid);
-        }
-        catch (Exception ex)
-        {
-            response.Status = 500;
-            response.ResponseMessage = ex.ToString();
-        }
-
-        return response;
+        return await _dbUtils.DeleteCustomer(customerGuid);
     }
 }
