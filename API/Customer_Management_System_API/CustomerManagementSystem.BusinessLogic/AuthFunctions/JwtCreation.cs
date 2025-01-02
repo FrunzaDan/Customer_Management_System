@@ -24,6 +24,11 @@ public class JwtCreation
 
     public async Task<ResponseModel<object>> GenerateBearerJwt(MerchantCredentials merchantCredentials)
     {
+        if (string.IsNullOrWhiteSpace(merchantCredentials.MerchantId))
+        {
+            return new ResponseModel<object>(403, "Invalid or empty merchant ID.");
+        }
+        
         try
         {
             // Validate merchant credentials

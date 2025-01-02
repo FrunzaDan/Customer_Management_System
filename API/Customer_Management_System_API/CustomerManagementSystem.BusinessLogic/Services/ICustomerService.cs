@@ -6,13 +6,13 @@ public interface ICustomerService
 {
     Task<ResponseModel<object>> GetCustomers();
 
-    Task<ResponseModel<object>> GetCustomer(GetCustomerRequest getCustomerRequest);
+    Task<ResponseModel<object>> GetCustomer(GetCustomerRequest request);
 
-    Task<ResponseModel<object>> RegisterCustomer(CustomerModel customerRequest);
+    Task<ResponseModel<object>> RegisterCustomer(CustomerModel request);
 
-    Task<ResponseModel<object>> EditCustomer(CustomerModel editCustomerRequest);
+    Task<ResponseModel<object>> EditCustomer(CustomerModel request);
 
-    Task<ResponseModel<object>> DeactivateCustomer(string customerGuid);
+    Task<ResponseModel<object>> DeactivateCustomer(string guid);
 
-    Task<ResponseModel<object>> DeleteCustomer(string customerGuid);
+    Task<ResponseModel<object>> DeleteCustomer(string guid);
 }
