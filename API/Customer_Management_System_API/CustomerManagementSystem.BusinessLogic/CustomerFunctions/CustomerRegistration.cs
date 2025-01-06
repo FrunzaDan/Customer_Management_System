@@ -16,10 +16,10 @@ public class CustomerRegistration
     public async Task<ResponseModel<object>> RegisterCustomerFunction(CustomerModel request)
     {
         if (string.IsNullOrEmpty(request.Email) || EmailValidation.ValidateEmail(request.Email) == false)
-            return new ResponseModel<object>(404, "Invalid or empty Email.");
+            return new ResponseModel<object>(400, "Invalid or empty Email.");
 
         if (string.IsNullOrEmpty(request.Msisdn) || MsisdnValidation.ValidateMsisdn(request.Msisdn) == false)
-            return new ResponseModel<object>(404, "Invalid or empty MSISDN.");
+            return new ResponseModel<object>(400, "Invalid or empty MSISDN.");
 
         return await _dbUtils.RegisterCustomer(request);
     }

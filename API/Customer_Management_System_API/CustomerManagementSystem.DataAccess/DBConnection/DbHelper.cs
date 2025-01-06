@@ -42,9 +42,9 @@ public static class DbHelper
             return new ResponseModel<object>(500, "No data returned or operation failed.");
 
         var message = reader["message"] as string;
-        return reader["result"] is 1
+        return reader["result"] is 0
             ? new ResponseModel<object>(200, message ?? "Operation successful!")
-            : new ResponseModel<object>(500, message ?? "Operation failed.");
+            : new ResponseModel<object>(Convert.ToInt32(reader["result"]), message ?? "Operation failed.");
     }
 
     public static async Task<ResponseModel<object>> HandleMerchantCredentialsResponse(SqlDataReader reader)
