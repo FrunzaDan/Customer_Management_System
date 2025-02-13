@@ -11,7 +11,7 @@ export class AuthGuardService {
   constructor(
     private verifyTokenService: VerifyTokenService,
     private router: Router,
-    private localStorageService: LocalStorageService
+    private localStorageService: LocalStorageService,
   ) {}
 
   canActivate(): Observable<boolean> {
@@ -19,7 +19,7 @@ export class AuthGuardService {
       map((isTokenValid: boolean) => {
         return isTokenValid ? true : this.redirectToLogin();
       }),
-      catchError((error) => this.handleError(error))
+      catchError((error) => this.handleError(error)),
     );
   }
 

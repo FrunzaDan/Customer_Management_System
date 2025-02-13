@@ -21,7 +21,7 @@ export class VerifyTokenService {
 
   constructor(
     private http: HttpClient,
-    private sessionStorageService: SessionStorageService
+    private sessionStorageService: SessionStorageService,
   ) {}
 
   isTokenValid(): Observable<boolean> {

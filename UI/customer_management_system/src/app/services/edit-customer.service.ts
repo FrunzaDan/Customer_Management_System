@@ -12,7 +12,7 @@ import { HttpHeaderService } from './http-header-service';
 export class EditCustomerService {
   constructor(
     private httpHeaderService: HttpHeaderService,
-    private http: HttpClient
+    private http: HttpClient,
   ) {}
 
   readonly APIURL =

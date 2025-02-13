@@ -14,7 +14,7 @@ export class GetCustomerService {
 
   constructor(
     private httpHeaderService: HttpHeaderService,
-    private http: HttpClient
+    private http: HttpClient,
   ) {}
 
   getCustomer(queryString: string): Observable<Customer> {

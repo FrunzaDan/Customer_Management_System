@@ -1,109 +1,109 @@
 /* You can add global styles to this file, and also import other style files */
 :root {
-    --spectrumColor1: #133b36;
-    --spectrumColor2: #037874;
-    --spectrumColor3: #00917c;
-    --spectrumColor4: #a5f0c5;
-    --dangerColor1: #b67295;
-    --regularFont: "JostRegular", sans-serif;
-    --extralightFont: "JostExtraLight", sans-serif;
+  --spectrumColor1: #133b36;
+  --spectrumColor2: #037874;
+  --spectrumColor3: #00917c;
+  --spectrumColor4: #a5f0c5;
+  --dangerColor1: #b67295;
+  --regularFont: 'JostRegular', sans-serif;
+  --extralightFont: 'JostExtraLight', sans-serif;
 }
 
 @font-face {
-    font-family: "JostRegular";
-    src: url("./assets/fonts/Jost-Regular.ttf");
+  font-family: 'JostRegular';
+  src: url('./assets/fonts/Jost-Regular.ttf');
 }
 
 @font-face {
-    font-family: "JostExtraLight";
-    src: url("./assets/fonts/Jost-ExtraLight.ttf");
+  font-family: 'JostExtraLight';
+  src: url('./assets/fonts/Jost-ExtraLight.ttf');
 }
 
 html,
 body {
-    width: 100%;
-    height: 100%;
-    background-color: transparent;
-    margin: 0;
-    padding: auto;
-    font-family: var(--regularFont);
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  margin: 0;
+  padding: auto;
+  font-family: var(--regularFont);
 }
 
 *,
 *::before,
 *::after {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    margin: 0px;
-    padding: 0px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  margin: 0px;
+  padding: 0px;
 }
 
 a {
-    color: var(--spectrumColor1);
+  color: var(--spectrumColor1);
 }
 
 .btn-link {
-    color: var(--spectrumColor2);
+  color: var(--spectrumColor2);
 }
 
 .btn-link:hover {
-    color: var(--spectrumColor1);
+  color: var(--spectrumColor1);
 }
 
 .btn-primary,
 .btn-primary:active,
 .btn-primary:visited {
-    background-color: var(--spectrumColor2) !important;
-    outline: none !important;
-    box-shadow: none;
-    border-color: var(--spectrumColor2);
-    transition: all 0.3s;
+  background-color: var(--spectrumColor2) !important;
+  outline: none !important;
+  box-shadow: none;
+  border-color: var(--spectrumColor2);
+  transition: all 0.3s;
 }
 
 .btn-primary:hover {
-    filter: brightness(90%);
+  filter: brightness(90%);
 }
 
 .btn-secondary,
 .btn-secondary:active,
 .btn-secondary:visited {
-    background-color: var(--spectrumColor3) !important;
-    outline: none !important;
-    box-shadow: none;
-    border-color: var(--spectrumColor3);
-    transition: all 0.3s;
+  background-color: var(--spectrumColor3) !important;
+  outline: none !important;
+  box-shadow: none;
+  border-color: var(--spectrumColor3);
+  transition: all 0.3s;
 }
 
 .btn-secondary:hover {
-    filter: brightness(90%);
+  filter: brightness(90%);
 }
 
 .btn-danger,
 .btn-danger:active,
 .btn-danger:visited {
-    background-color: var(--dangerColor1) !important;
-    outline: none !important;
-    box-shadow: none;
-    border-color: var(--dangerColor1);
-    transition: all 0.3s;
+  background-color: var(--dangerColor1) !important;
+  outline: none !important;
+  box-shadow: none;
+  border-color: var(--dangerColor1);
+  transition: all 0.3s;
 }
 
 .btn-danger:hover {
-    filter: brightness(90%);
+  filter: brightness(90%);
 }
 
 .hoverItem {
-    display: inline-block;
-    transition: transform .3s;
-    transform-origin: 50% 50%;
+  display: inline-block;
+  transition: transform 0.3s;
+  transform-origin: 50% 50%;
 }
 
 .hoverItem:hover {
-    transform: scale(1.06);
-    cursor: pointer;
+  transform: scale(1.06);
+  cursor: pointer;
 }
 
 .card-header {
-    background-color: var(--spectrumColor4);
+  background-color: var(--spectrumColor4);
 }

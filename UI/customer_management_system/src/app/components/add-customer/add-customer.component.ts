@@ -38,7 +38,7 @@ export class AddCustomerComponent implements OnInit {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private addCustomerService: AddCustomerService
+    private addCustomerService: AddCustomerService,
   ) {}
 
   ngOnInit() {

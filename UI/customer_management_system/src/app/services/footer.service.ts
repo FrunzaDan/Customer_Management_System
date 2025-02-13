@@ -2,21 +2,20 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FooterService {
-
   showFooter: BehaviorSubject<boolean>;
 
-  constructor() { 
+  constructor() {
     this.showFooter = new BehaviorSubject(true);
   }
 
-  hideFooter(){
+  hideFooter() {
     this.showFooter.next(false);
   }
 
-  displayFooter(){
+  displayFooter() {
     this.showFooter.next(true);
   }
 }

@@ -15,7 +15,7 @@ export class SessionStorageService {
       } catch (parseError: unknown) {
         console.error(
           'Error parsing products from session storage:',
-          parseError
+          parseError,
         );
         return 'ERROR-NO-SESSION-TOKEN';
       }

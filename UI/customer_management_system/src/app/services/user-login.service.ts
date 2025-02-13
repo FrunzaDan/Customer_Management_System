@@ -35,7 +35,7 @@ export class UserLoginService {
     private http: HttpClient,
     private router: Router,
     private sessionStorageService: SessionStorageService,
-    private httpHeaderService: HttpHeaderService
+    private httpHeaderService: HttpHeaderService,
   ) {}
 
   userLoginResponse!: LoginDataResponse;
@@ -48,14 +48,14 @@ export class UserLoginService {
       userLoginRequest,
       {
         headers: headers,
-      }
+      },
     );
   }
 
   checkCredentials(response: LoginDataResponse): string {
     if (response.data?.accessToken != null && response.status == 200) {
       this.sessionStorageService.setSessionAccessToken(
-        response.data.accessToken
+        response.data.accessToken,
       );
       this.router.navigateByUrl('customers');
     }

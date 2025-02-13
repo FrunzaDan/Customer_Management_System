@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { GetCustomersService } from '../../../../src/app/services/get-customers.service';
 import { Customer } from '../../../../src/app/interfaces/get-customer-list-response';
 import { Router } from '@angular/router';
@@ -9,48 +9,57 @@ import { CommonModule } from '@angular/common';
   templateUrl: './customer-list.component.html',
   styleUrls: ['./customer-list.component.css'],
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush, // Optimizes performance
 })
-export class CustomerListComponent {
+export class CustomerListComponent implements OnInit {
   customerList: Customer[] = [];
-  loadCompleted: boolean = false;
+  loadCompleted = false;
 
   constructor(
-    private getCustomersService: GetCustomersService,
-    private router: Router,
+    private readonly getCustomersService: GetCustomersService,
+    private readonly router: Router,
   ) {}
 
   ngOnInit(): void {
+    this.loadCustomerList();
+  }
+
+  private loadCustomerList(): void {
     this.loadCompleted = false;
     this.getCustomersService.refreshTable().subscribe({
       next: (response) => {
         this.customerList = response?.data ?? [];
         this.loadCompleted = true;
       },
-      error: (error) => {
-        let errorStatusCode = error.status;
-        if (errorStatusCode == 403) {
-          this.router.navigate(['']);
-        } else if (errorStatusCode == 404) {
-          this.loadCompleted = true;
-        }
-      },
-      complete: () => {},
+      error: (error) => this.handleError(error),
     });
   }
 
-  onGuidClick(customer: Customer) {
+  private handleError(error: any): void {
+    if (error.status === 403) {
+      this.router.navigate(['']);
+    } else if (error.status === 404) {
+      this.loadCompleted = true;
+    }
+  }
+
+  trackByCustomerId(index: number, customer: Customer): string {
+    return customer.guid;
+  }
+
+  onGuidClick(customer: Customer): void {
     this.router.navigate(['/customerDetails'], {
       queryParams: { id: customer.guid },
     });
   }
 
-  onEditClick(customer: Customer) {
+  onEditClick(customer: Customer): void {
     this.router.navigate(['/editCustomer'], {
       queryParams: { id: customer.guid },
     });
   }
 
-  onDeactivateClick(customer: Customer) {}
+  onDeactivateClick(customer: Customer): void {}
 
-  onReactivateClick(customer: Customer) {}
+  onReactivateClick(customer: Customer): void {}
 }

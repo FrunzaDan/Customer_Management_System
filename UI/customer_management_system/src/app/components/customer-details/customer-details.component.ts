@@ -26,7 +26,7 @@ export class CustomerDetailsComponent {
   constructor(
     private getCustomerService: GetCustomerService,
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {

@@ -2,20 +2,20 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class NavbarService {
   showNavbar: BehaviorSubject<boolean>;
 
-  constructor() { 
+  constructor() {
     this.showNavbar = new BehaviorSubject(true);
   }
 
-  hideNavbar(){
+  hideNavbar() {
     this.showNavbar.next(false);
   }
 
-  displayNavbar(){
+  displayNavbar() {
     this.showNavbar.next(true);
   }
 }

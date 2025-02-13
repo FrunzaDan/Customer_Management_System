@@ -41,7 +41,7 @@ export class EditCustomerComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private getCustomerService: GetCustomerService,
-    private editCustomerService: EditCustomerService
+    private editCustomerService: EditCustomerService,
   ) {}
 
   ngOnInit(): void {
