@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-display-error',
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './display-error.component.html',
   styleUrl: './display-error.component.css',
 })

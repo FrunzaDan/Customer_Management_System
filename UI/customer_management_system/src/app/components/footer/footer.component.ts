@@ -1,13 +1,12 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FooterService } from '../../services/footer.service';
 import { Subscription } from 'rxjs';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-footer',
   templateUrl: './footer.component.html',
   styleUrls: ['./footer.component.css'],
-  imports: [CommonModule],
+  imports: [],
 })
 export class FooterComponent implements OnDestroy {
   showFooter: boolean = true;

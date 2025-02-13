@@ -2,13 +2,12 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { GetCustomersService } from '../../../../src/app/services/get-customers.service';
 import { Customer } from '../../../../src/app/interfaces/get-customer-list-response';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-customer-list',
   templateUrl: './customer-list.component.html',
   styleUrls: ['./customer-list.component.css'],
-  imports: [CommonModule],
+  imports: [],
 })
 export class CustomerListComponent implements OnInit {
   customerList: Customer[] = [];

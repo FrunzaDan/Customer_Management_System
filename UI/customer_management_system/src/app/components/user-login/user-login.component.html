@@ -33,19 +33,16 @@
                       }"
                     />
                     <label for="username">Username</label>
-                    <div
-                      *ngIf="
-                        usernameControl?.invalid && usernameControl?.touched
-                      "
-                      class="text-danger mt-1"
-                    >
-                      <small *ngIf="usernameControl?.errors?.['required']"
-                        >Username is required.</small
-                      >
-                      <small *ngIf="usernameControl?.errors?.['pattern']"
-                        >Invalid username format.</small
-                      >
+                    @if ( usernameControl?.invalid && usernameControl?.touched )
+                    {
+                    <div class="text-danger mt-1">
+                      @if (usernameControl?.errors?.['required']) {
+                      <small>Username is required.</small>
+                      } @if (usernameControl?.errors?.['pattern']) {
+                      <small>Invalid username format.</small>
+                      }
                     </div>
+                    }
                   </div>
 
                   <!-- Password Input -->
@@ -62,14 +59,12 @@
                       }"
                     />
                     <label for="password">Password</label>
-                    <div
-                      *ngIf="
-                        passwordControl?.invalid && passwordControl?.touched
-                      "
-                      class="text-danger mt-1"
-                    >
+                    @if ( passwordControl?.invalid && passwordControl?.touched )
+                    {
+                    <div class="text-danger mt-1">
                       <small>Password is required.</small>
                     </div>
+                    }
                   </div>
 
                   <!-- Submit Button and Error Message -->
@@ -83,13 +78,14 @@
                         Sign in
                       </button>
                     </div>
+                    @if (errorMessage) {
                     <div
-                      *ngIf="errorMessage"
                       class="d-flex align-items-center justify-content-center alert alert-danger"
                       role="alert"
                     >
                       {{ errorMessage }}
                     </div>
+                    }
                   </div>
                   <div
                     class="d-flex align-items-center justify-content-center pt-3 pb-4"
