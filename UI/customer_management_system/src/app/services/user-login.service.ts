@@ -2,12 +2,16 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { UserLoginResponse } from '../../../src/app/interfaces/user-login-response';
+import {
+  LoginData,
+  LoginDataResponse,
+} from '../../../src/app/interfaces/user-login-response';
 import { UserLoginRequest } from '../../../src/app/interfaces/user-login-request';
 import { BehaviorSubject, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { SessionStorageService } from './session-storage.service';
 import { HttpHeaderService } from './http-header-service';
+import { GenericResponse } from '../interfaces/generic-response';
 
 @Injectable({
   providedIn: 'root',
@@ -34,19 +38,25 @@ export class UserLoginService {
     private httpHeaderService: HttpHeaderService
   ) {}
 
-  userLoginResponse!: UserLoginResponse;
+  userLoginResponse!: LoginDataResponse;
   accessToken!: string;
 
-  login(userLoginRequest: UserLoginRequest): Observable<UserLoginResponse> {
+  login(userLoginRequest: UserLoginRequest): Observable<LoginDataResponse> {
     const headers = this.httpHeaderService.getHeadersWithTokenSet();
-    return this.http.post<UserLoginResponse>(this.APIURL, userLoginRequest, {
-      headers: headers,
-    });
+    return this.http.post<GenericResponse<LoginData>>(
+      this.APIURL,
+      userLoginRequest,
+      {
+        headers: headers,
+      }
+    );
   }
 
-  checkCredentials(response: UserLoginResponse): string {
-    if (response.accessToken != null && response.status == 200) {
-      this.sessionStorageService.setSessionAccessToken(response.accessToken);
+  checkCredentials(response: LoginDataResponse): string {
+    if (response.data?.accessToken != null && response.status == 200) {
+      this.sessionStorageService.setSessionAccessToken(
+        response.data.accessToken
+      );
       this.router.navigateByUrl('customers');
     }
     return response.responseMessage;

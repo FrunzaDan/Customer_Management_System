@@ -18,9 +18,9 @@ export class EditCustomerService {
   readonly APIURL =
     environment.CustomerManagementSystemAPI + '/api/Customer/edit';
 
-  editCustomer(customer: Customer): Observable<GenericResponse> {
+  editCustomer(customer: Customer): Observable<GenericResponse<object>> {
     const headers = this.httpHeaderService.getHeadersWithTokenSet();
-    return this.http.patch<GenericResponse>(this.APIURL, customer, {
+    return this.http.patch<GenericResponse<object>>(this.APIURL, customer, {
       headers: headers,
     });
   }

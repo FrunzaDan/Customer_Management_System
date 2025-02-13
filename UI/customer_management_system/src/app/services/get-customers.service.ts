@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
-import { GetCustomerListResponse } from '../../../src/app/interfaces/get-customer-list-response';
+import { Observable, catchError, map, throwError, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { HttpHeaderService } from './http-header-service';
+import { GenericResponse } from '../interfaces/generic-response';
+import { Customer } from '../interfaces/get-customer-list-response';
 
 @Injectable({
   providedIn: 'root',
@@ -14,28 +15,19 @@ export class GetCustomersService {
 
   constructor(
     private http: HttpClient,
-    private httpHeaderService: HttpHeaderService
+    private httpHeaderService: HttpHeaderService,
   ) {}
 
-  refreshTable(): Observable<GetCustomerListResponse> {
+  refreshTable(): Observable<GenericResponse<Customer[]>> {
     const headers = this.httpHeaderService.getHeadersWithTokenSet();
 
     return this.http
-      .get<GetCustomerListResponse>(this.APIURL, { headers: headers })
-      .pipe(catchError(this.handleError));
-  }
-
-  private handleError(error: HttpErrorResponse) {
-    if (error.status === 0) {
-      console.error('An error occured: ', error.error);
-    } else {
-      console.error(
-        `Backend returned code ${error.status}, body was: `,
-        error.error
+      .get<GenericResponse<Customer[]>>(this.APIURL, { headers })
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          console.error('Error fetching customers:', error);
+          return throwError(() => error);
+        }),
       );
-    }
-    return throwError(
-      () => new Error('Something bad happened, please try again later.')
-    );
   }
 }

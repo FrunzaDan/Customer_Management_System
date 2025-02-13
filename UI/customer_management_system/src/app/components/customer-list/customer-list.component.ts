@@ -1,8 +1,5 @@
-import { Component, ElementRef, QueryList, ViewChild } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { HttpHeaders } from '@angular/common/http';
+import { Component } from '@angular/core';
 import { GetCustomersService } from '../../../../src/app/services/get-customers.service';
-import { GetCustomerListResponse } from '../../../../src/app/interfaces/get-customer-list-response';
 import { Customer } from '../../../../src/app/interfaces/get-customer-list-response';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -14,21 +11,19 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
 })
 export class CustomerListComponent {
-  getCustomerListResponse!: GetCustomerListResponse;
-  customerList!: Customer[];
+  customerList: Customer[] = [];
   loadCompleted: boolean = false;
 
   constructor(
     private getCustomersService: GetCustomersService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
     this.loadCompleted = false;
     this.getCustomersService.refreshTable().subscribe({
       next: (response) => {
-        this.getCustomerListResponse = response;
-        this.customerList = this.getCustomerListResponse.customerList;
+        this.customerList = response?.data ?? [];
         this.loadCompleted = true;
       },
       error: (error) => {

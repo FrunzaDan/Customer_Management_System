@@ -30,7 +30,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        SET @result = 4001; -- Invalid credentials
+        SET @result = 403; -- Invalid credentials
         SET @message = 'Invalid Merchant ID or Password.';
         SELECT @result AS result, @message AS message, NULL AS merchant_role;
     END

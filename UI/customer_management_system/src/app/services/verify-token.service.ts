@@ -51,7 +51,7 @@ export class VerifyTokenService {
     return result.asObservable();
   }
 
-  verifyTokenViaAPI(): Observable<GenericResponse> {
+  verifyTokenViaAPI(): Observable<GenericResponse<object>> {
     const sessionToken = this.sessionStorageService.getSessionAccessToken();
 
     const headers = new HttpHeaders()
@@ -60,7 +60,7 @@ export class VerifyTokenService {
 
     const params = new HttpParams().set('accessToken', sessionToken);
 
-    return this.http.get<GenericResponse>(this.APIURL, {
+    return this.http.get<GenericResponse<object>>(this.APIURL, {
       headers: headers,
       params: params,
     });

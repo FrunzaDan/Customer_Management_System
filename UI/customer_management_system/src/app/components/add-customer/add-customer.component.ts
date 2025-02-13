@@ -9,8 +9,8 @@ import {
 import { first } from 'rxjs/operators';
 import { AddCustomerService } from '../../../../src/app/services/add-customer.service';
 import {
-  Customer,
   Address,
+  Customer,
 } from '../../../../src/app/interfaces/get-customer-list-response';
 import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';

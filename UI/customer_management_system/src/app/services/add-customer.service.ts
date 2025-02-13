@@ -17,9 +17,9 @@ export class AddCustomerService {
   readonly APIURL =
     environment.CustomerManagementSystemAPI + '/api/Customer/register';
 
-  addCustomer(customer: Customer): Observable<GenericResponse> {
+  addCustomer(customer: Customer): Observable<GenericResponse<object>> {
     const headers = this.httpHeaderService.getHeadersWithTokenSet();
-    return this.http.post<GenericResponse>(this.APIURL, customer, {
+    return this.http.post<GenericResponse<object>>(this.APIURL, customer, {
       headers: headers,
     });
   }

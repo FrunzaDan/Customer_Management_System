@@ -22,12 +22,12 @@ BEGIN
 
     IF EXISTS (SELECT 1 FROM tbl_customers WHERE msisdn = @var_MSISDN)
     BEGIN
-        SET @result = 4001;  -- MSISDN already exists
+        SET @result = 400;  -- MSISDN already exists
         SET @message = 'MSISDN already exists.';
     END
     ELSE IF EXISTS (SELECT 1 FROM tbl_customers WHERE email = @var_Email)
     BEGIN
-        SET @result = 4002;  -- Email already exists
+        SET @result = 400;  -- Email already exists
         SET @message = 'Email already exists.';
     END
     ELSE
