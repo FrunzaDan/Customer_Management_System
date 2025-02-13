@@ -9,7 +9,6 @@ import { CommonModule } from '@angular/common';
   templateUrl: './customer-list.component.html',
   styleUrls: ['./customer-list.component.css'],
   imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush, // Optimizes performance
 })
 export class CustomerListComponent implements OnInit {
   customerList: Customer[] = [];

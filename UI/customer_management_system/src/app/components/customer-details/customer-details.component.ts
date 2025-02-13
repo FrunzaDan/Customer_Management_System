@@ -21,7 +21,7 @@ export class CustomerDetailsComponent {
   ]);
   customerGender: string | undefined;
   loadCompleted: boolean = false;
-  customer = {} as Customer;
+  customer: Customer | undefined = undefined;
 
   constructor(
     private getCustomerService: GetCustomerService,
@@ -34,8 +34,10 @@ export class CustomerDetailsComponent {
     let paramID: string = this.activatedRoute.snapshot.queryParamMap.get('id')!;
     this.getCustomerService.getCustomer(paramID).subscribe({
       next: (response) => {
-        this.customer = response;
-        this.customerGender = this.genderMap.get(this.customer.gender);
+        this.customer = response?.data;
+        if (this.customer && this.customer.gender !== undefined) {
+          this.customerGender = this.genderMap.get(this.customer.gender);
+        }
         this.loadCompleted = true;
       },
       error: (error) => {

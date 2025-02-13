@@ -15,7 +15,7 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let customer of this.customerList; trackBy: trackByCustomerId">
+    <tr *ngFor="let customer of customerList; trackBy: trackByCustomerId">
       <th class="align-middle text-center" scope="row">
         <a
           (click)="onGuidClick(customer)"

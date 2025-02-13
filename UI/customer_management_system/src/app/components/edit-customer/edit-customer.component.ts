@@ -28,7 +28,7 @@ export class EditCustomerComponent implements OnInit {
   loading: boolean = false;
   loadCompleted: boolean = false;
   submitted: boolean = false;
-  customer = {} as Customer;
+  customer: Customer | undefined = undefined;
   customerAddress: Address = {} as Address;
   paramId: string = '';
 
@@ -70,22 +70,22 @@ export class EditCustomerComponent implements OnInit {
     this.paramId = this.route.snapshot.queryParamMap.get('id')!;
     this.getCustomerService.getCustomer(this.paramId).subscribe({
       next: (response) => {
-        this.customer = response;
+        this.customer = response.data;
         this.form.patchValue({
-          firstName: this.customer.firstName,
-          lastName: this.customer.lastName,
-          email: this.customer.email,
-          msisdn: this.customer.msisdn,
-          gender: this.customer.gender,
-          birthYear: this.customer.birthdate.split('-')[0],
-          birthMonth: this.customer.birthdate.split('-')[1],
-          birthDay: this.customer.birthdate.split('-')[2],
-          country: this.customer.address.country,
-          county: this.customer.address.county,
-          town: this.customer.address.town,
-          street: this.customer.address.street,
-          number: this.customer.address.number,
-          zip: this.customer.address.zip,
+          firstName: this.customer?.firstName,
+          lastName: this.customer?.lastName,
+          email: this.customer?.email,
+          msisdn: this.customer?.msisdn,
+          gender: this.customer?.gender,
+          birthYear: this.customer?.birthdate.split('-')[0],
+          birthMonth: this.customer?.birthdate.split('-')[1],
+          birthDay: this.customer?.birthdate.split('-')[2],
+          country: this.customer?.address.country,
+          county: this.customer?.address.county,
+          town: this.customer?.address.town,
+          street: this.customer?.address.street,
+          number: this.customer?.address.number,
+          zip: this.customer?.address.zip,
         });
         this.loadCompleted = true;
       },
@@ -108,43 +108,45 @@ export class EditCustomerComponent implements OnInit {
 
     this.loading = true;
 
-    this.customer.guid = this.paramId;
-    this.customer.firstName = this.form.value.firstName;
-    this.customer.lastName = this.form.value.lastName;
-    this.customer.email = this.form.value.email;
-    this.customer.msisdn = this.form.value.msisdn;
-    this.customer.gender = this.form.value.gender;
-    this.customer.birthdate =
-      this.form.value.birthYear +
-      '-' +
-      this.form.value.birthMonth +
-      '-' +
-      this.form.value.birthDay;
+    if (this.customer !== undefined) {
+      this.customer.guid = this.paramId;
+      this.customer.firstName = this.form.value.firstName;
+      this.customer.lastName = this.form.value.lastName;
+      this.customer.email = this.form.value.email;
+      this.customer.msisdn = this.form.value.msisdn;
+      this.customer.gender = this.form.value.gender;
+      this.customer.birthdate =
+        this.form.value.birthYear +
+        '-' +
+        this.form.value.birthMonth +
+        '-' +
+        this.form.value.birthDay;
 
-    this.customerAddress.country = this.form.value.country;
-    this.customerAddress.county = this.form.value.county;
-    this.customerAddress.town = this.form.value.town;
-    this.customerAddress.street = this.form.value.street;
-    this.customerAddress.number = this.form.value.number;
-    this.customerAddress.zip = this.form.value.zip;
+      this.customerAddress.country = this.form.value.country;
+      this.customerAddress.county = this.form.value.county;
+      this.customerAddress.town = this.form.value.town;
+      this.customerAddress.street = this.form.value.street;
+      this.customerAddress.number = this.form.value.number;
+      this.customerAddress.zip = this.form.value.zip;
 
-    this.customer.address = this.customerAddress;
+      this.customer.address = this.customerAddress;
 
-    this.editCustomerService
-      .editCustomer(this.customer)
-      .pipe(first())
-      .subscribe({
-        next: () => {
-          this.router.navigate(['../customers'], { relativeTo: this.route });
-        },
-        error: (error) => {
-          let errorStatusCode = error.status;
-          if (errorStatusCode == 403) {
-            this.router.navigate(['']);
-          } else if (errorStatusCode == 404) {
-          }
-          this.loading = false;
-        },
-      });
+      this.editCustomerService
+        .editCustomer(this.customer)
+        .pipe(first())
+        .subscribe({
+          next: () => {
+            this.router.navigate(['../customers'], { relativeTo: this.route });
+          },
+          error: (error) => {
+            let errorStatusCode = error.status;
+            if (errorStatusCode == 403) {
+              this.router.navigate(['']);
+            } else if (errorStatusCode == 404) {
+            }
+            this.loading = false;
+          },
+        });
+    }
   }
 }
