@@ -15,9 +15,9 @@ export class CustomerDetailsComponent {
     [2, 'female'],
   ]);
 
-  customer: Signal<Customer | null>;
-  isLoading: Signal<boolean>;
-  errorMessage: Signal<string | null>;
+  readonly customer;
+  readonly isLoading;
+  readonly errorMessage;
   customerGender: Signal<string | undefined>;
 
   constructor(
@@ -25,13 +25,10 @@ export class CustomerDetailsComponent {
     private router: Router,
     private activatedRoute: ActivatedRoute,
   ) {
-    // Get signals from the service
-    this.customer = this.getCustomerService.getCustomerSignal();
-    console.log(this.customer());
-    this.isLoading = this.getCustomerService.isLoading();
-    this.errorMessage = this.getCustomerService.getErrorMessage();
+    this.customer = this.getCustomerService.selectedCustomer;
+    this.isLoading = this.getCustomerService.loading;
+    this.errorMessage = this.getCustomerService.error;
 
-    // Compute gender based on the customer data
     this.customerGender = computed(() => {
       const c = this.customer();
       return c && c.gender !== undefined
@@ -46,7 +43,7 @@ export class CustomerDetailsComponent {
     if (paramID) {
       this.getCustomerService.getCustomer(paramID);
     } else {
-      this.router.navigate(['']); // Redirect if no ID is found
+      this.router.navigate(['']);
     }
   }
 }

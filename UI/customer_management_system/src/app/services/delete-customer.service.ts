@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { GenericResponse } from '../interfaces/generic-response';
-import { GetCustomersService } from './get-customers.service';
+import { GetCustomerService } from './get-customer.service';
 import { HttpHeaderService } from './http-header-service';
 
 @Injectable({
@@ -15,7 +15,7 @@ export class DeleteCustomerService {
   constructor(
     private http: HttpClient,
     private httpHeaderService: HttpHeaderService,
-    private getCustomersService: GetCustomersService, // Inject GetCustomersService to update locally
+    private getCustomerService: GetCustomerService,
   ) {}
 
   deleteCustomer(customerGUID: string): void {
@@ -28,7 +28,7 @@ export class DeleteCustomerService {
       .subscribe({
         next: () => {
           // Remove the customer from the local signal
-          this.getCustomersService.removeCustomerLocally(customerGUID);
+          this.getCustomerService.removeCustomerLocally(customerGUID);
         },
         error: (error) => console.error('Deletion failed:', error),
       });

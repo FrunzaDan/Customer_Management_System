@@ -1,36 +1,41 @@
-import { Component, OnInit, Signal, computed, effect } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  Component,
+  effect,
+  inject,
+  Injector,
+  OnInit,
+  runInInjectionContext,
+} from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Customer } from '../../../../src/app/interfaces/get-customer-list-response';
 import { GetCustomerService } from '../../../../src/app/services/get-customer.service';
-import {
-  Address,
-  Customer,
-} from '../../../../src/app/interfaces/get-customer-list-response';
-import { Router, ActivatedRoute } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { CommonModule } from '@angular/common';
 import { EditCustomerService } from '../../services/edit-customer.service';
 
 @Component({
   selector: 'app-edit-customer',
   templateUrl: './edit-customer.component.html',
   styleUrls: ['./edit-customer.component.css'],
+  standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
 })
 export class EditCustomerComponent implements OnInit {
-  form!: FormGroup;
-  genderDropdown: any = ['unknown', 'male', 'female'];
+  form: FormGroup;
+  genderDropdown: string[] = ['unknown', 'male', 'female'];
   paramId: string = '';
-  submitted: boolean = false; // ✅ Add this property
+  submitted: boolean = false;
 
-  // Using signals
-  customer: Signal<Customer | null>;
-  isLoading: Signal<boolean>;
-  errorMessage: Signal<string | null>;
+  readonly customer;
+  readonly isLoading;
+  readonly errorMessage;
+  private injector = inject(Injector);
 
   constructor(
     private fb: FormBuilder,
@@ -39,13 +44,45 @@ export class EditCustomerComponent implements OnInit {
     private getCustomerService: GetCustomerService,
     private editCustomerService: EditCustomerService,
   ) {
-    this.customer = this.getCustomerService.getCustomerSignal();
-    this.isLoading = this.getCustomerService.isLoading();
-    this.errorMessage = this.getCustomerService.getErrorMessage();
+    this.form = this.createForm();
+
+    this.customer = this.getCustomerService.selectedCustomer;
+    this.isLoading = this.getCustomerService.loading;
+    this.errorMessage = this.getCustomerService.error;
+
+    // Create effect in constructor using injector
+    runInInjectionContext(this.injector, () => {
+      effect(() => {
+        const customerData = this.customer();
+        if (customerData) {
+          const birthParts = customerData.birthdate.split('-');
+
+          this.form.patchValue(
+            {
+              firstName: customerData.firstName,
+              lastName: customerData.lastName,
+              email: customerData.email,
+              msisdn: customerData.msisdn,
+              gender: customerData.gender,
+              birthYear: birthParts[0],
+              birthMonth: birthParts[1],
+              birthDay: birthParts[2],
+              country: customerData.address.country,
+              county: customerData.address.county,
+              town: customerData.address.town,
+              street: customerData.address.street,
+              number: customerData.address.number,
+              zip: customerData.address.zip,
+            },
+            { emitEvent: false },
+          );
+        }
+      });
+    });
   }
 
-  ngOnInit(): void {
-    this.form = this.fb.group({
+  private createForm(): FormGroup {
+    return this.fb.group({
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       email: [
@@ -67,40 +104,21 @@ export class EditCustomerComponent implements OnInit {
       number: ['', Validators.required],
       zip: ['', Validators.required],
     });
-
-    this.paramId = this.route.snapshot.queryParamMap.get('id')!;
-    this.getCustomerService.getCustomer(this.paramId);
-
-    effect(() => {
-      const customerData = this.customer();
-      if (customerData) {
-        this.form.patchValue({
-          firstName: customerData.firstName,
-          lastName: customerData.lastName,
-          email: customerData.email,
-          msisdn: customerData.msisdn,
-          gender: customerData.gender,
-          birthYear: customerData.birthdate.split('-')[0],
-          birthMonth: customerData.birthdate.split('-')[1],
-          birthDay: customerData.birthdate.split('-')[2],
-          country: customerData.address.country,
-          county: customerData.address.county,
-          town: customerData.address.town,
-          street: customerData.address.street,
-          number: customerData.address.number,
-          zip: customerData.address.zip,
-        });
-      }
-    });
   }
 
-  // ✅ Getter for form controls
+  ngOnInit(): void {
+    this.paramId = this.route.snapshot.queryParamMap.get('id') ?? '';
+    if (this.paramId) {
+      this.getCustomerService.getCustomer(this.paramId);
+    }
+  }
+
   get f() {
     return this.form.controls;
   }
 
   onSubmit() {
-    this.submitted = true; // ✅ Track form submission
+    this.submitted = true;
 
     if (this.form.invalid || !this.customer()) {
       return;

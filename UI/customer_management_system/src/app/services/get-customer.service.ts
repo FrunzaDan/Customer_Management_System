@@ -4,8 +4,8 @@ import {
   HttpHeaders,
   HttpParams,
 } from '@angular/common/http';
-import { Injectable, Signal, signal } from '@angular/core';
-import { Customer } from '../../../src/app/interfaces/get-customer-list-response';
+import { computed, Injectable, Signal, signal } from '@angular/core';
+import { Customer } from '../interfaces/get-customer-list-response';
 import { environment } from '../../environments/environment';
 import { GenericResponse } from '../interfaces/generic-response';
 import { HttpHeaderService } from './http-header-service';
@@ -14,61 +14,106 @@ import { HttpHeaderService } from './http-header-service';
   providedIn: 'root',
 })
 export class GetCustomerService {
-  readonly APIURL =
-    environment.CustomerManagementSystemAPI + '/api/Customer/get';
+  private readonly APIURL_ALL = `${environment.CustomerManagementSystemAPI}/api/Customer/all`;
+  private readonly APIURL_SINGLE = `${environment.CustomerManagementSystemAPI}/api/Customer/get`;
 
-  private customer = signal<Customer | null>(null);
-  private loading = signal<boolean>(false);
-  private errorMessage = signal<string | null>(null);
+  private readonly state = signal({
+    customers: [] as Customer[],
+    selectedCustomer: null as Customer | null,
+    loading: false,
+    error: null as string | null,
+  });
+
+  // Computed signals
+  public readonly customers = computed(() => this.state().customers);
+  public readonly selectedCustomer = computed(
+    () => this.state().selectedCustomer,
+  );
+  public readonly loading = computed(() => this.state().loading);
+  public readonly error = computed(() => this.state().error);
 
   constructor(
     private http: HttpClient,
     private httpHeaderService: HttpHeaderService,
-  ) {}
+  ) {
+    this.loadCustomers();
+  }
 
-  getCustomer(queryString: string): void {
-    this.loading.set(true);
-    this.errorMessage.set(null);
+  public loadCustomers(): void {
+    this.setLoading(true);
 
-    const headers: HttpHeaders =
-      this.httpHeaderService.getHeadersWithTokenSet();
-    const params = new HttpParams().set('searchVariable', queryString);
+    const headers = this.httpHeaderService.getHeadersWithTokenSet();
 
     this.http
-      .get<GenericResponse<Customer>>(this.APIURL, { headers, params })
+      .get<GenericResponse<Customer[]>>(this.APIURL_ALL, { headers })
       .subscribe({
         next: (response) => {
-          this.customer.set(response?.data ?? null);
-          this.loading.set(false);
+          this.state.update((state) => ({
+            ...state,
+            customers: response?.data ?? [],
+            loading: false,
+            error: null,
+          }));
         },
-        error: (error: HttpErrorResponse) => {
-          this.handleError(error);
-        },
+        error: (error: HttpErrorResponse) => this.handleError(error),
       });
   }
 
-  getCustomerSignal(): Signal<Customer | null> {
-    return this.customer;
-  }
+  getCustomer(queryString: string): void {
+    this.setLoading(true);
 
-  isLoading(): Signal<boolean> {
-    return this.loading;
-  }
+    const headers = this.httpHeaderService.getHeadersWithTokenSet();
+    const params = new HttpParams().set('searchVariable', queryString);
 
-  getErrorMessage(): Signal<string | null> {
-    return this.errorMessage;
-  }
-
-  private handleError(error: HttpErrorResponse): void {
-    console.error('Error fetching customer:', error);
-    this.errorMessage.set(error.message || 'Server error');
-    this.loading.set(false);
+    this.http
+      .get<GenericResponse<Customer>>(this.APIURL_SINGLE, { headers, params })
+      .subscribe({
+        next: (response) => {
+          this.state.update((state) => ({
+            ...state,
+            selectedCustomer: response?.data ?? null,
+            loading: false,
+            error: null,
+          }));
+        },
+        error: (error: HttpErrorResponse) => this.handleError(error),
+      });
   }
 
   updateCustomerLocally(updatedCustomer: Customer): void {
-    const existingCustomer = this.customer();
-    if (existingCustomer && existingCustomer.guid === updatedCustomer.guid) {
-      this.customer.set(updatedCustomer);
-    }
+    this.state.update((state) => ({
+      ...state,
+      customers: state.customers.map((c) =>
+        c.guid === updatedCustomer.guid ? updatedCustomer : c,
+      ),
+      selectedCustomer:
+        state.selectedCustomer?.guid === updatedCustomer.guid
+          ? updatedCustomer
+          : state.selectedCustomer,
+    }));
+  }
+
+  removeCustomerLocally(customerGUID: string): void {
+    this.state.update((state) => ({
+      ...state,
+      customers: state.customers.filter((c) => c.guid !== customerGUID),
+      selectedCustomer:
+        state.selectedCustomer?.guid === customerGUID
+          ? null
+          : state.selectedCustomer,
+    }));
+  }
+
+  private setLoading(loading: boolean): void {
+    this.state.update((state) => ({ ...state, loading, error: null }));
+  }
+
+  private handleError(error: HttpErrorResponse): void {
+    console.error('Error fetching customer data:', error);
+    this.state.update((state) => ({
+      ...state,
+      loading: false,
+      error: error.message || 'Server error',
+    }));
   }
 }

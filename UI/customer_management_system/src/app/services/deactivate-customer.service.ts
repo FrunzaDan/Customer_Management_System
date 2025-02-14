@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { GenericResponse } from '../interfaces/generic-response';
-import { GetCustomersService } from './get-customers.service';
+import { GetCustomerService } from './get-customer.service';
 import { HttpHeaderService } from './http-header-service';
 
 @Injectable({
@@ -15,7 +15,7 @@ export class DeactivateCustomerService {
   constructor(
     private http: HttpClient,
     private httpHeaderService: HttpHeaderService,
-    private getCustomersService: GetCustomersService, // Inject GetCustomersService to update locally
+    private getCustomerService: GetCustomerService, // Inject GetCustomersService to update locally
   ) {}
 
   deactivateCustomer(customerGUID: string): void {
@@ -28,7 +28,7 @@ export class DeactivateCustomerService {
       .subscribe({
         next: () => {
           // Update only the deactivated customer in-memory
-          this.getCustomersService.updateCustomerLocally({
+          this.getCustomerService.updateCustomerLocally({
             guid: customerGUID,
             isActive: false, // Assuming there's an `isActive` property
           } as any);
