@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Signal, computed, effect } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -14,7 +14,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { EditCustomerService } from '../../services/edit-customer.service';
-import { first } from 'rxjs/internal/operators/first';
 
 @Component({
   selector: 'app-edit-customer',
@@ -25,16 +24,13 @@ import { first } from 'rxjs/internal/operators/first';
 export class EditCustomerComponent implements OnInit {
   form!: FormGroup;
   genderDropdown: any = ['unknown', 'male', 'female'];
-  loading: boolean = false;
-  loadCompleted: boolean = false;
-  submitted: boolean = false;
-  customer: Customer | undefined = undefined;
-  customerAddress: Address = {} as Address;
   paramId: string = '';
+  submitted: boolean = false; // ✅ Add this property
 
-  get f() {
-    return this.form.controls;
-  }
+  // Using signals
+  customer: Signal<Customer | null>;
+  isLoading: Signal<boolean>;
+  errorMessage: Signal<string | null>;
 
   constructor(
     private fb: FormBuilder,
@@ -42,7 +38,11 @@ export class EditCustomerComponent implements OnInit {
     private router: Router,
     private getCustomerService: GetCustomerService,
     private editCustomerService: EditCustomerService,
-  ) {}
+  ) {
+    this.customer = this.getCustomerService.getCustomerSignal();
+    this.isLoading = this.getCustomerService.isLoading();
+    this.errorMessage = this.getCustomerService.getErrorMessage();
+  }
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -67,86 +67,64 @@ export class EditCustomerComponent implements OnInit {
       number: ['', Validators.required],
       zip: ['', Validators.required],
     });
+
     this.paramId = this.route.snapshot.queryParamMap.get('id')!;
-    this.getCustomerService.getCustomer(this.paramId).subscribe({
-      next: (response) => {
-        this.customer = response.data;
+    this.getCustomerService.getCustomer(this.paramId);
+
+    effect(() => {
+      const customerData = this.customer();
+      if (customerData) {
         this.form.patchValue({
-          firstName: this.customer?.firstName,
-          lastName: this.customer?.lastName,
-          email: this.customer?.email,
-          msisdn: this.customer?.msisdn,
-          gender: this.customer?.gender,
-          birthYear: this.customer?.birthdate.split('-')[0],
-          birthMonth: this.customer?.birthdate.split('-')[1],
-          birthDay: this.customer?.birthdate.split('-')[2],
-          country: this.customer?.address.country,
-          county: this.customer?.address.county,
-          town: this.customer?.address.town,
-          street: this.customer?.address.street,
-          number: this.customer?.address.number,
-          zip: this.customer?.address.zip,
+          firstName: customerData.firstName,
+          lastName: customerData.lastName,
+          email: customerData.email,
+          msisdn: customerData.msisdn,
+          gender: customerData.gender,
+          birthYear: customerData.birthdate.split('-')[0],
+          birthMonth: customerData.birthdate.split('-')[1],
+          birthDay: customerData.birthdate.split('-')[2],
+          country: customerData.address.country,
+          county: customerData.address.county,
+          town: customerData.address.town,
+          street: customerData.address.street,
+          number: customerData.address.number,
+          zip: customerData.address.zip,
         });
-        this.loadCompleted = true;
-      },
-      error: (error) => {
-        if (error.error.responseCode == 403) {
-          this.router.navigate(['']);
-        } else if (error.error.responseCode == 404) {
-        }
-      },
+      }
     });
   }
 
-  onSubmit() {
-    this.submitted = true;
+  // ✅ Getter for form controls
+  get f() {
+    return this.form.controls;
+  }
 
-    // stop here if form is invalid
-    if (this.form.invalid) {
+  onSubmit() {
+    this.submitted = true; // ✅ Track form submission
+
+    if (this.form.invalid || !this.customer()) {
       return;
     }
 
-    this.loading = true;
+    const updatedCustomer: Customer = {
+      ...this.customer()!,
+      firstName: this.form.value.firstName,
+      lastName: this.form.value.lastName,
+      email: this.form.value.email,
+      msisdn: this.form.value.msisdn,
+      gender: this.form.value.gender,
+      birthdate: `${this.form.value.birthYear}-${this.form.value.birthMonth}-${this.form.value.birthDay}`,
+      address: {
+        country: this.form.value.country,
+        county: this.form.value.county,
+        town: this.form.value.town,
+        street: this.form.value.street,
+        number: this.form.value.number,
+        zip: this.form.value.zip,
+      },
+    };
 
-    if (this.customer !== undefined) {
-      this.customer.guid = this.paramId;
-      this.customer.firstName = this.form.value.firstName;
-      this.customer.lastName = this.form.value.lastName;
-      this.customer.email = this.form.value.email;
-      this.customer.msisdn = this.form.value.msisdn;
-      this.customer.gender = this.form.value.gender;
-      this.customer.birthdate =
-        this.form.value.birthYear +
-        '-' +
-        this.form.value.birthMonth +
-        '-' +
-        this.form.value.birthDay;
-
-      this.customerAddress.country = this.form.value.country;
-      this.customerAddress.county = this.form.value.county;
-      this.customerAddress.town = this.form.value.town;
-      this.customerAddress.street = this.form.value.street;
-      this.customerAddress.number = this.form.value.number;
-      this.customerAddress.zip = this.form.value.zip;
-
-      this.customer.address = this.customerAddress;
-
-      this.editCustomerService
-        .editCustomer(this.customer)
-        .pipe(first())
-        .subscribe({
-          next: () => {
-            this.router.navigate(['../customers'], { relativeTo: this.route });
-          },
-          error: (error) => {
-            let errorStatusCode = error.status;
-            if (errorStatusCode == 403) {
-              this.router.navigate(['']);
-            } else if (errorStatusCode == 404) {
-            }
-            this.loading = false;
-          },
-        });
-    }
+    this.editCustomerService.editCustomer(updatedCustomer);
+    this.router.navigate(['../customers'], { relativeTo: this.route });
   }
 }

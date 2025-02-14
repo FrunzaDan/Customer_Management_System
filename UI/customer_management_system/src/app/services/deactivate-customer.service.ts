@@ -1,14 +1,9 @@
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpHeaders,
-  HttpParams,
-} from '@angular/common/http';
-import { catchError, Observable, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpHeaderService } from './http-header-service';
 import { GenericResponse } from '../interfaces/generic-response';
+import { GetCustomersService } from './get-customers.service';
+import { HttpHeaderService } from './http-header-service';
 
 @Injectable({
   providedIn: 'root',
@@ -20,24 +15,25 @@ export class DeactivateCustomerService {
   constructor(
     private http: HttpClient,
     private httpHeaderService: HttpHeaderService,
+    private getCustomersService: GetCustomersService, // Inject GetCustomersService to update locally
   ) {}
 
-  deactivateCustomer(queryString: string): Observable<GenericResponse<object>> {
-    console.log('Triggered!');
+  deactivateCustomer(customerGUID: string): void {
     const headers: HttpHeaders =
       this.httpHeaderService.getHeadersWithTokenSet();
-    const params = new HttpParams().set('customerGUID', queryString);
+    const params = new HttpParams().set('customerGUID', customerGUID);
 
-    return this.http
-      .patch<GenericResponse<object>>(this.APIURL, null, {
-        headers: headers,
-        params: params,
-      })
-      .pipe(catchError(this.handleError));
-  }
-
-  private handleError(error: HttpErrorResponse): Observable<never> {
-    console.error('Error:', error);
-    return throwError(() => new Error(error.message || 'Server error'));
+    this.http
+      .patch<GenericResponse<object>>(this.APIURL, null, { headers, params })
+      .subscribe({
+        next: () => {
+          // Update only the deactivated customer in-memory
+          this.getCustomersService.updateCustomerLocally({
+            guid: customerGUID,
+            isActive: false, // Assuming there's an `isActive` property
+          } as any);
+        },
+        error: (error) => console.error('Deactivation failed:', error),
+      });
   }
 }

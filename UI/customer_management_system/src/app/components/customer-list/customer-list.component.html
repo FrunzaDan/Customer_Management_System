@@ -1,7 +1,8 @@
-@if (loadCompleted) {
+@if (!isLoading(); ) {
+
 <table class="table table-responsive-sm table-striped table-hover">
   <caption class="container-fluid">
-    This table gets real time API data.
+    This table gets real-time API data.
   </caption>
   <thead class="table-dark">
     <tr>
@@ -12,16 +13,18 @@
     </tr>
   </thead>
   <tbody>
-    @for (customer of customerList; track trackByCustomerId($index, customer)) {
+    @for (customer of customers(); track trackByCustomerId){
+
     <tr>
-      <th class="align-middle text-center" scope="row">
+      <td class="align-middle text-center">
         <a
           (click)="onGuidClick(customer)"
           class="plain-Links hoverItem"
           target="_blank"
-          >{{ customer.firstName + ' ' + customer.lastName }}</a
         >
-      </th>
+          {{ customer.firstName + ' ' + customer.lastName }}
+        </a>
+      </td>
       <td class="align-middle text-center">{{ customer.email }}</td>
       <td class="align-middle text-center">{{ customer.msisdn }}</td>
       <td class="align-middle text-center">
@@ -32,7 +35,8 @@
         >
           Edit
         </button>
-        @if (customer.customerStatus == 1901) {
+
+        @if (customer.customerStatus === 1901) {
         <button
           (click)="onDeactivateClick(customer)"
           type="button"
@@ -40,7 +44,7 @@
         >
           Deactivate
         </button>
-        } @if (customer.customerStatus == 1903) {
+        } @if (customer.customerStatus === 1903) {
         <button
           (click)="onReactivateClick(customer)"
           type="button"

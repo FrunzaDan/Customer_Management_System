@@ -1,14 +1,9 @@
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpHeaders,
-  HttpParams,
-} from '@angular/common/http';
-import { catchError, Observable, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpHeaderService } from './http-header-service';
 import { GenericResponse } from '../interfaces/generic-response';
+import { GetCustomersService } from './get-customers.service';
+import { HttpHeaderService } from './http-header-service';
 
 @Injectable({
   providedIn: 'root',
@@ -20,23 +15,22 @@ export class DeleteCustomerService {
   constructor(
     private http: HttpClient,
     private httpHeaderService: HttpHeaderService,
+    private getCustomersService: GetCustomersService, // Inject GetCustomersService to update locally
   ) {}
 
-  deleteCustomer(queryString: string): Observable<GenericResponse<object>> {
+  deleteCustomer(customerGUID: string): void {
     const headers: HttpHeaders =
       this.httpHeaderService.getHeadersWithTokenSet();
-    const params = new HttpParams().set('customerGUID', queryString);
+    const params = new HttpParams().set('customerGUID', customerGUID);
 
-    return this.http
-      .delete<GenericResponse<object>>(this.APIURL, {
-        headers: headers,
-        params: params,
-      })
-      .pipe(catchError(this.handleError));
-  }
-
-  private handleError(error: HttpErrorResponse): Observable<never> {
-    console.error('Error:', error);
-    return throwError(() => new Error(error.message || 'Server error'));
+    this.http
+      .delete<GenericResponse<object>>(this.APIURL, { headers, params })
+      .subscribe({
+        next: () => {
+          // Remove the customer from the local signal
+          this.getCustomersService.removeCustomerLocally(customerGUID);
+        },
+        error: (error) => console.error('Deletion failed:', error),
+      });
   }
 }

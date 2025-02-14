@@ -21,6 +21,7 @@
               </div>
               }
             </div>
+
             <div class="mb-3">
               <label class="form-label">Last Name</label>
               <input
@@ -37,6 +38,7 @@
               </div>
               }
             </div>
+
             <div class="mb-3">
               <label class="form-label">Email</label>
               <input
@@ -55,6 +57,7 @@
               </div>
               }
             </div>
+
             <div class="mb-3">
               <label class="form-label">Phone</label>
               <input
@@ -73,19 +76,15 @@
               </div>
               }
             </div>
+
             <div class="mb-3">
               <label class="form-label">Gender</label>
-              <div class="form-group">
-                <select
-                  formControlName="gender"
-                  class="form-select"
-                  aria-label="Select gender"
-                >
-                  <option selected>Select a gender:</option>
-                  <option value="1">Male</option>
-                  <option value="2">Female</option>
-                </select>
-              </div>
+              <select formControlName="gender" class="form-select">
+                <option value="">Select a gender</option>
+                <option *ngFor="let gender of genderDropdown" [value]="gender">
+                  {{ gender }}
+                </option>
+              </select>
               @if (submitted && f['gender'].errors) {
               <div class="invalid-feedback">
                 @if (f['gender'].errors['required']) {
@@ -94,11 +93,11 @@
               </div>
               }
             </div>
+
             <div class="mb-3">
               <label class="form-label">Birthdate</label>
               <div class="row">
                 <div class="col">
-                  <label for="inputCity">Year</label>
                   <input
                     type="text"
                     formControlName="birthYear"
@@ -106,6 +105,7 @@
                     [ngClass]="{
                       'is-invalid': submitted && f['birthYear'].errors
                     }"
+                    placeholder="Year"
                   />
                   @if (submitted && f['birthYear'].errors) {
                   <div class="invalid-feedback">
@@ -116,7 +116,6 @@
                   }
                 </div>
                 <div class="col">
-                  <label for="inputCity">Month</label>
                   <input
                     type="text"
                     formControlName="birthMonth"
@@ -124,6 +123,7 @@
                     [ngClass]="{
                       'is-invalid': submitted && f['birthMonth'].errors
                     }"
+                    placeholder="Month"
                   />
                   @if (submitted && f['birthMonth'].errors) {
                   <div class="invalid-feedback">
@@ -134,7 +134,6 @@
                   }
                 </div>
                 <div class="col">
-                  <label for="inputZip">Day</label>
                   <input
                     type="text"
                     formControlName="birthDay"
@@ -142,6 +141,7 @@
                     [ngClass]="{
                       'is-invalid': submitted && f['birthDay'].errors
                     }"
+                    placeholder="Day"
                   />
                   @if (submitted && f['birthDay'].errors) {
                   <div class="invalid-feedback">
@@ -153,28 +153,15 @@
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card m-5">
-          <h4 class="card-header">Address:</h4>
-          <div class="card-body">
+
+            <h4 class="mt-4">Address:</h4>
             <div class="mb-3">
               <label class="form-label">Country</label>
               <input
                 type="text"
                 formControlName="country"
                 class="form-control"
-                [ngClass]="{ 'is-invalid': submitted && f['country'].errors }"
               />
-              @if (submitted && f['country'].errors) {
-              <div class="invalid-feedback">
-                @if (f['country'].errors['required']) {
-                <div>Country is required</div>
-                }
-              </div>
-              }
             </div>
             <div class="mb-3">
               <label class="form-label">County</label>
@@ -182,31 +169,11 @@
                 type="text"
                 formControlName="county"
                 class="form-control"
-                [ngClass]="{ 'is-invalid': submitted && f['county'].errors }"
               />
-              @if (submitted && f['county'].errors) {
-              <div class="invalid-feedback">
-                @if (f['county'].errors['required']) {
-                <div>County is required</div>
-                }
-              </div>
-              }
             </div>
             <div class="mb-3">
               <label class="form-label">Town</label>
-              <input
-                type="text"
-                formControlName="town"
-                class="form-control"
-                [ngClass]="{ 'is-invalid': submitted && f['town'].errors }"
-              />
-              @if (submitted && f['town'].errors) {
-              <div class="invalid-feedback">
-                @if (f['town'].errors['required']) {
-                <div>Town is required</div>
-                }
-              </div>
-              }
+              <input type="text" formControlName="town" class="form-control" />
             </div>
             <div class="mb-3">
               <label class="form-label">Street</label>
@@ -214,15 +181,7 @@
                 type="text"
                 formControlName="street"
                 class="form-control"
-                [ngClass]="{ 'is-invalid': submitted && f['street'].errors }"
               />
-              @if (submitted && f['street'].errors) {
-              <div class="invalid-feedback">
-                @if (f['street'].errors['required']) {
-                <div>Street is required</div>
-                }
-              </div>
-              }
             </div>
             <div class="mb-3">
               <label class="form-label">Number</label>
@@ -230,40 +189,25 @@
                 type="text"
                 formControlName="number"
                 class="form-control"
-                [ngClass]="{ 'is-invalid': submitted && f['number'].errors }"
               />
-              @if (submitted && f['number'].errors) {
-              <div class="invalid-feedback">
-                @if (f['number'].errors['required']) {
-                <div>Street number is required</div>
-                }
-              </div>
-              }
             </div>
             <div class="mb-3">
               <label class="form-label">Zip</label>
-              <input
-                type="text"
-                formControlName="zip"
-                class="form-control"
-                [ngClass]="{ 'is-invalid': submitted && f['zip'].errors }"
-              />
-              @if (submitted && f['zip'].errors) {
-              <div class="invalid-feedback">
-                @if (f['zip'].errors['required']) {
-                <div>Zip code is required</div>
-                }
-              </div>
-              }
+              <input type="text" formControlName="zip" class="form-control" />
             </div>
+
             <div>
-              <button [disabled]="loading" class="btn btn-primary">
-                @if (loading) {
+              <button [disabled]="isLoading()" class="btn btn-primary">
+                @if (isLoading()) {
                 <span class="spinner-border spinner-border-sm me-1"></span>
                 } Edit Customer
               </button>
               <a routerLink="/customers" class="btn btn-link">Cancel</a>
             </div>
+
+            @if (errorMessage()) {
+            <div class="alert alert-danger mt-3">{{ errorMessage() }}</div>
+            }
           </div>
         </div>
       </div>
