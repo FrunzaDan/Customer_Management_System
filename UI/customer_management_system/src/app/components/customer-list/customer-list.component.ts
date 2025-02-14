@@ -1,7 +1,9 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { GetCustomersService } from '../../../../src/app/services/get-customers.service';
 import { Customer } from '../../../../src/app/interfaces/get-customer-list-response';
 import { Router } from '@angular/router';
+import { DeactivateCustomerService } from '../../services/deactivate-customer.service';
+import { DeleteCustomerService } from '../../services/delete-customer.service';
 
 @Component({
   selector: 'app-customer-list',
@@ -15,6 +17,8 @@ export class CustomerListComponent implements OnInit {
 
   constructor(
     private readonly getCustomersService: GetCustomersService,
+    private readonly deactivateCustomerService: DeactivateCustomerService,
+    private readonly deleteCustomerService: DeleteCustomerService,
     private readonly router: Router,
   ) {}
 
@@ -57,7 +61,18 @@ export class CustomerListComponent implements OnInit {
     });
   }
 
-  onDeactivateClick(customer: Customer): void {}
+  onDeactivateClick(customer: Customer): void {
+    this.deactivateCustomerService.deactivateCustomer(customer.guid).subscribe({
+      next: () => {
+        this.loadCustomerList();
+      },
+      error: (error) => console.error('Deactivation failed:', error),
+    });
+  }
 
   onReactivateClick(customer: Customer): void {}
+
+  onDeleteClick(customer: Customer): void {
+    this.deleteCustomerService.deleteCustomer(customer.guid);
+  }
 }

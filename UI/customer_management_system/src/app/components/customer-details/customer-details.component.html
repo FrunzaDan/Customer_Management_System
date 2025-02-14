@@ -51,6 +51,19 @@
           </div>
         </div>
       </div>
+      <div class="card my-5">
+        <div class="card-body">
+          <h5 class="card-title">Account Misc:</h5>
+          <div class="card-text">
+            <p>Account Creation Time: {{ this.customer?.creationDate }}</p>
+            <p>
+              Account Last Interaction Time:
+              {{ this.customer?.interactionDate }}
+            </p>
+            <p>Account Status: {{ this.customer?.customerStatus }}</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
