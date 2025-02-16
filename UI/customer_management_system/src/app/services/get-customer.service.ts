@@ -5,7 +5,7 @@ import {
   HttpParams,
 } from '@angular/common/http';
 import { computed, Injectable, Signal, signal } from '@angular/core';
-import { Customer } from '../interfaces/get-customer-list-response';
+import { Customer } from '../interfaces/customer-response';
 import { environment } from '../../environments/environment';
 import { GenericResponse } from '../interfaces/generic-response';
 import { HttpHeaderService } from './http-header-service';

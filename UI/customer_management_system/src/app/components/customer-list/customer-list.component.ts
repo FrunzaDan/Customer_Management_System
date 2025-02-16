@@ -1,9 +1,13 @@
-import { Component, OnInit, computed, Signal } from '@angular/core';
-import { GetCustomerService } from '../../../../src/app/services/get-customer.service';
-import { Customer } from '../../../../src/app/interfaces/get-customer-list-response';
+// customer-list.component.ts
+import { Component, OnInit, computed, Signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { GetCustomerService } from '../../services/get-customer.service';
 import { ActivateCustomerService } from '../../services/activate-customer.service';
 import { DeleteCustomerService } from '../../services/delete-customer.service';
+import {
+  Customer,
+  CustomerActivationStatus,
+} from '../../interfaces/customer-response';
 
 @Component({
   selector: 'app-customer-list',
@@ -11,62 +15,74 @@ import { DeleteCustomerService } from '../../services/delete-customer.service';
   styleUrls: ['./customer-list.component.css'],
 })
 export class CustomerListComponent implements OnInit {
-  readonly customers;
-  readonly isLoading;
-  readonly errorMessage;
+  // Use dependency injection with inject()
+  private readonly getCustomerService = inject(GetCustomerService);
+  private readonly activateCustomerService = inject(ActivateCustomerService);
+  private readonly deleteCustomerService = inject(DeleteCustomerService);
+  private readonly router = inject(Router);
 
-  // Computed signal to check for duplicate GUIDs
+  // Public signals for template
+  readonly customers = this.getCustomerService.customersSignal;
+  readonly isLoading = this.getCustomerService.loadingSignal;
+  readonly errorMessage = this.getCustomerService.errorSignal;
+  readonly activationLoading = this.activateCustomerService.loadingSignal;
+  readonly activationError = this.activateCustomerService.errorSignal;
+
+  // Add CustomerStatus enum for better type checking
+  readonly CustomerStatus = CustomerActivationStatus;
+
+  // Computed signal for duplicate GUIDs
   readonly duplicateGuids = computed(() => {
-    const guids = this.customers().map((customer) => customer.guid);
-    return guids.filter((guid, index) => guids.indexOf(guid) !== index);
-  });
+    const customers = this.customers();
+    const guidCount = new Map<string, number>();
 
-  constructor(
-    private readonly getCustomerService: GetCustomerService,
-    private readonly activateCustomerService: ActivateCustomerService,
-    private readonly deleteCustomerService: DeleteCustomerService,
-    private readonly router: Router,
-  ) {
-    this.customers = this.getCustomerService.customersSignal;
-    this.isLoading = this.getCustomerService.loadingSignal;
-    this.errorMessage = this.getCustomerService.errorSignal;
-  }
+    customers.forEach((customer) => {
+      const count = guidCount.get(customer.guid) ?? 0;
+      guidCount.set(customer.guid, count + 1);
+    });
+
+    return Array.from(guidCount.entries())
+      .filter(([_, count]) => count > 1)
+      .map(([guid]) => guid);
+  });
 
   ngOnInit(): void {
     this.getCustomerService.loadCustomers();
 
-    if (this.duplicateGuids().length > 0) {
-      console.warn('Duplicate GUIDs found:', this.duplicateGuids());
-    } else {
-      console.log('No duplicated GUIDs found');
+    const duplicates = this.duplicateGuids();
+    if (duplicates.length > 0) {
+      console.warn('Duplicate GUIDs found:', duplicates);
     }
   }
 
-  trackByCustomerId(index: number, customer: Customer): string {
+  // Add return type and improve type safety
+  trackByCustomerId(_: number, customer: Customer): string {
     return customer.guid;
   }
 
-  onGuidClick(customer: Customer): void {
+  // Navigation methods
+  navigateToCustomer(guid: string): void {
     this.router.navigate(['/customerDetails'], {
-      queryParams: { id: customer.guid },
+      queryParams: { id: guid },
     });
   }
 
-  onEditClick(customer: Customer): void {
+  navigateToEdit(guid: string): void {
     this.router.navigate(['/editCustomer'], {
-      queryParams: { id: customer.guid },
+      queryParams: { id: guid },
     });
   }
 
-  onDeactivateClick(customer: Customer): void {
-    this.activateCustomerService.deactivateCustomer(customer.guid);
+  // Customer action methods
+  deactivateCustomer(guid: string): void {
+    this.activateCustomerService.deactivateCustomer(guid);
   }
 
-  onDeleteClick(customer: Customer): void {
-    this.deleteCustomerService.deleteCustomer(customer.guid);
+  reactivateCustomer(guid: string): void {
+    this.activateCustomerService.reactivateCustomer(guid);
   }
 
-  onReactivateClick(customer: Customer): void {
-    this.activateCustomerService.reactivateCustomer(customer.guid);
+  deleteCustomer(guid: string): void {
+    this.deleteCustomerService.deleteCustomer(guid);
   }
 }

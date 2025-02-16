@@ -14,7 +14,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Customer } from '../../../../src/app/interfaces/get-customer-list-response';
+import { Customer } from '../../interfaces/customer-response';
 import { GetCustomerService } from '../../../../src/app/services/get-customer.service';
 import { environment } from '../../../environments/environment';
 import { EditCustomerService } from '../../services/edit-customer.service';

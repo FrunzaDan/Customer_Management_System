@@ -1,6 +1,6 @@
 import { Component, Signal, computed } from '@angular/core';
 import { GetCustomerService } from '../../../../src/app/services/get-customer.service';
-import { Customer } from '../../../../src/app/interfaces/get-customer-list-response';
+import { Customer } from '../../interfaces/customer-response';
 import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({

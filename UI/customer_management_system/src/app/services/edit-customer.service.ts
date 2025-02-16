@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { GenericResponse } from '../../../src/app/interfaces/generic-response';
-import { Customer } from '../../../src/app/interfaces/get-customer-list-response';
+import { Customer } from '../interfaces/customer-response';
 import { HttpHeaderService } from './http-header-service';
 import { GetCustomerService } from './get-customer.service'; // Inject to update locally
 
