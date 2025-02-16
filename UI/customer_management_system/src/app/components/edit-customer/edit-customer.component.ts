@@ -46,9 +46,9 @@ export class EditCustomerComponent implements OnInit {
   ) {
     this.form = this.createForm();
 
-    this.customer = this.getCustomerService.selectedCustomer;
-    this.isLoading = this.getCustomerService.loading;
-    this.errorMessage = this.getCustomerService.error;
+    this.customer = this.getCustomerService.selectedCustomerSignal;
+    this.isLoading = this.getCustomerService.loadingSignal;
+    this.errorMessage = this.getCustomerService.errorSignal;
 
     // Create effect in constructor using injector
     runInInjectionContext(this.injector, () => {

@@ -92,6 +92,24 @@ public class CustomerController(ICustomerService customerService) : ControllerBa
                 new { Message = "An error occurred while processing your request.", Details = ex.Message });
         }
     }
+    
+    [HttpPatch("reactivate")]
+    public async Task<IActionResult> ReactivateCustomer([FromQuery] string customerGuid)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(customerGuid))
+                return BadRequest(new { Message = "Customer GUID cannot be null or empty." });
+
+            var response = await customerService.ReactivateCustomer(customerGuid);
+            return StatusCode(response.Status ?? 200, response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500,
+                new { Message = "An error occurred while processing your request.", Details = ex.Message });
+        }
+    }
 
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteCustomer([FromQuery] string customerGuid)

@@ -25,8 +25,16 @@ public class CustomerService : ICustomerService
     {
         if (_isAuthorized.Status != 200) return _isAuthorized;
 
-        var customerDeactivation = new CustomerDeactivation(_dbUtils);
+        var customerDeactivation = new CustomerActivation(_dbUtils);
         return await customerDeactivation.DeactivateCustomer(customerGuid);
+    }
+    
+    public async Task<ResponseModel<object>> ReactivateCustomer(string customerGuid)
+    {
+        if (_isAuthorized.Status != 200) return _isAuthorized;
+
+        var customerActivation = new CustomerActivation(_dbUtils);
+        return await customerActivation.ReactivateCustomer(customerGuid);
     }
 
     public async Task<ResponseModel<object>> DeleteCustomer(string customerGuid)

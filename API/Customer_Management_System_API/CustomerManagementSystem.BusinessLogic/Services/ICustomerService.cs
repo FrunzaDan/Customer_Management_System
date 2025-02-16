@@ -13,6 +13,8 @@ public interface ICustomerService
     Task<ResponseModel<object>> EditCustomer(CustomerModel request);
 
     Task<ResponseModel<object>> DeactivateCustomer(string guid);
+    
+    Task<ResponseModel<object>> ReactivateCustomer(string guid);
 
     Task<ResponseModel<object>> DeleteCustomer(string guid);
 }

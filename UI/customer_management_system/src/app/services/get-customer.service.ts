@@ -14,8 +14,8 @@ import { HttpHeaderService } from './http-header-service';
   providedIn: 'root',
 })
 export class GetCustomerService {
-  private readonly APIURL_ALL = `${environment.CustomerManagementSystemAPI}/api/Customer/all`;
-  private readonly APIURL_SINGLE = `${environment.CustomerManagementSystemAPI}/api/Customer/get`;
+  private readonly API_URL_GET_ALL = `${environment.CustomerManagementSystemAPI}/api/Customer/all`;
+  private readonly API_URL_GET_SINGLE = `${environment.CustomerManagementSystemAPI}/api/Customer/get`;
 
   private readonly state = signal({
     customers: [] as Customer[],
@@ -25,19 +25,17 @@ export class GetCustomerService {
   });
 
   // Computed signals
-  public readonly customers = computed(() => this.state().customers);
-  public readonly selectedCustomer = computed(
+  public readonly customersSignal = computed(() => this.state().customers);
+  public readonly selectedCustomerSignal = computed(
     () => this.state().selectedCustomer,
   );
-  public readonly loading = computed(() => this.state().loading);
-  public readonly error = computed(() => this.state().error);
+  public readonly loadingSignal = computed(() => this.state().loading);
+  public readonly errorSignal = computed(() => this.state().error);
 
   constructor(
     private http: HttpClient,
     private httpHeaderService: HttpHeaderService,
-  ) {
-    this.loadCustomers();
-  }
+  ) {}
 
   public loadCustomers(): void {
     this.setLoading(true);
@@ -45,7 +43,7 @@ export class GetCustomerService {
     const headers = this.httpHeaderService.getHeadersWithTokenSet();
 
     this.http
-      .get<GenericResponse<Customer[]>>(this.APIURL_ALL, { headers })
+      .get<GenericResponse<Customer[]>>(this.API_URL_GET_ALL, { headers })
       .subscribe({
         next: (response) => {
           this.state.update((state) => ({
@@ -66,7 +64,10 @@ export class GetCustomerService {
     const params = new HttpParams().set('searchVariable', queryString);
 
     this.http
-      .get<GenericResponse<Customer>>(this.APIURL_SINGLE, { headers, params })
+      .get<GenericResponse<Customer>>(this.API_URL_GET_SINGLE, {
+        headers,
+        params,
+      })
       .subscribe({
         next: (response) => {
           this.state.update((state) => ({
@@ -105,15 +106,29 @@ export class GetCustomerService {
   }
 
   private setLoading(loading: boolean): void {
-    this.state.update((state) => ({ ...state, loading, error: null }));
+    this.state.update((state) => ({
+      ...state,
+      loading,
+      error: loading ? state.error : null, // Clear error only if loading is false
+    }));
   }
 
   private handleError(error: HttpErrorResponse): void {
-    console.error('Error fetching customer data:', error);
+    let errorMessage = 'An unknown error occurred';
+
+    if (error.status === 0) {
+      errorMessage = 'Network error - please check your connection.';
+    } else if (error.status >= 400 && error.status < 500) {
+      errorMessage = error.error?.message || 'Client-side error occurred.';
+    } else if (error.status >= 500) {
+      errorMessage = 'Server error - please try again later.';
+    }
+
+    console.error('CustomerService Error:', errorMessage);
     this.state.update((state) => ({
       ...state,
       loading: false,
-      error: error.message || 'Server error',
+      error: errorMessage,
     }));
   }
 }

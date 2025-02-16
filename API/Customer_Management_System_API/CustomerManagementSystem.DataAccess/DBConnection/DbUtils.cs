@@ -58,6 +58,15 @@ public class DbUtils(IAppSettingsConfig configuration) : IDbUtils
             DbHelper.HandleResponseWithMessage
         );
     }
+    
+    public async Task<ResponseModel<object>> ReactivateCustomer(string customerGuid)
+    {
+        return await ExecuteStoredProcedureAsync(
+            "dbo.usp_reactivateCustomer",
+            command => command.Parameters.AddWithValue("@var_Guid", customerGuid),
+            DbHelper.HandleResponseWithMessage
+        );
+    }
 
     public async Task<ResponseModel<object>> DeleteCustomer(string customerGuid)
     {

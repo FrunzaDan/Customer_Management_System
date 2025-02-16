@@ -25,9 +25,9 @@ export class CustomerDetailsComponent {
     private router: Router,
     private activatedRoute: ActivatedRoute,
   ) {
-    this.customer = this.getCustomerService.selectedCustomer;
-    this.isLoading = this.getCustomerService.loading;
-    this.errorMessage = this.getCustomerService.error;
+    this.customer = this.getCustomerService.selectedCustomerSignal;
+    this.isLoading = this.getCustomerService.loadingSignal;
+    this.errorMessage = this.getCustomerService.errorSignal;
 
     this.customerGender = computed(() => {
       const c = this.customer();
@@ -38,12 +38,13 @@ export class CustomerDetailsComponent {
   }
 
   ngOnInit(): void {
-    const paramID: string | null =
-      this.activatedRoute.snapshot.queryParamMap.get('id');
-    if (paramID) {
-      this.getCustomerService.getCustomer(paramID);
-    } else {
-      this.router.navigate(['']);
-    }
+    this.activatedRoute.queryParamMap.subscribe((params) => {
+      const paramID = params.get('id');
+      if (paramID) {
+        this.getCustomerService.getCustomer(paramID);
+      } else {
+        this.router.navigate(['']);
+      }
+    });
   }
 }
