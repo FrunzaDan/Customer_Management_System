@@ -1,5 +1,5 @@
 // customer-list.component.ts
-import { Component, OnInit, computed, Signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, computed, effect, Signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { GetCustomerService } from '../../services/get-customer.service';
 import { ActivateCustomerService } from '../../services/activate-customer.service';
@@ -47,13 +47,20 @@ export class CustomerListComponent implements OnInit {
       .map(([guid]) => guid);
   });
 
+  constructor() {
+    // duplicateGuids() is a computed signal, so re-run this check whenever
+    // it actually changes instead of only once, synchronously, right after
+    // the (async) loadCustomers() call in ngOnInit.
+    effect(() => {
+      const duplicates = this.duplicateGuids();
+      if (duplicates.length > 0) {
+        console.warn('Duplicate GUIDs found:', duplicates);
+      }
+    });
+  }
+
   ngOnInit(): void {
     this.getCustomerService.loadCustomers();
-
-    const duplicates = this.duplicateGuids();
-    if (duplicates.length > 0) {
-      console.warn('Duplicate GUIDs found:', duplicates);
-    }
   }
 
   // Add return type and improve type safety
