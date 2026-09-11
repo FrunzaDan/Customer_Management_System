@@ -92,6 +92,10 @@ export class UserLoginComponent implements OnInit, OnDestroy {
       case 404:
         this.errorMessage = 'Endpoint is down!';
         break;
+      case 429:
+        this.errorMessage =
+          'Too many login attempts. Please wait a moment and try again.';
+        break;
       case 0:
         this.errorMessage =
           'Could not reach the server. It may be offline, or your browser does not trust its security certificate.';

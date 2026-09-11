@@ -160,6 +160,10 @@ docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1
             <li>
               The login form submits a merchant ID and password to
               <code>POST /api/Authentication/access-token</code> over HTTPS.
+              That endpoint is rate-limited (5 attempts per minute per
+              caller IP) — beyond that it responds with <code>429</code>
+              immediately, without touching the database, to blunt scripted
+              brute-force/credential-stuffing attempts.
             </li>
             <li>
               The API fetches only that merchant's stored password hash and

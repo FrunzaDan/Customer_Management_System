@@ -16,15 +16,16 @@ How an HTTP request moves through the ASP.NET Core API: middleware order, CORS, 
 Layering: `WebAPI` (controllers/host) → `BusinessLogic` (services, validation, JWT — see [[api-validation]], [[jwt-auth-flow]]) → `DataAccess` (ADO.NET + stored procs) → `Domain` (models/config). All customer/merchant DB access goes through **stored procedures** — no inline SQL, no ORM.
 
 **Middleware order in `Program.cs`** (order matters):
-`UseExceptionHandler` → `UseCors` → `UseHttpsRedirection` → `UseAuthentication` → `UseAuthorization` → `MapControllers`. In non-Development environments, `UseHsts()` runs alongside `UseHttpsRedirection`.
+`UseExceptionHandler` → `UseCors` → `UseHttpsRedirection` → `UseRateLimiter` → `UseAuthentication` → `UseAuthorization` → `MapControllers`. In non-Development environments, `UseHsts()` runs alongside `UseHttpsRedirection`.
 
 - A global exception handler middleware catches any unhandled exception, logs it, and returns a generic `{ Message, Details }` JSON 500 (`Details` only populated in Development) — controllers themselves don't have try/catch blocks.
 - CORS is locked to `Cors:AllowedOrigins` in `appsettings.json` (`http://localhost:4200`, `https://localhost:4200`), methods limited to `GET/POST/PATCH/DELETE`, headers limited to `Content-Type`/`Authorization`. No `AllowCredentials()` — consistent with bearer-token (not cookie) auth.
 - Swagger UI is only wired up in Development, with a Bearer-JWT security scheme so tokens can be pasted in for manual testing.
+- `AddRateLimiter` registers one named policy, `"login"`: a per-client-IP fixed-window limiter (5 requests/minute, in-memory), applied via `[EnableRateLimiting("login")]` on just `AuthenticationController.GetAccessToken` — not global, so it never throttles `verify-token` or any `CustomerController` endpoint. Exceeding it short-circuits with `429` and a small hand-written JSON body, configured via `options.OnRejected` (mirrors the exception handler's `{ Message }` shape rather than going through `ResponseModel`, since this runs before MVC's formatters). See [[known-gaps]] for why it's in-memory/per-instance rather than persistent.
 
 **Controllers:**
 - `AuthenticationController` (`api/Authentication`):
-  - `POST /access-token` — body `{ merchantId, merchantPassword }` → JWT if credentials check out.
+  - `POST /access-token` — body `{ merchantId, merchantPassword }` → JWT if credentials check out. Rate-limited (see above).
   - `GET /verify-token` — `[Authorize]`-gated; if the request gets past the JWT middleware, the token is valid — the endpoint has nothing left to do but return 200.
 - `CustomerController` (`api/Customer`) — class-level `[Authorize]`, every endpoint requires a bearer token:
   - `POST /register`, `GET /get?searchVariable=...`, `GET /all`, `PATCH /edit`, `PATCH /deactivate?customerGuid=...`, `PATCH /reactivate?customerGuid=...`, `DELETE /delete?customerGuid=...`.

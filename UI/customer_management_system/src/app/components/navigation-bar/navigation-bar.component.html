@@ -41,7 +41,12 @@
           >
         </li>
       </ul>
-      <a class="nav-link" aria-current="page" routerLink="login"
+      <a
+        class="nav-link"
+        aria-current="page"
+        role="button"
+        style="cursor: pointer"
+        (click)="logout()"
         ><span class="hoveritem">Log out</span></a
       >
     </div>

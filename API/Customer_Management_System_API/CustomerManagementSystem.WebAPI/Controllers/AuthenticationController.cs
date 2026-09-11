@@ -2,6 +2,7 @@ using CustomerManagementSystem.BusinessLogic.Services;
 using CustomerManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace CustomerManagementSystem.WebAPI.Controllers;
 
@@ -10,6 +11,7 @@ namespace CustomerManagementSystem.WebAPI.Controllers;
 public class AuthenticationController(IAuthService authService) : ControllerBase
 {
     [HttpPost("access-token")]
+    [EnableRateLimiting("login")]
     public async Task<IActionResult> GetAccessToken([FromBody] MerchantCredentials merchantCredentials)
     {
         var response = await authService.GetAccessToken(merchantCredentials);

@@ -1,8 +1,10 @@
 ﻿using System.Net;
+using System.Threading.RateLimiting;
 using CustomerManagementSystem.BusinessLogic;
 using CustomerManagementSystem.BusinessLogic.AuthFunctions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Newtonsoft.Json;
@@ -75,6 +77,34 @@ builder.Services.AddCors(options =>
         .WithHeaders("Content-Type", "Authorization"));
 });
 
+// Throttles POST /api/Authentication/access-token so scripted credential-stuffing/brute-force
+// can't run at network speed; PBKDF2 alone (see PasswordHasher) only slows a single guess.
+// Per-IP fixed window, in-memory — resets on app restart, doesn't survive multiple instances,
+// which is fine for this app's single-instance local/demo scope.
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("login", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        factory: _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0
+        }));
+
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.ContentType = "application/json";
+        await context.HttpContext.Response.WriteAsync(
+            JsonConvert.SerializeObject(new
+            {
+                Message = "Too many login attempts. Please wait a moment and try again."
+            }), cancellationToken);
+    };
+});
+
 builder.Services.AddHttpClient();
 
 builder.Services.AddHttpsRedirection(options =>
@@ -123,6 +153,8 @@ app.UseExceptionHandler(errorApp =>
 app.UseCors();
 
 app.UseHttpsRedirection();
+
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

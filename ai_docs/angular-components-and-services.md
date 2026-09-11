@@ -23,7 +23,7 @@ The route/component map, the customer services layer, and two real bugs that wer
 | `edit-customer` | `/editCustomer` | Edit-customer form |
 | `features` | `/features` | Static feature list page |
 | `about` | `/about` | Static about page |
-| `navigation-bar` | (shown/hidden via `NavbarService`) | Top nav — hidden on `/login` |
+| `navigation-bar` | (shown/hidden via `NavbarService`) | Top nav — hidden on `/login`; owns the "Log out" action |
 | `footer` | (shown/hidden via `FooterService`) | Page footer — hidden on `/login` |
 | `display-error` | n/a | Reusable error display |
 | `page-not-found` | `**` | 404 fallback |
@@ -41,3 +41,4 @@ Gender is stored/sent as an **integer**: `0` = Not declared, `1` = Male, `2` = F
 
 - `customer-list.component.ts`'s duplicate-GUID check runs as an `effect()` over the `duplicateGuids` computed signal, in the **constructor** (not `ngOnInit`) — it re-evaluates whenever `customers()` actually changes. A one-time synchronous check right after the async `loadCustomers()` call used to always see a stale/empty list and never fire; don't move this back to a one-shot check in `ngOnInit`.
 - See [[angular-app-config-and-routing]] for why `verify-token.service.ts` must stay a simple `pipe(map/catchError)` and not go back to a manually-managed `Subject`.
+- `NavigationBarComponent.logout()` explicitly calls `SessionStorageService.removeSessionStorage()` before navigating to `/login` — don't replace it with a plain `routerLink="login"` again. It used to be exactly that, and only "worked" because `UserLoginComponent.ngOnInit()` happens to clear storage too; that's an implicit dependency on another component's unrelated side effect, not something logout should rely on. See [[known-gaps]] for the fix history.

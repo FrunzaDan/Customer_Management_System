@@ -1,8 +1,9 @@
 import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { NavbarService } from '../../services/navbar.service';
+import { SessionStorageService } from '../../services/session-storage.service';
 import { Subscription } from 'rxjs';
 
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-navigation-bar',
@@ -14,10 +15,19 @@ import { RouterModule } from '@angular/router';
 export class NavigationBarComponent implements OnDestroy {
   showNavbar: boolean = true;
   subscription: Subscription;
-  constructor(private navbarService: NavbarService) {
+  constructor(
+    private navbarService: NavbarService,
+    private sessionStorageService: SessionStorageService,
+    private router: Router,
+  ) {
     this.subscription = this.navbarService.showNavbar.subscribe((value) => {
       this.showNavbar = value;
     });
+  }
+
+  logout(): void {
+    this.sessionStorageService.removeSessionStorage();
+    this.router.navigate(['login']);
   }
 
   ngOnDestroy(): void {
