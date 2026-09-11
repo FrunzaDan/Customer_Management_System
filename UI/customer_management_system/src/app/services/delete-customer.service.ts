@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import { GenericResponse } from '../interfaces/generic-response';
 import { GetCustomerService } from './get-customer.service';
 import { HttpHeaderService } from './http-header-service';
+import { NotificationService } from './notification.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +18,7 @@ export class DeleteCustomerService {
     private http: HttpClient,
     private httpHeaderService: HttpHeaderService,
     private getCustomerService: GetCustomerService,
+    private notificationService: NotificationService,
   ) {}
 
   deleteCustomer(customerGUID: string): Observable<GenericResponse<object>> {
@@ -27,7 +29,10 @@ export class DeleteCustomerService {
     return this.http
       .delete<GenericResponse<object>>(this.APIURL, { headers, params })
       .pipe(
-        tap(() => this.getCustomerService.removeCustomerLocally(customerGUID)),
+        tap(() => {
+          this.getCustomerService.removeCustomerLocally(customerGUID);
+          this.notificationService.show('Customer deleted successfully.');
+        }),
       );
   }
 }

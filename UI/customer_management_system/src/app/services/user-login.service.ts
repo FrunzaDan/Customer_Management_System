@@ -12,6 +12,7 @@ import { environment } from '../../environments/environment';
 import { SessionStorageService } from './session-storage.service';
 import { HttpHeaderService } from './http-header-service';
 import { GenericResponse } from '../interfaces/generic-response';
+import { NotificationService } from './notification.service';
 
 @Injectable({
   providedIn: 'root',
@@ -30,6 +31,7 @@ export class UserLoginService {
     private router: Router,
     private sessionStorageService: SessionStorageService,
     private httpHeaderService: HttpHeaderService,
+    private notificationService: NotificationService,
   ) {}
 
   userLoginResponse!: LoginDataResponse;
@@ -51,6 +53,7 @@ export class UserLoginService {
       this.sessionStorageService.setSessionAccessToken(
         response.data.accessToken,
       );
+      this.notificationService.show('Login successful.');
       this.router.navigateByUrl('customers');
     }
     return response.responseMessage;

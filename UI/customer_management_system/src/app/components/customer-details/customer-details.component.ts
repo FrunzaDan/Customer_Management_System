@@ -1,6 +1,19 @@
-import { Component, Signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  Signal,
+  computed,
+  signal,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { GetCustomerService } from '../../../../src/app/services/get-customer.service';
-import { Customer } from '../../interfaces/customer-response';
+import { ActivateCustomerService } from '../../services/activate-customer.service';
+import { DeleteCustomerService } from '../../services/delete-customer.service';
+import {
+  Customer,
+  CustomerActivationStatus,
+} from '../../interfaces/customer-response';
 import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -9,7 +22,7 @@ import { Router, ActivatedRoute } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./customer-details.component.css'],
 })
-export class CustomerDetailsComponent {
+export class CustomerDetailsComponent implements OnInit {
   genderMap = new Map<Customer['gender'], string>([
     [0, 'not declared'],
     [1, 'male'],
@@ -21,14 +34,28 @@ export class CustomerDetailsComponent {
   readonly errorMessage;
   customerGender: Signal<string | undefined>;
 
+  readonly CustomerStatus = CustomerActivationStatus;
+
+  // Deactivate/reactivate share ActivateCustomerService's loading/error state (it's
+  // providedIn: 'root', same instance the customer list uses); delete gets its own,
+  // same split as customer-list.component.ts.
+  readonly activationLoading;
+  readonly activationError;
+  readonly deleting = signal(false);
+  readonly deleteError = signal<string | null>(null);
+
   constructor(
     private getCustomerService: GetCustomerService,
+    private activateCustomerService: ActivateCustomerService,
+    private deleteCustomerService: DeleteCustomerService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
   ) {
     this.customer = this.getCustomerService.selectedCustomerSignal;
     this.isLoading = this.getCustomerService.loadingSignal;
     this.errorMessage = this.getCustomerService.errorSignal;
+    this.activationLoading = this.activateCustomerService.loadingSignal;
+    this.activationError = this.activateCustomerService.errorSignal;
 
     this.customerGender = computed(() => {
       const c = this.customer();
@@ -47,5 +74,57 @@ export class CustomerDetailsComponent {
         this.router.navigate(['']);
       }
     });
+  }
+
+  navigateToEdit(): void {
+    const guid = this.customer()?.guid;
+    if (!guid) return;
+    this.router.navigate(['/editCustomer'], { queryParams: { id: guid } });
+  }
+
+  deactivateCustomer(): void {
+    const guid = this.customer()?.guid;
+    if (!guid) return;
+    this.activateCustomerService.deactivateCustomer(guid);
+  }
+
+  reactivateCustomer(): void {
+    const guid = this.customer()?.guid;
+    if (!guid) return;
+    this.activateCustomerService.reactivateCustomer(guid);
+  }
+
+  deleteCustomer(): void {
+    const guid = this.customer()?.guid;
+    if (!guid) return;
+    if (
+      !confirm(
+        'Are you sure you want to permanently delete this customer? This cannot be undone.',
+      )
+    ) {
+      return;
+    }
+
+    this.deleting.set(true);
+    this.deleteError.set(null);
+
+    this.deleteCustomerService.deleteCustomer(guid).subscribe({
+      next: () => this.router.navigate(['/customers']),
+      error: (error: HttpErrorResponse) => {
+        this.deleting.set(false);
+        this.deleteError.set(this.extractErrorMessage(error));
+      },
+    });
+  }
+
+  private extractErrorMessage(error: HttpErrorResponse): string {
+    if (error.status === 0) {
+      return 'Could not reach the server. It may be offline, or your browser does not trust its security certificate.';
+    }
+    return (
+      error.error?.responseMessage ??
+      error.error?.message ??
+      `Request failed (${error.status}). Please try again.`
+    );
   }
 }

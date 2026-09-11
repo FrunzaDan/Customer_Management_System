@@ -64,6 +64,65 @@
           </div>
         </div>
       </div>
+      <div class="card my-5">
+        <div class="card-body">
+          <h5 class="card-title">Actions:</h5>
+          <div class="btn-group" role="group">
+            <button
+              (click)="navigateToEdit()"
+              type="button"
+              class="btn btn-primary shadow-none"
+              [disabled]="activationLoading() || deleting()"
+            >
+              Edit
+            </button>
+
+            @if (customer()?.customerStatus === CustomerStatus.Active) {
+            <button
+              (click)="deactivateCustomer()"
+              type="button"
+              class="btn btn-danger"
+              [disabled]="activationLoading() || deleting()"
+            >
+              Deactivate
+            </button>
+            } @if (customer()?.customerStatus === CustomerStatus.Deactivated) {
+            <button
+              (click)="reactivateCustomer()"
+              type="button"
+              class="btn btn-secondary"
+              [disabled]="activationLoading() || deleting()"
+            >
+              Reactivate
+            </button>
+            }
+
+            <button
+              (click)="deleteCustomer()"
+              type="button"
+              class="btn btn-danger shadow-none"
+              [disabled]="
+                customer()?.customerStatus !== CustomerStatus.Deactivated ||
+                activationLoading() ||
+                deleting()
+              "
+              [title]="
+                customer()?.customerStatus !== CustomerStatus.Deactivated
+                  ? 'Deactivate this customer before deleting it'
+                  : ''
+              "
+            >
+              Delete
+            </button>
+          </div>
+
+          @if (activationError(); as error) {
+          <div class="alert alert-danger mt-3">{{ error }}</div>
+          } @if (deleteError(); as error) {
+          <div class="alert alert-danger mt-3">{{ error }}</div>
+          }
+        </div>
+      </div>
     </div>
   </div>
 </div>

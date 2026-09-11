@@ -12,6 +12,7 @@ import { HttpHeaderService } from './http-header-service';
 import { CustomerActivationStatus } from '../interfaces/customer-response';
 import { retry } from 'rxjs/internal/operators/retry';
 import { catchError } from 'rxjs/internal/operators/catchError';
+import { NotificationService } from './notification.service';
 
 interface ActivationState {
   loading: boolean;
@@ -39,6 +40,7 @@ export class ActivateCustomerService {
     private http: HttpClient,
     private httpHeaderService: HttpHeaderService,
     private getCustomerService: GetCustomerService, // Inject GetCustomersService to update locally
+    private notificationService: NotificationService,
   ) {}
 
   deactivateCustomer(customerGUID: string): void {
@@ -76,6 +78,7 @@ export class ActivateCustomerService {
               customerStatus: CustomerActivationStatus.Deactivated,
             });
             this.clearError();
+            this.notificationService.show('Customer deactivated successfully.');
           } else {
             this.handleError(
               new Error(
@@ -123,6 +126,7 @@ export class ActivateCustomerService {
               customerStatus: CustomerActivationStatus.Active,
             });
             this.clearError();
+            this.notificationService.show('Customer reactivated successfully.');
           } else {
             this.handleError(
               new Error(
