@@ -78,7 +78,9 @@ docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1
           </ul>
           <p class="card-text mb-0">
             <code>run.sh</code> is safe to re-run any time: an existing,
-            already-initialized database is simply left alone, and a
+            already-initialized database is simply left alone (schema
+            deploys are a diff, not a wipe-and-recreate — so any customers
+            you've registered through the UI survive a re-run), and a
             stopped container is restarted rather than recreated.
           </p>
         </div>
@@ -95,7 +97,11 @@ docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1
             retrying automatically until the freshly-started container
             starts accepting connections. This deploy is a diff against the
             container's current state, so it's idempotent — running it
-            again against an already-initialized database changes nothing.
+            again against an already-initialized database changes nothing —
+            and it's allowed to rebuild already-populated tables when a
+            schema change requires it (e.g. adding a constraint), since this
+            is disposable local dev data, not a production database that
+            needs that guardrail.
           </p>
           <p class="card-text">The schema has three tables:</p>
           <ul>
@@ -104,7 +110,9 @@ docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1
               email, MSISDN, gender, birthdate, a numeric
               <code>customer_Status</code> (active / deactivated), and
               creation/last-interaction timestamps, keyed by a GUID
-              primary key.
+              primary key. Email and MSISDN each carry a unique constraint,
+              so duplicates are rejected by the database itself, not just
+              application logic.
             </li>
             <li>
               <code>tbl_addresses</code> — one row per customer's address,
@@ -112,10 +120,10 @@ docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1
               that same GUID.
             </li>
             <li>
-              <code>tbl_merchants</code> — login accounts for the API: a
-              merchant ID, a PBKDF2 password hash and its salt (never the
-              plaintext password), a role, and a last-interaction
-              timestamp.
+              <code>tbl_merchants</code> — login accounts for the API,
+              keyed by merchant ID (primary key): a PBKDF2 password hash
+              and its salt (never the plaintext password), a role, and a
+              last-interaction timestamp.
             </li>
           </ul>
           <p class="card-text">
@@ -168,9 +176,12 @@ docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1
               password is never stored anywhere.
             </li>
             <li>
-              On success, the API mints a JWT signed with HMAC-SHA256,
-              carrying the merchant ID, role, a unique token ID, and issued
-              time, with a configured expiry.
+              On success, the API mints a JWT signed with HMAC-SHA256 (the
+              same signing-key logic is shared by issuing and validating, so
+              they can never quietly drift apart). It carries the merchant
+              ID (as several standard claim types), the merchant's role, a
+              marker for how they authenticated, a unique token ID, and
+              issued time, with a configured expiry.
             </li>
             <li>
               The Angular app stores that token in <code>sessionStorage</code>

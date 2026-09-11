@@ -12,7 +12,7 @@ The `tbl_customers`/`tbl_addresses` schema, the status codes that drive the deac
 
 ## How it works
 
-**`tbl_customers`**: `PK_customer_guid` (NVARCHAR 50, app-generated), `first_name`, `last_name`, `email`, `msisdn`, `gender` (INT — see [[angular-components-and-services]] for the 0/1/2 mapping), `birthdate`, `customer_Status`, `creation_Date`, `interaction_Date`.
+**`tbl_customers`**: `PK_customer_guid` (NVARCHAR 50, app-generated), `first_name`, `last_name`, `email` (unique), `msisdn` (unique), `gender` (INT — see [[angular-components-and-services]] for the 0/1/2 mapping), `birthdate`, `customer_Status`, `creation_Date`, `interaction_Date`.
 
 **`tbl_addresses`**: 1:1 with a customer via `FK_customer_guid` (`ON UPDATE CASCADE`) — country/county/town/zip/street/number. `usp_createCustomer` inserts both rows in **one transaction** — `usp_getCustomer`/`usp_getCustomers` `INNER JOIN` the two tables, so a customer row without a matching address row would silently disappear from every read despite existing in `tbl_customers`.
 
@@ -25,7 +25,7 @@ The `tbl_customers`/`tbl_addresses` schema, the status codes that drive the deac
 - `usp_deactivateCustomer` only updates rows where status `<> 1903` → `409` if already deactivated.
 - `usp_reactivateCustomer` only updates rows where status `<> 1901` → `409` if already active.
 - **`usp_deleteCustomer` requires status `= 1903`** — a customer must be deactivated first; deleting an active customer returns `409` with `'Customer must be deactivated before it can be deleted.'`. Only `deactivate → delete` or `deactivate → reactivate` are valid paths; `deactivate → delete → reactivate` is not (the customer no longer exists after delete).
-- `usp_createCustomer` also rejects duplicate `email` or `msisdn` up front with a `400`, before attempting the insert.
+- `usp_createCustomer` also rejects duplicate `email` or `msisdn` up front with a friendly `400`, before attempting the insert. `UQ_tbl_customers_email`/`UQ_tbl_customers_msisdn` unique constraints on the table back this up as a DB-level safety net for the race window between that check and the insert (two concurrent registrations with the same email/MSISDN); a request that loses that race gets a `500` from the constraint violation instead of the friendlier `400`, via the proc's existing `TRY/CATCH`.
 
 **Lookup**: `CustomerGetting.GetCustomerFunction` doesn't take an explicit search type from the caller — it auto-detects one via `DetermineSearchOption`, trying (in order) GUID format → MSISDN format → email format, and passing the matching `SearchOption` (1/2/3) to `usp_getCustomer`'s `@var_SearchOption`. An unrecognized `searchVariable` shape returns `404` without ever hitting the DB.
 

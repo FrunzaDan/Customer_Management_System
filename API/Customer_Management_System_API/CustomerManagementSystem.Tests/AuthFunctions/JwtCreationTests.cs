@@ -30,7 +30,7 @@ public class JwtCreationTests
     {
         var dbUtils = new Mock<IDbUtils>();
         dbUtils.Setup(d => d.CheckMerchantCredentialsFromDb(It.IsAny<MerchantCredentials>()))
-            .ReturnsAsync(new ResponseModel<object>(200, "Success!"));
+            .ReturnsAsync(new ResponseModel<int?>(200, "Success!", 1801));
         var jwtCreation = new JwtCreation(CreateConfig().Object, dbUtils.Object);
 
         var result = await jwtCreation.GenerateBearerJwt(Credentials);
@@ -46,7 +46,7 @@ public class JwtCreationTests
     {
         var dbUtils = new Mock<IDbUtils>();
         dbUtils.Setup(d => d.CheckMerchantCredentialsFromDb(It.IsAny<MerchantCredentials>()))
-            .ReturnsAsync(new ResponseModel<object>(403, "Invalid merchant credentials."));
+            .ReturnsAsync(new ResponseModel<int?>(403, "Invalid merchant credentials."));
         var jwtCreation = new JwtCreation(CreateConfig().Object, dbUtils.Object);
 
         var result = await jwtCreation.GenerateBearerJwt(Credentials);
@@ -76,7 +76,7 @@ public class JwtCreationTests
     {
         var dbUtils = new Mock<IDbUtils>();
         dbUtils.Setup(d => d.CheckMerchantCredentialsFromDb(It.IsAny<MerchantCredentials>()))
-            .ReturnsAsync(new ResponseModel<object>(200, "Success!"));
+            .ReturnsAsync(new ResponseModel<int?>(200, "Success!", 1801));
         var jwtCreation = new JwtCreation(CreateConfig(accessTokenTimeout: "not-a-number").Object, dbUtils.Object);
 
         var result = await jwtCreation.GenerateBearerJwt(Credentials);

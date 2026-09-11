@@ -1,6 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 using CustomerManagementSystem.DataAccess.DBConnection;
 using CustomerManagementSystem.Domain.Configuration;
 using CustomerManagementSystem.Domain.Models;
@@ -13,13 +12,13 @@ public class JwtCreation
 {
     private readonly IAppSettingsConfig _configuration;
     private readonly IDbUtils _dbUtils;
-    private readonly byte[] _jwtKey;
+    private readonly SymmetricSecurityKey _signingKey;
 
     public JwtCreation(IAppSettingsConfig appSettingsConfig, IDbUtils dbUtils)
     {
         _dbUtils = dbUtils;
         _configuration = appSettingsConfig;
-        _jwtKey = Encoding.ASCII.GetBytes(_configuration.SecureJwtKey);
+        _signingKey = JwtSigningKey.Create(_configuration.SecureJwtKey);
     }
 
     public async Task<ResponseModel<object>> GenerateBearerJwt(MerchantCredentials merchantCredentials)
@@ -37,8 +36,7 @@ public class JwtCreation
                     credentialsCheck.ResponseMessage);
 
             // Generate token
-            var merchantRole = credentialsCheck.Data as int?;
-            var token = GenerateJwtToken(merchantCredentials.MerchantId, merchantRole);
+            var token = GenerateJwtToken(merchantCredentials.MerchantId, credentialsCheck.Data);
 
             if (!double.TryParse(_configuration.AccessTokenTimeout, out var timeoutMinutes))
                 return new ResponseModel<object>(500, "Invalid AccessTokenTimeout configuration.");
@@ -82,8 +80,7 @@ public class JwtCreation
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString("o"))
             ]),
             Expires = DateTime.UtcNow.AddMinutes(double.Parse(_configuration.AccessTokenTimeout)),
-            SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(_jwtKey), SecurityAlgorithms.HmacSha256Signature),
+            SigningCredentials = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256Signature),
             Issuer = _configuration.JwtIssuer,
             Audience = _configuration.JwtAudience
         };

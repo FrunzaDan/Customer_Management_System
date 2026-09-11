@@ -116,7 +116,13 @@ elapsed=0
 max_elapsed=180
 echo -n "    "
 while [[ "$elapsed" -lt "$max_elapsed" ]]; do
-  if sqlpackage /Action:Publish /SourceFile:"$DB_DACPAC" /TargetConnectionString:"$TARGET_CONN" >"$PUBLISH_LOG" 2>&1; then
+  # BlockOnPossibleDataLoss:false — this is a local, disposable dev DB we actively iterate
+  # schema on; SSDT's default guard refuses any table rebuild (e.g. adding a PRIMARY KEY)
+  # against a table that already has rows, even when the rebuild is actually safe (as it is
+  # here), which otherwise makes every retry below fail identically for the full timeout
+  # instead of just succeeding.
+  if sqlpackage /Action:Publish /SourceFile:"$DB_DACPAC" /TargetConnectionString:"$TARGET_CONN" \
+    /p:BlockOnPossibleDataLoss=false >"$PUBLISH_LOG" 2>&1; then
     published=1
     break
   fi

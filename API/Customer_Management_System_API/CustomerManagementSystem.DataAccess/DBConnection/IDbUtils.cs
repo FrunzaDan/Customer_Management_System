@@ -11,5 +11,5 @@ public interface IDbUtils
     public Task<ResponseModel<object>> DeactivateCustomer(string customerGuid);
     public Task<ResponseModel<object>> ReactivateCustomer(string customerGuid);
     public Task<ResponseModel<object>> DeleteCustomer(string customerGuid);
-    public Task<ResponseModel<object>> CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials);
+    public Task<ResponseModel<int?>> CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials);
 }

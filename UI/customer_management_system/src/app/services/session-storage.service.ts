@@ -6,21 +6,18 @@ import { Injectable } from '@angular/core';
 export class SessionStorageService {
   private readonly accessTokenKey = 'accessToken';
 
-  getSessionAccessToken(): string {
-    if (typeof window !== 'undefined') {
-      try {
-        const accessTokenString = sessionStorage.getItem(this.accessTokenKey);
-
-        return accessTokenString ?? 'ERROR-NO-SESSION-TOKEN';
-      } catch (parseError: unknown) {
-        console.error(
-          'Error parsing products from session storage:',
-          parseError,
-        );
-        return 'ERROR-NO-SESSION-TOKEN';
-      }
-    } else {
-      return 'ERROR-NON-BROWSER-ENVIRONMENT';
+  getSessionAccessToken(): string | null {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+    try {
+      return sessionStorage.getItem(this.accessTokenKey);
+    } catch (parseError: unknown) {
+      console.error(
+        'Error parsing products from session storage:',
+        parseError,
+      );
+      return null;
     }
   }
 

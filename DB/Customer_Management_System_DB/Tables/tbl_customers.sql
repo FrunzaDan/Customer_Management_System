@@ -10,5 +10,7 @@ CREATE TABLE [dbo].[tbl_customers]
     [customer_Status] INT NULL,
     [creation_Date] NVARCHAR (50) NULL,
     [interaction_Date] NVARCHAR (50) NULL,
-    PRIMARY KEY (PK_customer_guid)
+    PRIMARY KEY (PK_customer_guid),
+    CONSTRAINT [UQ_tbl_customers_email] UNIQUE ([email]),
+    CONSTRAINT [UQ_tbl_customers_msisdn] UNIQUE ([msisdn])
 );

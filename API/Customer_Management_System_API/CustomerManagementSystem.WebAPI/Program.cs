@@ -1,6 +1,6 @@
 ﻿using System.Net;
-using System.Text;
 using CustomerManagementSystem.BusinessLogic;
+using CustomerManagementSystem.BusinessLogic.AuthFunctions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
@@ -54,7 +54,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtKey)),
+            IssuerSigningKey = JwtSigningKey.Create(jwtKey),
             ValidateIssuer = true,
             ValidIssuer = jwtIssuer,
             ValidateAudience = true,
