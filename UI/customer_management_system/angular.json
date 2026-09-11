@@ -11,7 +11,7 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:application",
+          "builder": "@angular/build:application",
           "options": {
             "outputPath": "dist/customer_management_system",
             "index": "src/index.html",
@@ -42,8 +42,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "3kb",
+                  "maximumError": "5kb"
                 }
               ],
               "outputHashing": "all"
@@ -52,12 +52,25 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "testing": {
+              "aot": false,
+              "optimization": false,
+              "extractLicenses": false,
+              "styles": [
+                "src/styles.css"
+              ],
+              "scripts": [],
+              "polyfills": [
+                "zone.js",
+                "zone.js/testing"
+              ]
             }
           },
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
+          "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
               "buildTarget": "customer_management_system:build:production"
@@ -69,16 +82,14 @@
           "defaultConfiguration": "development"
         },
         "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n"
+          "builder": "@angular/build:extract-i18n"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
-            "assets": ["src/favicon.ico", "src/assets"],
-            "styles": ["src/styles.css"],
-            "scripts": []
+            "buildTarget": ":build:testing",
+            "runner": "vitest"
           }
         }
       }
@@ -86,5 +97,31 @@
   },
   "cli": {
     "analytics": false
+  },
+  "schematics": {
+    "@schematics/angular:component": {
+      "type": "component"
+    },
+    "@schematics/angular:directive": {
+      "type": "directive"
+    },
+    "@schematics/angular:service": {
+      "type": "service"
+    },
+    "@schematics/angular:guard": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:interceptor": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:module": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:pipe": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:resolver": {
+      "typeSeparator": "."
+    }
   }
 }

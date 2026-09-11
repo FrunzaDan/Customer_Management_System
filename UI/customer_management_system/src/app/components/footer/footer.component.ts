@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { FooterService } from '../../services/footer.service';
 import { Subscription } from 'rxjs';
 
@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
   selector: 'app-footer',
   templateUrl: './footer.component.html',
   styleUrls: ['./footer.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [],
 })
 export class FooterComponent implements OnDestroy {

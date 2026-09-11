@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import {
@@ -21,12 +21,6 @@ export class UserLoginService {
     environment.CustomerManagementSystemAPI +
     '/api/Authentication/access-token';
 
-  httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-    }),
-  };
   userSubject = new BehaviorSubject<any>(null);
   errorSubject = new BehaviorSubject<any>(null);
   errorMessage = this.errorSubject.asObservable();

@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { NavbarService } from '../../services/navbar.service';
 import { Subscription } from 'rxjs';
 
@@ -8,6 +8,7 @@ import { RouterModule } from '@angular/router';
   selector: 'app-navigation-bar',
   templateUrl: './navigation-bar.component.html',
   styleUrls: ['./navigation-bar.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [RouterModule],
 })
 export class NavigationBarComponent implements OnDestroy {

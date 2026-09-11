@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { GenericResponse } from '../../../src/app/interfaces/generic-response';
-import { Subject, Observable } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import { environment } from '../../../src/environments/environment';
-import { SessionStorageService } from './session-storage.service';
+import { HttpHeaderService } from './http-header-service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,57 +12,26 @@ export class VerifyTokenService {
   readonly APIURL =
     environment.CustomerManagementSystemAPI +
     '/api/Authentication/verify-token';
-  httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-    }),
-  };
 
   constructor(
     private http: HttpClient,
-    private sessionStorageService: SessionStorageService,
+    private httpHeaderService: HttpHeaderService,
   ) {}
 
   isTokenValid(): Observable<boolean> {
-    const result = new Subject<boolean>();
-
-    this.verifyTokenViaAPI().subscribe({
-      next: (response) => {
-        if (response.status == 200) {
-          result.next(true);
-        } else if (response.status == 403) {
-          result.next(false);
-          result.complete();
-        } else {
-          result.next(false);
-          result.complete();
-        }
-      },
-      error: (error) => {
-        if (error.error.responseCode == 403) {
-          console.log('Forbidden Access!');
-        }
-
-        result.next(false);
-        result.complete();
-      },
-    });
-    return result.asObservable();
+    // Reaching a response at all means the API's [Authorize] middleware accepted the
+    // token; any error (401 with an empty body, network failure, etc.) means it didn't.
+    return this.verifyTokenViaAPI().pipe(
+      map(() => true),
+      catchError(() => of(false)),
+    );
   }
 
   verifyTokenViaAPI(): Observable<GenericResponse<object>> {
-    const sessionToken = this.sessionStorageService.getSessionAccessToken();
-
-    const headers = new HttpHeaders()
-      .set('content-type', 'application/json')
-      .set('Access-Control-Allow-Origin', '*');
-
-    const params = new HttpParams().set('accessToken', sessionToken);
+    const headers = this.httpHeaderService.getHeadersWithTokenSet();
 
     return this.http.get<GenericResponse<object>>(this.APIURL, {
       headers: headers,
-      params: params,
     });
   }
 }

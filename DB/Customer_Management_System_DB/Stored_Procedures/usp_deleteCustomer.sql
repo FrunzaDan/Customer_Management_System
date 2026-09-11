@@ -7,11 +7,25 @@ BEGIN
     DECLARE @result INT;
     DECLARE @message NVARCHAR(255);
 
-    IF EXISTS (
+    IF NOT EXISTS (
         SELECT 1
         FROM tbl_customers
         WHERE PK_customer_guid = @var_Guid
     )
+    BEGIN
+        SET @result = 404;
+        SET @message = 'Customer not found.';
+    END
+    ELSE IF NOT EXISTS (
+        SELECT 1
+        FROM tbl_customers
+        WHERE PK_customer_guid = @var_Guid AND customer_Status = 1903
+    )
+    BEGIN
+        SET @result = 409;
+        SET @message = 'Customer must be deactivated before it can be deleted.';
+    END
+    ELSE
     BEGIN
         DELETE FROM tbl_addresses
         WHERE FK_customer_guid = @var_Guid;
@@ -33,11 +47,6 @@ BEGIN
             SET @result = 409;
             SET @message = 'Failed to delete customer. Deletion may not have been successful.';
         END
-    END
-    ELSE
-    BEGIN
-        SET @result = 404;
-        SET @message = 'Customer not found.';
     END
 
     SELECT @result AS result, @message AS message;

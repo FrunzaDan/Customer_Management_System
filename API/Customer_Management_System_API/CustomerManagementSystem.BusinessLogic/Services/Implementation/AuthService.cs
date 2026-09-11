@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Http;
 namespace CustomerManagementSystem.BusinessLogic.Services.Implementation;
 
 public class AuthService(
-    IHttpContextAccessor httpContextAccessor,
     IHttpClientFactory httpClientFactory,
     IAppSettingsConfig appSettingsConfig,
     IDbUtils dbUtils)
@@ -41,16 +40,9 @@ public class AuthService(
         return response;
     }
 
-    public ResponseModel<object> VerifyToken(string? accessToken)
+    private ResponseModel<object> VerifyToken(string? accessToken)
     {
-        if (string.IsNullOrWhiteSpace(accessToken)) return new ResponseModel<object>(500, "No Access Token provided!");
-
-        var httpContext = httpContextAccessor.HttpContext;
-        if (httpContext is null) return new ResponseModel<object>(500, "Failed to initialize the HTTP context!");
-
         var jwtValidation = new JwtValidation(appSettingsConfig);
-        var isAuthorized = jwtValidation.Authorize(httpContext, accessToken);
-
-        return isAuthorized;
+        return jwtValidation.ValidateToken(accessToken);
     }
 }

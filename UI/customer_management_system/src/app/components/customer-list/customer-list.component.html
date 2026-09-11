@@ -15,7 +15,7 @@
       </tr>
     </thead>
     <tbody>
-      @for (customer of customers(); track trackByCustomerId) {
+      @for (customer of customers(); track trackByCustomerId($index, customer)) {
       <tr>
         <td class="align-middle text-center">
           <a

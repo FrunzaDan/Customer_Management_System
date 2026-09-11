@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, map, Observable, of } from 'rxjs';
 import { VerifyTokenService } from '../../../src/app/services/verify-token.service';
-import { LocalStorageService } from './local-storage.service';
+import { SessionStorageService } from './session-storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +11,7 @@ export class AuthGuardService {
   constructor(
     private verifyTokenService: VerifyTokenService,
     private router: Router,
-    private localStorageService: LocalStorageService,
+    private sessionStorageService: SessionStorageService,
   ) {}
 
   canActivate(): Observable<boolean> {
@@ -30,7 +30,7 @@ export class AuthGuardService {
   }
 
   private logout(): void {
-    this.localStorageService.removeLocalAccessToken();
+    this.sessionStorageService.removeSessionStorage();
   }
 
   private handleError(error: any): Observable<boolean> {

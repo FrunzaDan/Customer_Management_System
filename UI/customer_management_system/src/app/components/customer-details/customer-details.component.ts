@@ -1,4 +1,4 @@
-import { Component, Signal, computed } from '@angular/core';
+import { Component, Signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { GetCustomerService } from '../../../../src/app/services/get-customer.service';
 import { Customer } from '../../interfaces/customer-response';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -6,6 +6,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-customer-details',
   templateUrl: './customer-details.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./customer-details.component.css'],
 })
 export class CustomerDetailsComponent {

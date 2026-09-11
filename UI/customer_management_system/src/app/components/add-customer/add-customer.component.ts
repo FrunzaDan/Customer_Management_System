@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import {
   FormBuilder,
@@ -16,11 +16,11 @@ import { CommonModule } from '@angular/common';
   selector: 'app-add-customer',
   templateUrl: './add-customer.component.html',
   styleUrls: ['./add-customer.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CommonModule, ReactiveFormsModule],
 })
 export class AddCustomerComponent implements OnInit {
   form!: FormGroup;
-  genderDropdown: any = ['unknown', 'male', 'female'];
   loading: boolean = false;
   loadCompleted: boolean = false;
   submitted: boolean = false;

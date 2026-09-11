@@ -7,6 +7,7 @@ import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import {
   provideClientHydration,
   withEventReplay,
+  withNoIncrementalHydration
 } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import {
@@ -29,7 +30,7 @@ export const appConfig: ApplicationConfig = {
       }),
       withViewTransitions(),
     ),
-    provideClientHydration(withEventReplay()),
+    provideClientHydration(withEventReplay(), withNoIncrementalHydration()),
     provideHttpClient(withFetch(), withInterceptorsFromDi()),
     provideAnimations(),
   ],

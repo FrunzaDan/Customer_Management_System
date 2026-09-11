@@ -79,15 +79,20 @@ public class DbUtils(IAppSettingsConfig configuration) : IDbUtils
 
     public async Task<ResponseModel<object>> CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials)
     {
-        return await ExecuteStoredProcedureAsync(
-            "dbo.usp_checkMerchantCredentials",
-            command =>
-            {
-                command.Parameters.AddWithValue("@var_MerchantID", merchantCredentials.MerchantId);
-                command.Parameters.AddWithValue("@var_MerchantPassword", merchantCredentials.MerchantPassword);
-            },
-            DbHelper.HandleMerchantCredentialsResponse
+        var authData = await ExecuteStoredProcedureAsync(
+            "dbo.usp_getMerchantAuthData",
+            command => command.Parameters.AddWithValue("@var_MerchantID", merchantCredentials.MerchantId),
+            DbHelper.HandleMerchantAuthDataResponse
         );
+
+        if (authData is null ||
+            !PasswordHasher.VerifyPassword(merchantCredentials.MerchantPassword ?? string.Empty, authData.PasswordHash,
+                authData.PasswordSalt))
+            return new ResponseModel<object>(403, "Invalid Merchant ID or Password.");
+
+        return authData.MerchantRole == 1801
+            ? new ResponseModel<object>(200, $"Credentials validated successfully. Role: {authData.MerchantRole}.")
+            : new ResponseModel<object>(403, $"The provided merchant role ({authData.MerchantRole}) is not valid.");
     }
 
     private void CheckConnectionString()

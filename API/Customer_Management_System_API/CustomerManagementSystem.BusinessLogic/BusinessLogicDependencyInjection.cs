@@ -1,4 +1,5 @@
-﻿using CustomerManagementSystem.BusinessLogic.Services;
+﻿using CustomerManagementSystem.BusinessLogic.CustomerFunctions;
+using CustomerManagementSystem.BusinessLogic.Services;
 using CustomerManagementSystem.BusinessLogic.Services.Implementation;
 using CustomerManagementSystem.DataAccess.DBConnection;
 using CustomerManagementSystem.Domain.Configuration;
@@ -14,5 +15,11 @@ public static class BusinessLogicDependencyInjection
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddSingleton<IDbUtils, DbUtils>();
         services.AddSingleton<IAppSettingsConfig, AppSettingsConfig>();
+
+        services.AddScoped<CustomerRegistration>();
+        services.AddScoped<CustomerGetting>();
+        services.AddScoped<CustomerEditing>();
+        services.AddScoped<CustomerActivation>();
+        services.AddScoped<CustomerDeletion>();
     }
 }

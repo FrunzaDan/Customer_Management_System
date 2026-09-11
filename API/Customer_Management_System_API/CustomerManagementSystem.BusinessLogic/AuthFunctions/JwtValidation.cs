@@ -21,27 +21,10 @@ public class JwtValidation
         _jwtAudience = appSettingsConfig.JwtAudience;
     }
 
-    public ResponseModel<object> Authorize(HttpContext httpContext, string? bearerToken)
+    public ResponseModel<object> ValidateToken(string? token)
     {
-        string authHeader;
-        if (string.IsNullOrEmpty(bearerToken))
-            authHeader = httpContext.Request.Headers["Authorization"].ToString();
-        else
-            authHeader = "Bearer " + bearerToken;
+        if (string.IsNullOrEmpty(token)) return new ResponseModel<object>(500, "Unauthorized: Empty JWT.");
 
-        if (string.IsNullOrEmpty(authHeader)) return new ResponseModel<object>(500, "Unauthorized: Empty auth header.");
-
-        if (!authHeader.StartsWith("Bearer "))
-            return new ResponseModel<object>(500, "Unauthorized: No Bearer header identified.");
-
-        var jwt = authHeader.Split(' ')[1];
-        return string.IsNullOrEmpty(jwt)
-            ? new ResponseModel<object>(500, "Unauthorized: Empty JWT.")
-            : ValidateToken(jwt);
-    }
-
-    private ResponseModel<object> ValidateToken(string? token)
-    {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_jwtKey);
         try

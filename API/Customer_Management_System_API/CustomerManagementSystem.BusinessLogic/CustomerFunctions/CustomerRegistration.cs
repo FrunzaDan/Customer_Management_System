@@ -21,6 +21,9 @@ public class CustomerRegistration
         if (string.IsNullOrEmpty(request.Msisdn) || MsisdnValidation.ValidateMsisdn(request.Msisdn) == false)
             return new ResponseModel<object>(400, "Invalid or empty MSISDN.");
 
+        // A new customer's identifier is always generated server-side; a client-supplied GUID is never trusted.
+        request.Guid = Guid.NewGuid().ToString();
+
         return await _dbUtils.RegisterCustomer(request);
     }
 }

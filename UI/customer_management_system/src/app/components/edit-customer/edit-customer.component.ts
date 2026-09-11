@@ -6,6 +6,7 @@ import {
   Injector,
   OnInit,
   runInInjectionContext,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import {
   FormBuilder,
@@ -24,11 +25,11 @@ import { EditCustomerService } from '../../services/edit-customer.service';
   templateUrl: './edit-customer.component.html',
   styleUrls: ['./edit-customer.component.css'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CommonModule, ReactiveFormsModule],
 })
 export class EditCustomerComponent implements OnInit {
   form: FormGroup;
-  genderDropdown: string[] = ['unknown', 'male', 'female'];
   paramId: string = '';
   submitted: boolean = false;
 
@@ -63,7 +64,7 @@ export class EditCustomerComponent implements OnInit {
               lastName: customerData.lastName,
               email: customerData.email,
               msisdn: customerData.msisdn,
-              gender: customerData.gender,
+              gender: customerData.gender?.toString() ?? '',
               birthYear: birthParts[0],
               birthMonth: birthParts[1],
               birthDay: birthParts[2],

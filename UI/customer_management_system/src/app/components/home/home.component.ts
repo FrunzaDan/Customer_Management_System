@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CustomerListComponent } from '../customer-list/customer-list.component';
 
@@ -6,6 +6,7 @@ import { CustomerListComponent } from '../customer-list/customer-list.component'
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CustomerListComponent],
 })
 export class HomeComponent {

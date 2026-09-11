@@ -81,9 +81,9 @@
               <label class="form-label">Gender</label>
               <select formControlName="gender" class="form-select">
                 <option value="">Select a gender</option>
-                <option *ngFor="let gender of genderDropdown" [value]="gender">
-                  {{ gender }}
-                </option>
+                <option value="0">Not declared</option>
+                <option value="1">Male</option>
+                <option value="2">Female</option>
               </select>
               @if (submitted && f['gender'].errors) {
               <div class="invalid-feedback">

@@ -3,11 +3,13 @@ using Microsoft.Data.SqlClient;
 
 namespace CustomerManagementSystem.DataAccess.DBConnection;
 
+public sealed record MerchantAuthData(byte[] PasswordHash, byte[] PasswordSalt, int? MerchantRole);
+
 public static class DbHelper
 {
     public static void AddCustomerParameters(SqlCommand command, CustomerModel customer)
     {
-        command.Parameters.AddWithValue("@var_Guid", customer.Guid ?? Guid.NewGuid().ToString());
+        command.Parameters.AddWithValue("@var_Guid", customer.Guid);
         command.Parameters.AddWithValue("@var_FirstName", customer.FirstName);
         command.Parameters.AddWithValue("@var_LastName", customer.LastName);
         command.Parameters.AddWithValue("@var_Email", customer.Email);
@@ -47,22 +49,20 @@ public static class DbHelper
             : new ResponseModel<object>(Convert.ToInt32(reader["result"]), message ?? "Operation failed.");
     }
 
-    public static async Task<ResponseModel<object>> HandleMerchantCredentialsResponse(SqlDataReader reader)
+    public static async Task<MerchantAuthData?> HandleMerchantAuthDataResponse(SqlDataReader reader)
     {
-        if (!await reader.ReadAsync().ConfigureAwait(false))
-            return new ResponseModel<object>(404, "Invalid merchant credentials or no matching merchant found!");
+        if (!await reader.ReadAsync().ConfigureAwait(false)) return null;
 
-        var result = reader["result"] is int resultCode ? resultCode : 500;
-        var message = reader["message"] as string ?? "Operation failed.";
+        if (await reader.IsDBNullAsync(reader.GetOrdinal("password_hash")).ConfigureAwait(false) ||
+            await reader.IsDBNullAsync(reader.GetOrdinal("password_salt")).ConfigureAwait(false))
+            return null;
 
-        if (result != 0) return new ResponseModel<object>(400, message);
-
-        var role = reader["merchant_role"].ToString();
-        return role == "1801"
-            ? new ResponseModel<object>(200, $"{message} Role: {role}.")
-            : new ResponseModel<object>(403, $"The provided merchant role ({role}) is not valid.");
+        return new MerchantAuthData(
+            (byte[])reader["password_hash"],
+            (byte[])reader["password_salt"],
+            reader["merchant_role"] as int?
+        );
     }
-
 
     private static CustomerModel MapCustomerFromReader(SqlDataReader reader)
     {

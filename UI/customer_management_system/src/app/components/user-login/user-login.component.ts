@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -17,6 +17,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-user-login',
   templateUrl: './user-login.component.html',
   styleUrls: ['./user-login.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CommonModule, ReactiveFormsModule],
 })
 export class UserLoginComponent implements OnInit, OnDestroy {
@@ -91,8 +92,12 @@ export class UserLoginComponent implements OnInit, OnDestroy {
       case 404:
         this.errorMessage = 'Endpoint is down!';
         break;
+      case 0:
+        this.errorMessage =
+          'Could not reach the server. It may be offline, or your browser does not trust its security certificate.';
+        break;
       default:
-        this.errorMessage = 'Server is down!';
+        this.errorMessage = `Server error (${statusCode}). Please try again later.`;
     }
     this.userLoginService.errorSubject.next(this.errorMessage);
   }
