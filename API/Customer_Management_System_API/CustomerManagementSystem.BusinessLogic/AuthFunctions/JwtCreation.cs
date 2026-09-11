@@ -37,7 +37,8 @@ public class JwtCreation
                     credentialsCheck.ResponseMessage);
 
             // Generate token
-            var token = GenerateJwtToken(merchantCredentials.MerchantId);
+            var merchantRole = credentialsCheck.Data as int?;
+            var token = GenerateJwtToken(merchantCredentials.MerchantId, merchantRole);
 
             if (!double.TryParse(_configuration.AccessTokenTimeout, out var timeoutMinutes))
                 return new ResponseModel<object>(500, "Invalid AccessTokenTimeout configuration.");
@@ -59,20 +60,24 @@ public class JwtCreation
         }
     }
 
-    private string GenerateJwtToken(string merchantId)
+    private string GenerateJwtToken(string merchantId, int? merchantRole)
     {
-        var tokenDescriptor = BuildTokenDescriptor(merchantId);
+        var tokenDescriptor = BuildTokenDescriptor(merchantId, merchantRole);
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
     }
 
-    private SecurityTokenDescriptor BuildTokenDescriptor(string merchantId)
+    private SecurityTokenDescriptor BuildTokenDescriptor(string merchantId, int? merchantRole)
     {
         return new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity([
                 new Claim(ClaimTypes.Sid, merchantId),
+                new Claim(JwtRegisteredClaimNames.Sub, merchantId),
+                new Claim(ClaimTypes.Name, merchantId),
+                new Claim(ClaimTypes.Role, merchantRole?.ToString() ?? string.Empty),
+                new Claim("amr", "pwd"),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString("o"))
             ]),

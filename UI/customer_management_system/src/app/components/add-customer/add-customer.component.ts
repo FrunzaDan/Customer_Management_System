@@ -9,7 +9,6 @@ import {
 import { first } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AddCustomerService } from '../../../../src/app/services/add-customer.service';
-import { SessionStorageService } from '../../../../src/app/services/session-storage.service';
 import { Address, Customer } from '../../interfaces/customer-response';
 import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
@@ -39,7 +38,6 @@ export class AddCustomerComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private addCustomerService: AddCustomerService,
-    private sessionStorageService: SessionStorageService,
   ) {}
 
   ngOnInit() {
@@ -108,18 +106,8 @@ export class AddCustomerComponent implements OnInit {
         },
         error: (error: HttpErrorResponse) => {
           this.loading = false;
-
-          // The register endpoint itself never returns 403 — a 401 here means the
-          // session's JWT expired while filling out this form, since the auth guard
-          // only re-checks the token on route navigation, not on every API call.
-          if (error.status === 401) {
-            this.sessionStorageService.removeSessionStorage();
-            this.router.navigate(['login'], {
-              queryParams: { sessionExpired: true },
-            });
-            return;
-          }
-
+          // A 401 here (session expired while filling out this form) is handled
+          // globally by authErrorInterceptor, which redirects to login.
           this.errorMessage = this.extractErrorMessage(error);
         },
       });

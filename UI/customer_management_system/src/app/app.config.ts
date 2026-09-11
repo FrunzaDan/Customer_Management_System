@@ -1,6 +1,7 @@
 import {
   provideHttpClient,
   withFetch,
+  withInterceptors,
   withInterceptorsFromDi,
 } from '@angular/common/http';
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
@@ -17,6 +18,7 @@ import {
   withViewTransitions,
 } from '@angular/router';
 import { routes } from './app.routes';
+import { authErrorInterceptor } from './services/auth-error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -31,7 +33,11 @@ export const appConfig: ApplicationConfig = {
       withViewTransitions(),
     ),
     provideClientHydration(withEventReplay(), withNoIncrementalHydration()),
-    provideHttpClient(withFetch(), withInterceptorsFromDi()),
+    provideHttpClient(
+      withFetch(),
+      withInterceptorsFromDi(),
+      withInterceptors([authErrorInterceptor]),
+    ),
     provideAnimations(),
   ],
 };

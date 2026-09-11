@@ -58,7 +58,7 @@ public class DbUtils(IAppSettingsConfig configuration) : IDbUtils
             DbHelper.HandleResponseWithMessage
         );
     }
-    
+
     public async Task<ResponseModel<object>> ReactivateCustomer(string customerGuid)
     {
         return await ExecuteStoredProcedureAsync(
@@ -91,7 +91,8 @@ public class DbUtils(IAppSettingsConfig configuration) : IDbUtils
             return new ResponseModel<object>(403, "Invalid Merchant ID or Password.");
 
         return authData.MerchantRole == 1801
-            ? new ResponseModel<object>(200, $"Credentials validated successfully. Role: {authData.MerchantRole}.")
+            ? new ResponseModel<object>(200, $"Credentials validated successfully. Role: {authData.MerchantRole}.",
+                authData.MerchantRole)
             : new ResponseModel<object>(403, $"The provided merchant role ({authData.MerchantRole}) is not valid.");
     }
 
