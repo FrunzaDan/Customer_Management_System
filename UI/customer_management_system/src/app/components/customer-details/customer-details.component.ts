@@ -29,10 +29,16 @@ export class CustomerDetailsComponent implements OnInit {
     [2, 'female'],
   ]);
 
+  statusMap = new Map<Customer['customerStatus'], string>([
+    [CustomerActivationStatus.Active, 'Active'],
+    [CustomerActivationStatus.Deactivated, 'Deactivated'],
+  ]);
+
   readonly customer;
   readonly isLoading;
   readonly errorMessage;
   customerGender: Signal<string | undefined>;
+  customerStatusLabel: Signal<string | undefined>;
 
   readonly CustomerStatus = CustomerActivationStatus;
 
@@ -63,6 +69,13 @@ export class CustomerDetailsComponent implements OnInit {
         ? this.genderMap.get(c.gender)
         : undefined;
     });
+
+    this.customerStatusLabel = computed(() => {
+      const c = this.customer();
+      return c && c.customerStatus !== undefined
+        ? this.statusMap.get(c.customerStatus)
+        : undefined;
+    });
   }
 
   ngOnInit(): void {
@@ -85,6 +98,9 @@ export class CustomerDetailsComponent implements OnInit {
   deactivateCustomer(): void {
     const guid = this.customer()?.guid;
     if (!guid) return;
+    if (!confirm('Are you sure you want to deactivate this customer?')) {
+      return;
+    }
     this.activateCustomerService.deactivateCustomer(guid);
   }
 

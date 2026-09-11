@@ -238,13 +238,13 @@ docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1
         <div class="card-header">What You Can Do In The UI</div>
         <div class="card-body">
           <ul class="mb-0">
-            <li>Log in with merchant credentials to start a session.</li>
-            <li>Browse the customer table, populated live from the API on every visit.</li>
-            <li>Register a new customer through a validated form (name, contact details, address, etc.).</li>
-            <li>Open a customer's details page for a full read-only view.</li>
+            <li>Log in with merchant credentials to start a session, and log out explicitly from the top nav when you're done.</li>
+            <li>Browse the customer table, populated live from the API on every visit, with client-side search (by name, email, or phone) and pagination once the list grows past one page.</li>
+            <li>Register a new customer through a validated form (name, contact details, address, birthdate via a native date picker, etc.).</li>
+            <li>Open a customer's details page for a full read-only view, with a plain-language account status instead of a raw code.</li>
             <li>Edit an existing customer's information.</li>
-            <li>Deactivate an active customer, or reactivate one that was deactivated.</li>
-            <li>Permanently delete a customer once it has been deactivated.</li>
+            <li>Deactivate an active customer (with a confirmation prompt), or reactivate one that was deactivated.</li>
+            <li>Permanently delete a customer once it has been deactivated (also confirmation-guarded).</li>
             <li>Get redirected to login automatically if your session expires or is rejected by the API.</li>
           </ul>
         </div>

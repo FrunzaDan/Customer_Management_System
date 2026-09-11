@@ -53,9 +53,7 @@ export class AddCustomerComponent implements OnInit {
         [Validators.required, Validators.pattern(environment.PhoneRegex)],
       ],
       gender: ['', Validators.required],
-      birthYear: ['', Validators.required],
-      birthMonth: ['', Validators.required],
-      birthDay: ['', Validators.required],
+      birthdate: ['', Validators.required],
       country: ['', Validators.required],
       county: ['', Validators.required],
       town: ['', Validators.required],
@@ -81,12 +79,7 @@ export class AddCustomerComponent implements OnInit {
     this.customer.email = this.form.value.email;
     this.customer.msisdn = this.form.value.msisdn;
     this.customer.gender = this.form.value.gender;
-    this.customer.birthdate =
-      this.form.value.birthYear +
-      '-' +
-      this.form.value.birthMonth +
-      '-' +
-      this.form.value.birthDay;
+    this.customer.birthdate = this.form.value.birthdate;
 
     this.customerAddress.country = this.form.value.country;
     this.customerAddress.county = this.form.value.county;

@@ -104,62 +104,19 @@
 
             <div class="mb-3">
               <label class="form-label">Birthdate</label>
-              <div class="row">
-                <div class="col">
-                  <input
-                    type="text"
-                    formControlName="birthYear"
-                    class="form-control"
-                    [ngClass]="{
-                      'is-invalid': submitted && f['birthYear'].errors
-                    }"
-                    placeholder="Year"
-                  />
-                  @if (submitted && f['birthYear'].errors) {
-                  <div class="invalid-feedback">
-                    @if (f['birthYear'].errors['required']) {
-                    <div>Year is required</div>
-                    }
-                  </div>
-                  }
-                </div>
-                <div class="col">
-                  <input
-                    type="text"
-                    formControlName="birthMonth"
-                    class="form-control"
-                    [ngClass]="{
-                      'is-invalid': submitted && f['birthMonth'].errors
-                    }"
-                    placeholder="Month"
-                  />
-                  @if (submitted && f['birthMonth'].errors) {
-                  <div class="invalid-feedback">
-                    @if (f['birthMonth'].errors['required']) {
-                    <div>Month is required</div>
-                    }
-                  </div>
-                  }
-                </div>
-                <div class="col">
-                  <input
-                    type="text"
-                    formControlName="birthDay"
-                    class="form-control"
-                    [ngClass]="{
-                      'is-invalid': submitted && f['birthDay'].errors
-                    }"
-                    placeholder="Day"
-                  />
-                  @if (submitted && f['birthDay'].errors) {
-                  <div class="invalid-feedback">
-                    @if (f['birthDay'].errors['required']) {
-                    <div>Day is required</div>
-                    }
-                  </div>
-                  }
-                </div>
+              <input
+                type="date"
+                formControlName="birthdate"
+                class="form-control"
+                [ngClass]="{ 'is-invalid': submitted && f['birthdate'].errors }"
+              />
+              @if (submitted && f['birthdate'].errors) {
+              <div class="invalid-feedback">
+                @if (f['birthdate'].errors['required']) {
+                <div>Birthdate is required</div>
+                }
               </div>
+              }
             </div>
           </div>
         </div>

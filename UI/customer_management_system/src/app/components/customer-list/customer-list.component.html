@@ -4,6 +4,23 @@
 } @if (deleteError(); as error) {
 <div class="alert alert-danger mt-2">{{ error }}</div>
 }
+<div class="container-fluid mb-2">
+  <input
+    type="search"
+    class="form-control"
+    style="max-width: 320px"
+    placeholder="Search by name, email, or phone..."
+    [value]="searchTerm()"
+    (input)="onSearchInput($any($event.target).value)"
+    aria-label="Search customers"
+  />
+</div>
+@if (filteredCustomers().length === 0) {
+<p class="container-fluid">
+  @if (searchTerm()) { No customers match "{{ searchTerm() }}". } @else { No
+  customers yet. }
+</p>
+} @else {
 <div class="table-responsive">
   <table class="table table-striped table-hover">
     <caption class="container-fluid">
@@ -18,7 +35,7 @@
       </tr>
     </thead>
     <tbody>
-      @for (customer of customers(); track trackByCustomerId($index, customer)) {
+      @for (customer of pagedCustomers(); track trackByCustomerId($index, customer)) {
       <tr>
         <td class="align-middle text-center">
           <a
@@ -75,4 +92,26 @@
     </tbody>
   </table>
 </div>
+@if (totalPages() > 1) {
+<nav class="container-fluid d-flex justify-content-center align-items-center gap-2 my-3" aria-label="Customer list pages">
+  <button
+    type="button"
+    class="btn btn-secondary btn-sm"
+    [disabled]="currentPage() === 1"
+    (click)="goToPage(currentPage() - 1)"
+  >
+    Previous
+  </button>
+  <span>Page {{ currentPage() }} of {{ totalPages() }}</span>
+  <button
+    type="button"
+    class="btn btn-secondary btn-sm"
+    [disabled]="currentPage() === totalPages()"
+    (click)="goToPage(currentPage() + 1)"
+  >
+    Next
+  </button>
+</nav>
+}
+}
 }

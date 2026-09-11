@@ -64,8 +64,6 @@ export class EditCustomerComponent implements OnInit {
       effect(() => {
         const customerData = this.customer();
         if (customerData) {
-          const birthParts = customerData.birthdate.split('-');
-
           this.form.patchValue(
             {
               firstName: customerData.firstName,
@@ -73,9 +71,7 @@ export class EditCustomerComponent implements OnInit {
               email: customerData.email,
               msisdn: customerData.msisdn,
               gender: customerData.gender?.toString() ?? '',
-              birthYear: birthParts[0],
-              birthMonth: birthParts[1],
-              birthDay: birthParts[2],
+              birthdate: this.toDateInputValue(customerData.birthdate),
               country: customerData.address.country,
               county: customerData.address.county,
               town: customerData.address.town,
@@ -88,6 +84,16 @@ export class EditCustomerComponent implements OnInit {
         }
       });
     });
+  }
+
+  // <input type="date"> requires a strictly zero-padded "YYYY-MM-DD" value to
+  // pre-fill correctly. Older records saved via the previous year/month/day
+  // text-box form could store unpadded values (e.g. "2020-1-5"), so normalize
+  // before patching the form.
+  private toDateInputValue(birthdate: string): string {
+    const [year, month, day] = birthdate.split('-');
+    if (!year || !month || !day) return '';
+    return `${year.padStart(4, '0')}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
   }
 
   private createForm(): FormGroup {
@@ -103,9 +109,7 @@ export class EditCustomerComponent implements OnInit {
         [Validators.required, Validators.pattern(environment.PhoneRegex)],
       ],
       gender: ['', Validators.required],
-      birthYear: ['', Validators.required],
-      birthMonth: ['', Validators.required],
-      birthDay: ['', Validators.required],
+      birthdate: ['', Validators.required],
       country: ['', Validators.required],
       county: ['', Validators.required],
       town: ['', Validators.required],
@@ -140,7 +144,7 @@ export class EditCustomerComponent implements OnInit {
       email: this.form.value.email,
       msisdn: this.form.value.msisdn,
       gender: this.form.value.gender,
-      birthdate: `${this.form.value.birthYear}-${this.form.value.birthMonth}-${this.form.value.birthDay}`,
+      birthdate: this.form.value.birthdate,
       address: {
         country: this.form.value.country,
         county: this.form.value.county,
