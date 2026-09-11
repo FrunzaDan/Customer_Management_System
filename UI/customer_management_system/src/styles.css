@@ -11,12 +11,12 @@
 
 @font-face {
   font-family: 'JostRegular';
-  src: url('./assets/fonts/Jost-Regular.ttf');
+  src: url('/assets/fonts/Jost-Regular.ttf');
 }
 
 @font-face {
   font-family: 'JostExtraLight';
-  src: url('./assets/fonts/Jost-ExtraLight.ttf');
+  src: url('/assets/fonts/Jost-ExtraLight.ttf');
 }
 
 html,

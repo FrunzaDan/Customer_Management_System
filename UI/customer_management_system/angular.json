@@ -13,12 +13,24 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
+            "optimization": {
+              "styles": true,
+              "fonts": true
+            },
+            "aot": true,
+            "sourceMap": false,
+            "namedChunks": false,
             "outputPath": "dist/customer_management_system",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": ["zone.js"],
+            "polyfills": [],
             "tsConfig": "tsconfig.app.json",
-            "assets": ["src/favicon.ico", "src/assets"],
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles.css"
@@ -34,24 +46,38 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/",
+              "optimization": {
+                "scripts": true,
+                "styles": true,
+                "fonts": true
+              },
+              "outputHashing": "all",
+              "sourceMap": false,
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2mb",
-                  "maximumError": "4mb"
+                  "maximumWarning": "1mb",
+                  "maximumError": "2mb"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "3kb",
-                  "maximumError": "5kb"
+                  "maximumWarning": "4kb",
+                  "maximumError": "8kb"
                 }
               ],
-              "outputHashing": "all"
+              "subresourceIntegrity": true
             },
             "development": {
-              "optimization": false,
+              "baseHref": "/",
+              "optimization": {
+                "scripts": true,
+                "styles": true,
+                "fonts": true
+              },
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "namedChunks": true
             },
             "testing": {
               "aot": false,
@@ -61,10 +87,7 @@
                 "src/styles.css"
               ],
               "scripts": [],
-              "polyfills": [
-                "zone.js",
-                "zone.js/testing"
-              ]
+              "polyfills": []
             }
           },
           "defaultConfiguration": "production"

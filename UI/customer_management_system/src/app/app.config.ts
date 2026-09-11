@@ -4,7 +4,11 @@ import {
   withInterceptors,
   withInterceptorsFromDi,
 } from '@angular/common/http';
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import {
+  ApplicationConfig,
+  provideBrowserGlobalErrorListeners,
+  provideZonelessChangeDetection,
+} from '@angular/core';
 import {
   provideClientHydration,
   withEventReplay,
@@ -22,7 +26,8 @@ import { authErrorInterceptor } from './services/auth-error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideAnimations(),
+    provideBrowserGlobalErrorListeners(),
     provideRouter(
       routes,
       withComponentInputBinding(),
@@ -38,6 +43,6 @@ export const appConfig: ApplicationConfig = {
       withInterceptorsFromDi(),
       withInterceptors([authErrorInterceptor]),
     ),
-    provideAnimations(),
+    provideZonelessChangeDetection(),
   ],
 };
