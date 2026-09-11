@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import {
   FormBuilder,
   FormGroup,
@@ -7,7 +7,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { first } from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
 import { AddCustomerService } from '../../../../src/app/services/add-customer.service';
+import { SessionStorageService } from '../../../../src/app/services/session-storage.service';
 import { Address, Customer } from '../../interfaces/customer-response';
 import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
@@ -17,13 +19,14 @@ import { CommonModule } from '@angular/common';
   templateUrl: './add-customer.component.html',
   styleUrls: ['./add-customer.component.css'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
 })
 export class AddCustomerComponent implements OnInit {
   form!: FormGroup;
   loading: boolean = false;
   loadCompleted: boolean = false;
   submitted: boolean = false;
+  errorMessage: string | null = null;
   customer = {} as Customer;
   customerAddress: Address = {} as Address;
 
@@ -36,6 +39,7 @@ export class AddCustomerComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private addCustomerService: AddCustomerService,
+    private sessionStorageService: SessionStorageService,
   ) {}
 
   ngOnInit() {
@@ -72,6 +76,7 @@ export class AddCustomerComponent implements OnInit {
     }
 
     this.loading = true;
+    this.errorMessage = null;
 
     this.customer.firstName = this.form.value.firstName;
     this.customer.lastName = this.form.value.lastName;
@@ -101,14 +106,33 @@ export class AddCustomerComponent implements OnInit {
         next: () => {
           this.router.navigate(['../customers'], { relativeTo: this.route });
         },
-        error: (error) => {
-          let errorStatusCode = error.status;
-          if (errorStatusCode == 403) {
-            this.router.navigate(['']);
-          } else if (errorStatusCode == 404) {
-          }
+        error: (error: HttpErrorResponse) => {
           this.loading = false;
+
+          // The register endpoint itself never returns 403 — a 401 here means the
+          // session's JWT expired while filling out this form, since the auth guard
+          // only re-checks the token on route navigation, not on every API call.
+          if (error.status === 401) {
+            this.sessionStorageService.removeSessionStorage();
+            this.router.navigate(['login'], {
+              queryParams: { sessionExpired: true },
+            });
+            return;
+          }
+
+          this.errorMessage = this.extractErrorMessage(error);
         },
       });
+  }
+
+  private extractErrorMessage(error: HttpErrorResponse): string {
+    if (error.status === 0) {
+      return 'Could not reach the server. It may be offline, or your browser does not trust its security certificate.';
+    }
+    return (
+      error.error?.responseMessage ??
+      error.error?.message ??
+      `Failed to add customer (${error.status}). Please try again.`
+    );
   }
 }

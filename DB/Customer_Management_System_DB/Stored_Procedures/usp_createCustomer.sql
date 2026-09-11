@@ -32,28 +32,44 @@ BEGIN
     END
     ELSE
     BEGIN
-        INSERT INTO dbo.tbl_customers
-        (
-            PK_customer_guid, first_name, last_name, email, msisdn, 
-            gender, birthdate, customer_Status, creation_Date, interaction_Date
-        )
-        VALUES
-        (
-            @var_Guid, @var_FirstName, @var_LastName, @var_Email, @var_MSISDN, 
-            @var_Gender, @var_Birthdate, 1901, @currentDateTime, @currentDateTime
-        );
+        BEGIN TRY
+            BEGIN TRANSACTION;
 
-        INSERT INTO dbo.tbl_addresses
-        (
-            FK_customer_guid, country, county, town, zip_code, street, number
-        )
-        VALUES
-        (
-            @var_Guid, @var_Country, @var_County, @var_Town, @var_ZIP, @var_Street, @var_Number
-        );
+            -- Both inserts must succeed together: usp_getCustomer/usp_getCustomers INNER JOIN
+            -- to tbl_addresses, so a customer row left without a matching address row would
+            -- silently disappear from every read despite existing in tbl_customers.
+            INSERT INTO dbo.tbl_customers
+            (
+                PK_customer_guid, first_name, last_name, email, msisdn,
+                gender, birthdate, customer_Status, creation_Date, interaction_Date
+            )
+            VALUES
+            (
+                @var_Guid, @var_FirstName, @var_LastName, @var_Email, @var_MSISDN,
+                @var_Gender, @var_Birthdate, 1901, @currentDateTime, @currentDateTime
+            );
 
-        SET @result = 0; 
-        SET @message = CONCAT('Customer created successfully. GUID: ', @var_Guid);
+            INSERT INTO dbo.tbl_addresses
+            (
+                FK_customer_guid, country, county, town, zip_code, street, number
+            )
+            VALUES
+            (
+                @var_Guid, @var_Country, @var_County, @var_Town, @var_ZIP, @var_Street, @var_Number
+            );
+
+            COMMIT TRANSACTION;
+
+            SET @result = 0;
+            SET @message = CONCAT('Customer created successfully. GUID: ', @var_Guid);
+        END TRY
+        BEGIN CATCH
+            IF @@TRANCOUNT > 0
+                ROLLBACK TRANSACTION;
+
+            SET @result = 500;
+            SET @message = CONCAT('Failed to create customer: ', ERROR_MESSAGE());
+        END CATCH
     END
 
     SELECT @result AS result, @message AS message;

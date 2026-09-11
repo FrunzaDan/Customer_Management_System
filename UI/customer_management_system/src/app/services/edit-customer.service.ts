@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { GenericResponse } from '../../../src/app/interfaces/generic-response';
 import { Customer } from '../interfaces/customer-response';
@@ -19,18 +20,12 @@ export class EditCustomerService {
     private getCustomerService: GetCustomerService, // Used for local updates
   ) {}
 
-  editCustomer(customer: Customer): void {
+  editCustomer(customer: Customer): Observable<GenericResponse<object>> {
     const headers: HttpHeaders =
       this.httpHeaderService.getHeadersWithTokenSet();
 
-    this.http
+    return this.http
       .patch<GenericResponse<object>>(this.APIURL, customer, { headers })
-      .subscribe({
-        next: () => {
-          // Update the local cache of the customer
-          this.getCustomerService.updateCustomerLocally(customer);
-        },
-        error: (error) => console.error('Customer edit failed:', error),
-      });
+      .pipe(tap(() => this.getCustomerService.updateCustomerLocally(customer)));
   }
 }

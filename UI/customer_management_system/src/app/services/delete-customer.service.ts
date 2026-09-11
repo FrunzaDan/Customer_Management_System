@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { GenericResponse } from '../interfaces/generic-response';
 import { GetCustomerService } from './get-customer.service';
@@ -18,19 +19,15 @@ export class DeleteCustomerService {
     private getCustomerService: GetCustomerService,
   ) {}
 
-  deleteCustomer(customerGUID: string): void {
+  deleteCustomer(customerGUID: string): Observable<GenericResponse<object>> {
     const headers: HttpHeaders =
       this.httpHeaderService.getHeadersWithTokenSet();
     const params = new HttpParams().set('customerGUID', customerGUID);
 
-    this.http
+    return this.http
       .delete<GenericResponse<object>>(this.APIURL, { headers, params })
-      .subscribe({
-        next: () => {
-          // Remove the customer from the local signal
-          this.getCustomerService.removeCustomerLocally(customerGUID);
-        },
-        error: (error) => console.error('Deletion failed:', error),
-      });
+      .pipe(
+        tap(() => this.getCustomerService.removeCustomerLocally(customerGUID)),
+      );
   }
 }

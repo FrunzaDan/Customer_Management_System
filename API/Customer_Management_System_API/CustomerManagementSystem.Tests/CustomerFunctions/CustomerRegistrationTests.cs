@@ -42,6 +42,22 @@ public class CustomerRegistrationTests
     }
 
     [Fact]
+    public async Task RegisterCustomerFunction_RejectsAMissingAddress_WithoutTouchingTheDb()
+    {
+        // usp_createCustomer's address parameters have no SQL-side defaults, so without this
+        // check a missing Address would otherwise surface as an opaque 500 instead of a 400.
+        var dbUtils = new Mock<IDbUtils>();
+        var registration = new CustomerRegistration(dbUtils.Object);
+        var request = new CustomerModel { Email = "dan@example.com", Msisdn = "123456789", Address = null };
+
+        var result = await registration.RegisterCustomerFunction(request);
+
+        Assert.Equal(400, result.Status);
+        Assert.Contains("Address", result.ResponseMessage);
+        dbUtils.Verify(d => d.RegisterCustomer(It.IsAny<CustomerModel>()), Times.Never);
+    }
+
+    [Fact]
     public async Task RegisterCustomerFunction_AlwaysGeneratesAFreshServerSideGuid_IgnoringAnyClientSuppliedValue()
     {
         var dbUtils = new Mock<IDbUtils>();
@@ -56,6 +72,7 @@ public class CustomerRegistrationTests
             Guid = clientSuppliedGuid,
             Email = "dan@example.com",
             Msisdn = "123456789",
+            Address = new AddressModel { Country = "Romania" },
         };
 
         var result = await registration.RegisterCustomerFunction(request);

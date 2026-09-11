@@ -6,7 +6,8 @@ import {
   Injector,
   OnInit,
   runInInjectionContext,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
+  signal,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -14,7 +15,8 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Customer } from '../../interfaces/customer-response';
 import { GetCustomerService } from '../../../../src/app/services/get-customer.service';
 import { environment } from '../../../environments/environment';
@@ -26,7 +28,7 @@ import { EditCustomerService } from '../../services/edit-customer.service';
   styleUrls: ['./edit-customer.component.css'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
 })
 export class EditCustomerComponent implements OnInit {
   form: FormGroup;
@@ -36,6 +38,12 @@ export class EditCustomerComponent implements OnInit {
   readonly customer;
   readonly isLoading;
   readonly errorMessage;
+
+  // Distinct from isLoading/errorMessage above, which reflect fetching the
+  // customer being edited — this tracks the save (PATCH) request itself.
+  readonly saving = signal(false);
+  readonly saveError = signal<string | null>(null);
+
   private injector = inject(Injector);
 
   constructor(
@@ -143,7 +151,28 @@ export class EditCustomerComponent implements OnInit {
       },
     };
 
-    this.editCustomerService.editCustomer(updatedCustomer);
-    this.router.navigate(['../customers'], { relativeTo: this.route });
+    this.saving.set(true);
+    this.saveError.set(null);
+
+    this.editCustomerService.editCustomer(updatedCustomer).subscribe({
+      next: () => {
+        this.router.navigate(['../customers'], { relativeTo: this.route });
+      },
+      error: (error: HttpErrorResponse) => {
+        this.saving.set(false);
+        this.saveError.set(this.extractErrorMessage(error));
+      },
+    });
+  }
+
+  private extractErrorMessage(error: HttpErrorResponse): string {
+    if (error.status === 0) {
+      return 'Could not reach the server. It may be offline, or your browser does not trust its security certificate.';
+    }
+    return (
+      error.error?.responseMessage ??
+      error.error?.message ??
+      `Failed to save changes (${error.status}). Please try again.`
+    );
   }
 }

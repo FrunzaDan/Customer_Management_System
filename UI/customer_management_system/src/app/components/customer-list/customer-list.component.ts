@@ -1,6 +1,7 @@
 // customer-list.component.ts
-import { Component, OnInit, computed, effect, Signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, computed, effect, signal, Signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { GetCustomerService } from '../../services/get-customer.service';
 import { ActivateCustomerService } from '../../services/activate-customer.service';
 import { DeleteCustomerService } from '../../services/delete-customer.service';
@@ -28,6 +29,11 @@ export class CustomerListComponent implements OnInit {
   readonly errorMessage = this.getCustomerService.errorSignal;
   readonly activationLoading = this.activateCustomerService.loadingSignal;
   readonly activationError = this.activateCustomerService.errorSignal;
+
+  // Delete is a separate action from deactivate/reactivate, so it gets its own
+  // in-flight/error state rather than being folded into activationLoading/Error.
+  readonly deleting = signal(false);
+  readonly deleteError = signal<string | null>(null);
 
   // Add CustomerStatus enum for better type checking
   readonly CustomerStatus = CustomerActivationStatus;
@@ -91,6 +97,34 @@ export class CustomerListComponent implements OnInit {
   }
 
   deleteCustomer(guid: string): void {
-    this.deleteCustomerService.deleteCustomer(guid);
+    if (
+      !confirm(
+        'Are you sure you want to permanently delete this customer? This cannot be undone.',
+      )
+    ) {
+      return;
+    }
+
+    this.deleting.set(true);
+    this.deleteError.set(null);
+
+    this.deleteCustomerService.deleteCustomer(guid).subscribe({
+      next: () => this.deleting.set(false),
+      error: (error: HttpErrorResponse) => {
+        this.deleting.set(false);
+        this.deleteError.set(this.extractErrorMessage(error));
+      },
+    });
+  }
+
+  private extractErrorMessage(error: HttpErrorResponse): string {
+    if (error.status === 0) {
+      return 'Could not reach the server. It may be offline, or your browser does not trust its security certificate.';
+    }
+    return (
+      error.error?.responseMessage ??
+      error.error?.message ??
+      `Request failed (${error.status}). Please try again.`
+    );
   }
 }

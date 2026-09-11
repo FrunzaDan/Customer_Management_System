@@ -1,10 +1,13 @@
 @if (!isLoading(); ) {
+@if (activationError(); as error) {
+<div class="alert alert-danger mt-2">{{ error }}</div>
+} @if (deleteError(); as error) {
+<div class="alert alert-danger mt-2">{{ error }}</div>
+}
 <div class="table-responsive">
   <table class="table table-striped table-hover">
     <caption class="container-fluid">
-      This table gets real-time API data. @if (activationError(); as error) {
-      <div class="alert alert-danger mt-2">{{ error }}</div>
-      }
+      This table gets real-time API data.
     </caption>
     <thead class="table-dark">
       <tr>
@@ -33,7 +36,7 @@
               (click)="navigateToEdit(customer.guid)"
               type="button"
               class="btn btn-primary shadow-none"
-              [disabled]="activationLoading()"
+              [disabled]="activationLoading() || deleting()"
             >
               Edit
             </button>
@@ -43,7 +46,7 @@
               (click)="deactivateCustomer(customer.guid)"
               type="button"
               class="btn btn-danger"
-              [disabled]="activationLoading()"
+              [disabled]="activationLoading() || deleting()"
             >
               Deactivate
             </button>
@@ -52,7 +55,7 @@
               (click)="reactivateCustomer(customer.guid)"
               type="button"
               class="btn btn-secondary"
-              [disabled]="activationLoading()"
+              [disabled]="activationLoading() || deleting()"
             >
               Reactivate
             </button>
@@ -60,7 +63,7 @@
               (click)="deleteCustomer(customer.guid)"
               type="button"
               class="btn btn-danger shadow-none"
-              [disabled]="activationLoading()"
+              [disabled]="activationLoading() || deleting()"
             >
               Delete
             </button>

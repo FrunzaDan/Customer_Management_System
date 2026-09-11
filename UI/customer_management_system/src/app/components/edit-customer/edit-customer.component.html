@@ -1,5 +1,13 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
   <div class="container">
+    @if (isLoading()) {
+    <div class="text-center my-3">
+      <span class="spinner-border spinner-border-sm me-1"></span> Loading
+      customer...
+    </div>
+    } @if (errorMessage() && !isLoading()) {
+    <div class="alert alert-danger mt-3">{{ errorMessage() }}</div>
+    }
     <div class="row">
       <div class="col-md-6">
         <div class="card m-5">
@@ -202,17 +210,17 @@
             </div>
 
             <div>
-              <button [disabled]="isLoading()" class="btn btn-primary">
-                @if (isLoading()) {
+              <button [disabled]="saving()" class="btn btn-primary">
+                @if (saving()) {
                 <span class="spinner-border spinner-border-sm me-1"></span>
                 } Edit Customer
               </button>
               <a routerLink="/customers" class="btn btn-link">Cancel</a>
             </div>
 
-            @if (errorMessage()) {
+            @if (saveError()) {
             <div class="alert alert-danger mt-3">
-              {{ errorMessage() }}
+              {{ saveError() }}
             </div>
             }
           </div>

@@ -21,6 +21,11 @@ public class CustomerRegistration
         if (string.IsNullOrEmpty(request.Msisdn) || MsisdnValidation.ValidateMsisdn(request.Msisdn) == false)
             return new ResponseModel<object>(400, "Invalid or empty MSISDN.");
 
+        // usp_createCustomer's address parameters have no SQL-side defaults, so a missing
+        // Address would otherwise surface as an opaque 500 instead of a validation error.
+        if (request.Address is null)
+            return new ResponseModel<object>(400, "Address is required.");
+
         // A new customer's identifier is always generated server-side; a client-supplied GUID is never trusted.
         request.Guid = Guid.NewGuid().ToString();
 
