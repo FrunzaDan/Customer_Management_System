@@ -29,16 +29,16 @@
                       placeholder="Username"
                       [ngClass]="{
                         'is-invalid':
-                          usernameControl?.invalid && usernameControl?.touched
+                          usernameControl?.invalid && usernameControl.touched
                       }"
                     />
                     <label for="username">Username</label>
-                    @if ( usernameControl?.invalid && usernameControl?.touched )
+                    @if ( usernameControl?.invalid && usernameControl.touched )
                     {
                     <div class="text-danger mt-1">
-                      @if (usernameControl?.errors?.['required']) {
+                      @if (usernameControl.errors?.['required']) {
                       <small>Username is required.</small>
-                      } @if (usernameControl?.errors?.['pattern']) {
+                      } @if (usernameControl.errors?.['pattern']) {
                       <small>Invalid username format.</small>
                       }
                     </div>
@@ -55,11 +55,11 @@
                       placeholder="Password"
                       [ngClass]="{
                         'is-invalid':
-                          passwordControl?.invalid && passwordControl?.touched
+                          passwordControl?.invalid && passwordControl.touched
                       }"
                     />
                     <label for="password">Password</label>
-                    @if ( passwordControl?.invalid && passwordControl?.touched )
+                    @if ( passwordControl?.invalid && passwordControl.touched )
                     {
                     <div class="text-danger mt-1">
                       <small>Password is required.</small>

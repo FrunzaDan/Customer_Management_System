@@ -6,8 +6,8 @@ import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
+  templateUrl: './app.html',
+  styleUrls: ['./app.css'],
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FooterComponent,
@@ -16,6 +16,6 @@ import { RouterOutlet } from '@angular/router';
     RouterOutlet,
   ],
 })
-export class AppComponent {
+export class App {
   title = 'customer_management_system';
 }

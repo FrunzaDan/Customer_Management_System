@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormBuilder,
+  FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
@@ -21,7 +22,10 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule, ReactiveFormsModule],
 })
 export class UserLoginComponent implements OnInit, OnDestroy {
-  loginForm: FormGroup;
+  loginForm: FormGroup<{
+    username: FormControl<string>;
+    password: FormControl<string>;
+  }>;
   errorMessage: string | null = null;
   isEmailValid: boolean = true;
 
@@ -32,7 +36,7 @@ export class UserLoginComponent implements OnInit, OnDestroy {
     private footerService: FooterService,
     private sessionStorageService: SessionStorageService
   ) {
-    this.loginForm = this.formBuilder.group({
+    this.loginForm = this.formBuilder.nonNullable.group({
       username: [
         '',
         [Validators.required, Validators.pattern(environment.UserName)],
@@ -64,8 +68,8 @@ export class UserLoginComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     if (this.loginForm.valid) {
       const loginRequest: UserLoginRequest = {
-        merchantID: this.usernameControl?.value,
-        merchantPassword: this.passwordControl?.value,
+        merchantID: this.usernameControl?.value ?? '',
+        merchantPassword: this.passwordControl?.value ?? '',
       };
 
       this.userLoginService.login(loginRequest).subscribe({

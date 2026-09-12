@@ -14,7 +14,6 @@ import {
   withEventReplay,
   withNoIncrementalHydration
 } from '@angular/platform-browser';
-import { provideAnimations } from '@angular/platform-browser/animations';
 import {
   provideRouter,
   withComponentInputBinding,
@@ -26,7 +25,6 @@ import { authErrorInterceptor } from './services/auth-error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideAnimations(),
     provideBrowserGlobalErrorListeners(),
     provideRouter(
       routes,
