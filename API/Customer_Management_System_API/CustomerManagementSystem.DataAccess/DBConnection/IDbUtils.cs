@@ -14,4 +14,5 @@ public interface IDbUtils
     public Task<ResponseModel<int?>> CheckMerchantCredentialsFromDb(MerchantCredentials merchantCredentials);
     public Task<ResponseModel<object>> LogCustomerAudit(string customerGuid, string merchantId, string action, string? details);
     public Task<ResponseModel<object>> GetCustomerAuditLog(string customerGuid);
+    public Task<ResponseModel<object>> GetAllCustomerAuditLog(int pageNumber, int pageSize);
 }

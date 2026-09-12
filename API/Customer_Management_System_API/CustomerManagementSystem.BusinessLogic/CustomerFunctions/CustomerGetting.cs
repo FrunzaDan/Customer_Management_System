@@ -106,6 +106,17 @@ public class CustomerGetting
         return await _dbUtils.GetCustomerAuditLog(customerGuid);
     }
 
+    public async Task<ResponseModel<object>> GetAllAuditLogFunction(int pageNumber, int pageSize)
+    {
+        if (pageNumber < 1)
+            return new ResponseModel<object>(400, "Page number must be 1 or greater.");
+
+        if (pageSize < 1 || pageSize > MaxPageSize)
+            return new ResponseModel<object>(400, $"Page size must be between 1 and {MaxPageSize}.");
+
+        return await _dbUtils.GetAllCustomerAuditLog(pageNumber, pageSize);
+    }
+
     private static int DetermineSearchOption(string searchVariable)
     {
         return GuidValidation.ValidateGuid(searchVariable) ? 1 :

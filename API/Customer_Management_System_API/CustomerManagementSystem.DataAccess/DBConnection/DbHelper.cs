@@ -78,6 +78,25 @@ public static class DbHelper
         return new ResponseModel<object>(200, $"{items.Count} audit log entries found.", items);
     }
 
+    public static async Task<ResponseModel<object>> HandleResponseWithPagedAuditLogList(SqlDataReader reader,
+        int pageNumber, int pageSize)
+    {
+        var items = new List<GlobalAuditLogEntry>();
+        var totalItems = 0;
+
+        while (await reader.ReadAsync().ConfigureAwait(false))
+        {
+            if (items.Count == 0)
+                totalItems = Convert.ToInt32(reader["total_count"]);
+
+            items.Add(MapGlobalAuditLogEntryFromReader(reader));
+        }
+
+        var pagedResponse = new PagedResponse<GlobalAuditLogEntry>(items, totalItems, pageNumber, pageSize);
+        return new ResponseModel<object>(200, $"{items.Count} audit log entries found (page {pageNumber}).",
+            pagedResponse);
+    }
+
     public static async Task<MerchantAuthData?> HandleMerchantAuthDataResponse(SqlDataReader reader)
     {
         if (!await reader.ReadAsync().ConfigureAwait(false)) return null;
@@ -127,6 +146,24 @@ public static class DbHelper
         {
             AuditId = Convert.ToInt32(reader["audit_id"]),
             CustomerGuid = reader["customer_guid"].ToString(),
+            MerchantId = reader["merchant_id"].ToString(),
+            Action = reader["action"].ToString(),
+            Details = reader["details"].ToString(),
+            ActionDate = (DateTime)reader["action_Date"]
+        };
+    }
+
+    private static GlobalAuditLogEntry MapGlobalAuditLogEntryFromReader(SqlDataReader reader)
+    {
+        return new GlobalAuditLogEntry
+        {
+            AuditId = Convert.ToInt32(reader["audit_id"]),
+            CustomerGuid = reader["customer_guid"].ToString(),
+            // `as string`, not `.ToString()`: a DBNull (deleted customer, via the
+            // proc's LEFT JOIN) must come back as a real null, not the empty
+            // string DBNull.Value.ToString() would produce.
+            CustomerFirstName = reader["first_name"] as string,
+            CustomerLastName = reader["last_name"] as string,
             MerchantId = reader["merchant_id"].ToString(),
             Action = reader["action"].ToString(),
             Details = reader["details"].ToString(),

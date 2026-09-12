@@ -64,6 +64,13 @@ public class CustomerController(ICustomerService customerService) : ControllerBa
         return StatusCode(response.Status ?? 200, response);
     }
 
+    [HttpGet("auditLog/all")]
+    public async Task<IActionResult> GetAllCustomerAuditLog([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        var response = await customerService.GetAllCustomerAuditLog(pageNumber, pageSize);
+        return StatusCode(response.Status ?? 200, response);
+    }
+
     [HttpPatch("edit")]
     public async Task<IActionResult> EditCustomer([FromBody] CustomerModel editCustomerRqst)
     {

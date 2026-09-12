@@ -75,18 +75,17 @@
             </div>
             <div class="mb-3">
               <label class="form-label">Gender</label>
-              <div class="form-group">
-                <select
-                  formControlName="gender"
-                  class="form-select"
-                  aria-label="Select gender"
-                >
-                  <option value="" selected>Select a gender:</option>
-                  <option value="0">Not declared</option>
-                  <option value="1">Male</option>
-                  <option value="2">Female</option>
-                </select>
-              </div>
+              <select
+                formControlName="gender"
+                class="form-select"
+                aria-label="Select gender"
+                [ngClass]="{ 'is-invalid': submitted && f['gender'].errors }"
+              >
+                <option value="" selected>Select a gender:</option>
+                <option value="0">Not declared</option>
+                <option value="1">Male</option>
+                <option value="2">Female</option>
+              </select>
               @if (submitted && f['gender'].errors) {
               <div class="invalid-feedback">
                 @if (f['gender'].errors['required']) {

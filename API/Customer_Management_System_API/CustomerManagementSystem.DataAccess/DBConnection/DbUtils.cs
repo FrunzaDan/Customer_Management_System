@@ -128,6 +128,19 @@ public class DbUtils(IAppSettingsConfig configuration) : IDbUtils
         );
     }
 
+    public async Task<ResponseModel<object>> GetAllCustomerAuditLog(int pageNumber, int pageSize)
+    {
+        return await ExecuteStoredProcedureAsync(
+            "dbo.usp_getAllCustomerAuditLog",
+            command =>
+            {
+                command.Parameters.AddWithValue("@PageNumber", pageNumber);
+                command.Parameters.AddWithValue("@PageSize", pageSize);
+            },
+            reader => DbHelper.HandleResponseWithPagedAuditLogList(reader, pageNumber, pageSize)
+        );
+    }
+
     private void CheckConnectionString()
     {
         if (!string.IsNullOrEmpty(CurrentConnectionString)) return;

@@ -15,3 +15,10 @@ GO
 -- NVARCHAR column, indexed for the per-customer lookup usp_getCustomerAuditLog does.
 CREATE INDEX [IX_tbl_customer_audit_log_customer_guid]
     ON [dbo].[tbl_customer_audit_log] ([customer_guid]);
+GO
+
+-- Supports usp_getAllCustomerAuditLog's global, unfiltered "newest first" scan
+-- across every customer — the index above only helps once a customer_guid is
+-- known, which the global admin view doesn't have.
+CREATE INDEX [IX_tbl_customer_audit_log_action_Date]
+    ON [dbo].[tbl_customer_audit_log] ([action_Date] DESC, [audit_id] DESC);

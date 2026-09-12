@@ -29,6 +29,9 @@ public class CustomerService(
     public async Task<ResponseModel<object>> GetCustomerAuditLog(string customerGuid) =>
         await customerGetting.GetCustomerAuditLogFunction(customerGuid);
 
+    public async Task<ResponseModel<object>> GetAllCustomerAuditLog(int pageNumber, int pageSize) =>
+        await customerGetting.GetAllAuditLogFunction(pageNumber, pageSize);
+
     public async Task<ResponseModel<object>> GetCustomers(GetCustomersRequest request) =>
         await customerGetting.GetCustomersFunction(request);
 

@@ -10,6 +10,7 @@ import { FeaturesComponent } from './components/features/features.component';
 import { AddCustomerComponent } from './components/add-customer/add-customer.component';
 import { EditCustomerComponent } from './components/edit-customer/edit-customer.component';
 import { CustomerDetailsComponent } from './components/customer-details/customer-details.component';
+import { GlobalAuditLogComponent } from './components/global-audit-log/global-audit-log.component';
 import { AuthGuardService } from './services/auth-guard.service';
 
 const authGuardFn: CanActivateFn = () => {
@@ -64,6 +65,12 @@ export const routes: Routes = [
     component: CustomerDetailsComponent,
     canActivate: [authGuardFn],
     title: 'Customer Details',
+  },
+  {
+    path: 'auditLog',
+    component: GlobalAuditLogComponent,
+    canActivate: [authGuardFn],
+    title: 'Audit Log',
   },
   {
     path: '**',

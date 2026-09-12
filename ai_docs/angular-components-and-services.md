@@ -19,6 +19,7 @@ The route/component map, the customer services layer, and two real bugs that wer
 | `home` | `/`, `/customers` | Customer list landing page |
 | `customer-list` | (used by `home`) | Table of customers, `@for` track-by GUID; server-side search, sort, and pagination |
 | `customer-details` | `/customerDetails` | Single customer's full record (friendly status) plus its audit trail |
+| `global-audit-log` | `/auditLog` | Paginated audit trail across every customer, newest first |
 | `add-customer` | `/addCustomer` | Create-customer form |
 | `edit-customer` | `/editCustomer` | Edit-customer form |
 | `features` | `/features` | Static feature list page |
@@ -32,7 +33,7 @@ Gender is stored/sent as an **integer**: `0` = Not declared, `1` = Male, `2` = F
 
 **Services** (`src/app/services/`):
 - `user-login.service.ts`, `verify-token.service.ts`, `auth-guard.service.ts`, `session-storage.service.ts`, `http-header-service.ts`, `auth-error.interceptor.ts` — see [[angular-login-flow]] and [[angular-app-config-and-routing]].
-- `get-customer.service.ts`, `add-customer.service.ts`, `edit-customer.service.ts`, `activate-customer.service.ts`, `delete-customer.service.ts`, `audit-log.service.ts`, `export-customer.service.ts` — one per `CustomerController` endpoint group (see [[api-request-pipeline]]).
+- `get-customer.service.ts`, `add-customer.service.ts`, `edit-customer.service.ts`, `activate-customer.service.ts`, `delete-customer.service.ts`, `audit-log.service.ts`, `export-customer.service.ts`, `global-audit-log.service.ts` — one per `CustomerController` endpoint group (see [[api-request-pipeline]]).
 - `navbar.service.ts`, `footer.service.ts` — simple show/hide state for chrome that shouldn't appear on the login screen.
 
 **Customer lifecycle actions in the UI** (`customer-list.component.ts`, `customer-details.component.ts`): Edit is always available; Deactivate shows only when active; Reactivate and Delete show only when deactivated — mirroring the stored-procedure rules in [[customer-data-model-and-lifecycle]] rather than re-deriving them. Both Deactivate and Delete are guarded by a native `confirm()` prompt before the request fires; Reactivate and Edit are not (both are non-destructive/reversible).
@@ -42,6 +43,8 @@ Gender is stored/sent as an **integer**: `0` = Not declared, `1` = Male, `2` = F
 **Audit trail** (`customer-details.component.ts`): `AuditLogService.loadAuditLog(guid)` is called in `ngOnInit` alongside the customer fetch, and rendered as its own card (newest first). Unlike the customer record itself (which updates in place via `updateCustomerLocally`), the audit list has no local-patch path, so it's re-fetched via a constructor `effect()` that watches `activationLoading()` and reloads on the true→false transition (i.e. right after a deactivate/reactivate call resolves) — without this, the trail would look stale until the next full page load even though the status right above it just updated live.
 
 **CSV export** (`customer-list.component.ts`): the "Export CSV" button calls `ExportCustomerService.exportCustomers()` with the list's *current* `searchTerm`/`sortColumn`/`sortDirection` signals — same filter/sort the table is showing, but not limited to the current page (see [[customer-data-model-and-lifecycle]]). The service requests the API with `responseType: 'blob'` and triggers the browser download itself (`URL.createObjectURL` + a synthetic `<a download>` click) with a client-generated filename, rather than reading the server's `Content-Disposition` filename — that header isn't in the API's CORS exposed-headers list, so JS can't read it cross-origin, and exposing it wasn't judged worth widening the CORS config for.
+
+**Global audit log** (`global-audit-log.component.ts`, `/auditLog`): like `customer-list`, pagination is server-side (`GlobalAuditLogService.loadAllAuditLog`, `GET /api/Customer/auditLog/all`), but there's no search or sort — just a newest-first paginated table (page size 20, not the customer list's 10, since an admin log view expects more rows at once). A row's customer name links to `/customerDetails` only when the customer still exists (`entry.customerFirstName`/`customerLastName` non-null); a deleted customer renders as plain text, `(deleted customer <guid>)` — see [[customer-data-model-and-lifecycle]] for why the API can return rows for a GUID that no longer resolves to a customer.
 
 **Birthdate is a native `<input type="date">`** in both `add-customer` and `edit-customer` — replaced three separate year/month/day text boxes. The API still just wants `YYYY-MM-DD` (that's what `usp_createCustomer`/`usp_editCustomer` store as-is in `tbl_customers.birthdate`, an `NVARCHAR`, not a real `DATE` column), and a date input's `.value` is always exactly that format, so no manual concatenation is needed on submit anymore. When *editing* an existing customer, `EditCustomerComponent.toDateInputValue()` zero-pads the stored value before patching the form — a date input silently fails to pre-fill on anything not strictly zero-padded, and the old three-box form could have saved e.g. `"2020-1-5"` for some existing records.
 

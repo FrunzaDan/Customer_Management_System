@@ -12,6 +12,8 @@ public interface ICustomerService
 
     Task<ResponseModel<object>> GetCustomerAuditLog(string customerGuid);
 
+    Task<ResponseModel<object>> GetAllCustomerAuditLog(int pageNumber, int pageSize);
+
     Task<ResponseModel<object>> RegisterCustomer(CustomerModel request, string merchantId);
 
     Task<ResponseModel<object>> EditCustomer(CustomerModel request, string merchantId);

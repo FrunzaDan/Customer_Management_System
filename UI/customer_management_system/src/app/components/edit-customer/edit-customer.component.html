@@ -87,7 +87,11 @@
 
             <div class="mb-3">
               <label class="form-label">Gender</label>
-              <select formControlName="gender" class="form-select">
+              <select
+                formControlName="gender"
+                class="form-select"
+                [ngClass]="{ 'is-invalid': submitted && f['gender'].errors }"
+              >
                 <option value="">Select a gender</option>
                 <option value="0">Not declared</option>
                 <option value="1">Male</option>

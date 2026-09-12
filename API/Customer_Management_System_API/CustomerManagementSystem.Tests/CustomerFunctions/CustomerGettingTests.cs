@@ -244,4 +244,48 @@ public class CustomerGettingTests
 
         Assert.Same(expected, result);
     }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public async Task GetAllAuditLogFunction_RejectsAnInvalidPageNumber_WithoutTouchingTheDb(int pageNumber)
+    {
+        var dbUtils = new Mock<IDbUtils>();
+        var getting = new CustomerGetting(dbUtils.Object);
+
+        var result = await getting.GetAllAuditLogFunction(pageNumber, 10);
+
+        Assert.Equal(400, result.Status);
+        dbUtils.Verify(d => d.GetAllCustomerAuditLog(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(101)]
+    public async Task GetAllAuditLogFunction_RejectsAnInvalidPageSize_WithoutTouchingTheDb(int pageSize)
+    {
+        var dbUtils = new Mock<IDbUtils>();
+        var getting = new CustomerGetting(dbUtils.Object);
+
+        var result = await getting.GetAllAuditLogFunction(1, pageSize);
+
+        Assert.Equal(400, result.Status);
+        dbUtils.Verify(d => d.GetAllCustomerAuditLog(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetAllAuditLogFunction_ReturnsWhateverTheDbLayerReturns()
+    {
+        var dbUtils = new Mock<IDbUtils>();
+        var expected = new ResponseModel<object>(200, "Success!",
+            new PagedResponse<GlobalAuditLogEntry>(new List<GlobalAuditLogEntry>(), 0, 1, 10));
+        dbUtils.Setup(d => d.GetAllCustomerAuditLog(1, 10)).ReturnsAsync(expected);
+        var getting = new CustomerGetting(dbUtils.Object);
+
+        var result = await getting.GetAllAuditLogFunction(1, 10);
+
+        Assert.Same(expected, result);
+        dbUtils.Verify(d => d.GetAllCustomerAuditLog(1, 10), Times.Once);
+    }
 }
