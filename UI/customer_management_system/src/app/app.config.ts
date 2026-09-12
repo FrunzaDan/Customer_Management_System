@@ -21,6 +21,7 @@ import {
   withViewTransitions,
 } from '@angular/router';
 import { routes } from './app.routes';
+import { apiLoggerInterceptor } from './services/api-logger.interceptor';
 import { authErrorInterceptor } from './services/auth-error.interceptor';
 
 export const appConfig: ApplicationConfig = {
@@ -39,7 +40,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withFetch(),
       withInterceptorsFromDi(),
-      withInterceptors([authErrorInterceptor]),
+      withInterceptors([apiLoggerInterceptor, authErrorInterceptor]),
     ),
     provideZonelessChangeDetection(),
   ],

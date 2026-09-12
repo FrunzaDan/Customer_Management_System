@@ -28,9 +28,39 @@
     </caption>
     <thead class="table-dark">
       <tr>
-        <th scope="col" class="text-center">Name</th>
-        <th scope="col" class="text-center">Email</th>
-        <th scope="col" class="text-center">MSISDN</th>
+        <th
+          scope="col"
+          class="text-center sortable-header"
+          role="button"
+          (click)="setSort('name')"
+        >
+          Name
+          @if (sortColumn() === 'name') {
+          <span>{{ sortDirection() === 'asc' ? '▲' : '▼' }}</span>
+          }
+        </th>
+        <th
+          scope="col"
+          class="text-center sortable-header"
+          role="button"
+          (click)="setSort('email')"
+        >
+          Email
+          @if (sortColumn() === 'email') {
+          <span>{{ sortDirection() === 'asc' ? '▲' : '▼' }}</span>
+          }
+        </th>
+        <th
+          scope="col"
+          class="text-center sortable-header"
+          role="button"
+          (click)="setSort('msisdn')"
+        >
+          MSISDN
+          @if (sortColumn() === 'msisdn') {
+          <span>{{ sortDirection() === 'asc' ? '▲' : '▼' }}</span>
+          }
+        </th>
         <th scope="col" class="w-25 text-center">Action</th>
       </tr>
     </thead>

@@ -17,3 +17,12 @@
   text-decoration: none;
   color: black;
 }
+
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable-header:hover {
+  text-decoration: underline;
+}

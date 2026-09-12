@@ -60,7 +60,11 @@
               Account Last Interaction Time:
               {{ this.customer()?.interactionDate }}
             </p>
-            <p>Account Status: {{ this.customerStatusLabel() }}</p>
+            <p>
+              Account Status: {{ this.customerStatusLabel() }} ({{
+                this.customer()?.customerStatus
+              }})
+            </p>
           </div>
         </div>
       </div>

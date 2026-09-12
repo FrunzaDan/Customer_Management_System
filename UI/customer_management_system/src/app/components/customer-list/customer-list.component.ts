@@ -57,17 +57,38 @@ export class CustomerListComponent implements OnInit {
     );
   });
 
+  // Column sorting is client-side too, over the already-filtered list, for
+  // the same reason search is: everything is already loaded in memory.
+  readonly sortColumn = signal<'name' | 'email' | 'msisdn' | null>(null);
+  readonly sortDirection = signal<'asc' | 'desc'>('asc');
+
+  readonly sortedCustomers = computed(() => {
+    const column = this.sortColumn();
+    const customers = this.filteredCustomers();
+    if (!column) return customers;
+
+    const direction = this.sortDirection() === 'asc' ? 1 : -1;
+    const sortKey = (customer: Customer): string =>
+      column === 'name'
+        ? `${customer.firstName} ${customer.lastName}`
+        : customer[column];
+
+    return [...customers].sort(
+      (a, b) => sortKey(a).localeCompare(sortKey(b)) * direction,
+    );
+  });
+
   readonly pageSize = 10;
   readonly currentPage = signal(1);
 
   readonly totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.filteredCustomers().length / this.pageSize)),
+    Math.max(1, Math.ceil(this.sortedCustomers().length / this.pageSize)),
   );
 
   readonly pagedCustomers = computed(() => {
     const page = this.currentPage();
     const start = (page - 1) * this.pageSize;
-    return this.filteredCustomers().slice(start, start + this.pageSize);
+    return this.sortedCustomers().slice(start, start + this.pageSize);
   });
 
   // Computed signal for duplicate GUIDs
@@ -108,6 +129,16 @@ export class CustomerListComponent implements OnInit {
 
   goToPage(page: number): void {
     this.currentPage.set(Math.min(Math.max(page, 1), this.totalPages()));
+  }
+
+  setSort(column: 'name' | 'email' | 'msisdn'): void {
+    if (this.sortColumn() === column) {
+      this.sortDirection.set(this.sortDirection() === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.sortColumn.set(column);
+      this.sortDirection.set('asc');
+    }
+    this.currentPage.set(1);
   }
 
   ngOnInit(): void {

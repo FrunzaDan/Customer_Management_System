@@ -235,6 +235,53 @@ docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1
       </div>
 
       <div class="card mb-4">
+        <div class="card-header">Console-Logged API Calls</div>
+        <div class="card-body">
+          <p class="card-text">
+            Since this is a showcase app, every HTTP call the Angular
+            frontend makes to the API is mirrored to the browser's devtools
+            console via <code>apiLoggerInterceptor</code>, a functional
+            <code>HttpInterceptorFn</code> registered in
+            <code>app.config.ts</code>. Open devtools (<kbd>F12</kbd> or
+            <kbd>Cmd/Ctrl+Shift+I</kbd>) and watch the Console tab while using
+            the app:
+          </p>
+          <ul>
+            <li>
+              A blue <code>→ METHOD url</code> line is logged when a request
+              goes out, with its request body attached.
+            </li>
+            <li>
+              A green <code>← METHOD url status (Nms)</code> line is logged
+              when the response comes back successfully, with the response
+              body and how long it took.
+            </li>
+            <li>
+              A red <code>✖ METHOD url status (Nms)</code> line is logged
+              instead if the request fails.
+            </li>
+          </ul>
+          <p class="card-text">
+            Login/password fields are redacted before logging (shown as
+            <code>••••••••</code>), and nothing is logged during server-side
+            rendering — only in the browser.
+          </p>
+          <p class="card-text">
+            Purely a learning/demo aid, so it can be switched off:
+          </p>
+          <button
+            type="button"
+            class="btn"
+            [class.btn-success]="apiLoggingEnabled()"
+            [class.btn-secondary]="!apiLoggingEnabled()"
+            (click)="toggleApiLogging()"
+          >
+            API call logging: {{ apiLoggingEnabled() ? 'On' : 'Off' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="card mb-4">
         <div class="card-header">What You Can Do In The UI</div>
         <div class="card-body">
           <ul class="mb-0">
