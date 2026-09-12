@@ -103,6 +103,31 @@ public class DbUtils(IAppSettingsConfig configuration) : IDbUtils
             : new ResponseModel<int?>(403, $"The provided merchant role ({authData.MerchantRole}) is not valid.");
     }
 
+    public async Task<ResponseModel<object>> LogCustomerAudit(string customerGuid, string merchantId, string action,
+        string? details)
+    {
+        return await ExecuteStoredProcedureAsync(
+            "dbo.usp_insertCustomerAuditLog",
+            command =>
+            {
+                command.Parameters.AddWithValue("@var_CustomerGuid", customerGuid);
+                command.Parameters.AddWithValue("@var_MerchantID", merchantId);
+                command.Parameters.AddWithValue("@var_Action", action);
+                command.Parameters.AddWithValue("@var_Details", (object?)details ?? DBNull.Value);
+            },
+            DbHelper.HandleResponseWithMessage
+        );
+    }
+
+    public async Task<ResponseModel<object>> GetCustomerAuditLog(string customerGuid)
+    {
+        return await ExecuteStoredProcedureAsync(
+            "dbo.usp_getCustomerAuditLog",
+            command => command.Parameters.AddWithValue("@var_CustomerGuid", customerGuid),
+            DbHelper.HandleResponseWithAuditLogList
+        );
+    }
+
     private void CheckConnectionString()
     {
         if (!string.IsNullOrEmpty(CurrentConnectionString)) return;

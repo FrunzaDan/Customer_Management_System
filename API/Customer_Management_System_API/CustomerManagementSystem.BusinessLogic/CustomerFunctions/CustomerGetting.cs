@@ -56,6 +56,14 @@ public class CustomerGetting
         return await _dbUtils.GetCustomers(request);
     }
 
+    public async Task<ResponseModel<object>> GetCustomerAuditLogFunction(string customerGuid)
+    {
+        if (string.IsNullOrWhiteSpace(customerGuid) || !GuidValidation.ValidateGuid(customerGuid))
+            return new ResponseModel<object>(400, "A valid customer GUID is required.");
+
+        return await _dbUtils.GetCustomerAuditLog(customerGuid);
+    }
+
     private static int DetermineSearchOption(string searchVariable)
     {
         return GuidValidation.ValidateGuid(searchVariable) ? 1 :

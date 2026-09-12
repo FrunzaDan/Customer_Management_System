@@ -16,6 +16,7 @@ public static class BusinessLogicDependencyInjection
         services.AddSingleton<IDbUtils, DbUtils>();
         services.AddSingleton<IAppSettingsConfig, AppSettingsConfig>();
 
+        services.AddScoped<ICustomerAuditLogger, CustomerAuditLogger>();
         services.AddScoped<CustomerRegistration>();
         services.AddScoped<CustomerGetting>();
         services.AddScoped<CustomerEditing>();

@@ -3,10 +3,17 @@ using CustomerManagementSystem.Domain.Models;
 
 namespace CustomerManagementSystem.BusinessLogic.CustomerFunctions;
 
-public class CustomerDeletion(IDbUtils dbUtils)
+public class CustomerDeletion(IDbUtils dbUtils, ICustomerAuditLogger auditLogger)
 {
-    public async Task<ResponseModel<object>> DeleteCustomer(string guid)
+    public async Task<ResponseModel<object>> DeleteCustomer(string guid, string merchantId)
     {
-        return await dbUtils.DeleteCustomer(guid);
+        var response = await dbUtils.DeleteCustomer(guid);
+
+        // No FK from tbl_customer_audit_log to tbl_customers, deliberately — this row
+        // is the one place that outlives the customer it's about.
+        if (response.Status == 200)
+            await auditLogger.Log(guid, merchantId, "Deleted");
+
+        return response;
     }
 }

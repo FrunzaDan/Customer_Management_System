@@ -68,6 +68,16 @@ public static class DbHelper
             : new ResponseModel<object>(Convert.ToInt32(reader["result"]), message ?? "Operation failed.");
     }
 
+    public static async Task<ResponseModel<object>> HandleResponseWithAuditLogList(SqlDataReader reader)
+    {
+        var items = new List<AuditLogEntry>();
+
+        while (await reader.ReadAsync().ConfigureAwait(false))
+            items.Add(MapAuditLogEntryFromReader(reader));
+
+        return new ResponseModel<object>(200, $"{items.Count} audit log entries found.", items);
+    }
+
     public static async Task<MerchantAuthData?> HandleMerchantAuthDataResponse(SqlDataReader reader)
     {
         if (!await reader.ReadAsync().ConfigureAwait(false)) return null;
@@ -109,6 +119,19 @@ public static class DbHelper
         };
 
         return customer;
+    }
+
+    private static AuditLogEntry MapAuditLogEntryFromReader(SqlDataReader reader)
+    {
+        return new AuditLogEntry
+        {
+            AuditId = Convert.ToInt32(reader["audit_id"]),
+            CustomerGuid = reader["customer_guid"].ToString(),
+            MerchantId = reader["merchant_id"].ToString(),
+            Action = reader["action"].ToString(),
+            Details = reader["details"].ToString(),
+            ActionDate = (DateTime)reader["action_Date"]
+        };
     }
 
     private static void AddAddressParameters(SqlCommand command, AddressModel? address)

@@ -7,6 +7,8 @@ namespace CustomerManagementSystem.Tests.CustomerFunctions;
 
 public class CustomerRegistrationTests
 {
+    private const string MerchantId = "TestMerchantID";
+
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -14,10 +16,11 @@ public class CustomerRegistrationTests
     public async Task RegisterCustomerFunction_RejectsInvalidEmail_WithoutTouchingTheDb(string? email)
     {
         var dbUtils = new Mock<IDbUtils>();
-        var registration = new CustomerRegistration(dbUtils.Object);
+        var auditLogger = new Mock<ICustomerAuditLogger>();
+        var registration = new CustomerRegistration(dbUtils.Object, auditLogger.Object);
         var request = new CustomerModel { Email = email, Msisdn = "123456789" };
 
-        var result = await registration.RegisterCustomerFunction(request);
+        var result = await registration.RegisterCustomerFunction(request, MerchantId);
 
         Assert.Equal(400, result.Status);
         Assert.Contains("Email", result.ResponseMessage);
@@ -31,10 +34,11 @@ public class CustomerRegistrationTests
     public async Task RegisterCustomerFunction_RejectsInvalidMsisdn_WithoutTouchingTheDb(string? msisdn)
     {
         var dbUtils = new Mock<IDbUtils>();
-        var registration = new CustomerRegistration(dbUtils.Object);
+        var auditLogger = new Mock<ICustomerAuditLogger>();
+        var registration = new CustomerRegistration(dbUtils.Object, auditLogger.Object);
         var request = new CustomerModel { Email = "dan@example.com", Msisdn = msisdn };
 
-        var result = await registration.RegisterCustomerFunction(request);
+        var result = await registration.RegisterCustomerFunction(request, MerchantId);
 
         Assert.Equal(400, result.Status);
         Assert.Contains("MSISDN", result.ResponseMessage);
@@ -47,10 +51,11 @@ public class CustomerRegistrationTests
         // usp_createCustomer's address parameters have no SQL-side defaults, so without this
         // check a missing Address would otherwise surface as an opaque 500 instead of a 400.
         var dbUtils = new Mock<IDbUtils>();
-        var registration = new CustomerRegistration(dbUtils.Object);
+        var auditLogger = new Mock<ICustomerAuditLogger>();
+        var registration = new CustomerRegistration(dbUtils.Object, auditLogger.Object);
         var request = new CustomerModel { Email = "dan@example.com", Msisdn = "123456789", Address = null };
 
-        var result = await registration.RegisterCustomerFunction(request);
+        var result = await registration.RegisterCustomerFunction(request, MerchantId);
 
         Assert.Equal(400, result.Status);
         Assert.Contains("Address", result.ResponseMessage);
@@ -61,11 +66,12 @@ public class CustomerRegistrationTests
     public async Task RegisterCustomerFunction_AlwaysGeneratesAFreshServerSideGuid_IgnoringAnyClientSuppliedValue()
     {
         var dbUtils = new Mock<IDbUtils>();
+        var auditLogger = new Mock<ICustomerAuditLogger>();
         CustomerModel? capturedRequest = null;
         dbUtils.Setup(d => d.RegisterCustomer(It.IsAny<CustomerModel>()))
             .Callback<CustomerModel>(c => capturedRequest = c)
-            .ReturnsAsync(new ResponseModel<object>(0, "Customer created successfully."));
-        var registration = new CustomerRegistration(dbUtils.Object);
+            .ReturnsAsync(new ResponseModel<object>(200, "Customer created successfully."));
+        var registration = new CustomerRegistration(dbUtils.Object, auditLogger.Object);
         const string clientSuppliedGuid = "11111111-1111-1111-1111-111111111111";
         var request = new CustomerModel
         {
@@ -75,12 +81,15 @@ public class CustomerRegistrationTests
             Address = new AddressModel { Country = "Romania" },
         };
 
-        var result = await registration.RegisterCustomerFunction(request);
+        var result = await registration.RegisterCustomerFunction(request, MerchantId);
 
-        Assert.Equal(0, result.Status);
+        Assert.Equal(200, result.Status);
         dbUtils.Verify(d => d.RegisterCustomer(It.IsAny<CustomerModel>()), Times.Once);
         Assert.NotNull(capturedRequest!.Guid);
         Assert.NotEqual(clientSuppliedGuid, capturedRequest.Guid);
         Assert.True(Guid.TryParse(capturedRequest.Guid, out _));
+        auditLogger.Verify(
+            a => a.Log(capturedRequest.Guid!, MerchantId, "Created", "Email: dan@example.com, MSISDN: 123456789"),
+            Times.Once);
     }
 }

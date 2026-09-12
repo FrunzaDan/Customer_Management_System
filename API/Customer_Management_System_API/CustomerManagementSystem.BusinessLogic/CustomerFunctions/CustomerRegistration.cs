@@ -7,13 +7,15 @@ namespace CustomerManagementSystem.BusinessLogic.CustomerFunctions;
 public class CustomerRegistration
 {
     private readonly IDbUtils _dbUtils;
+    private readonly ICustomerAuditLogger _auditLogger;
 
-    public CustomerRegistration(IDbUtils dbUtils)
+    public CustomerRegistration(IDbUtils dbUtils, ICustomerAuditLogger auditLogger)
     {
         _dbUtils = dbUtils;
+        _auditLogger = auditLogger;
     }
 
-    public async Task<ResponseModel<object>> RegisterCustomerFunction(CustomerModel request)
+    public async Task<ResponseModel<object>> RegisterCustomerFunction(CustomerModel request, string merchantId)
     {
         if (string.IsNullOrEmpty(request.Email) || EmailValidation.ValidateEmail(request.Email) == false)
             return new ResponseModel<object>(400, "Invalid or empty Email.");
@@ -29,6 +31,12 @@ public class CustomerRegistration
         // A new customer's identifier is always generated server-side; a client-supplied GUID is never trusted.
         request.Guid = Guid.NewGuid().ToString();
 
-        return await _dbUtils.RegisterCustomer(request);
+        var response = await _dbUtils.RegisterCustomer(request);
+
+        if (response.Status == 200)
+            await _auditLogger.Log(request.Guid, merchantId, "Created",
+                $"Email: {request.Email}, MSISDN: {request.Msisdn}");
+
+        return response;
     }
 }

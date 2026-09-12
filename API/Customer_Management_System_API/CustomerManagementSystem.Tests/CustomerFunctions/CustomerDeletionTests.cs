@@ -7,19 +7,23 @@ namespace CustomerManagementSystem.Tests.CustomerFunctions;
 
 public class CustomerDeletionTests
 {
+    private const string MerchantId = "TestMerchantID";
+
     [Fact]
-    public async Task DeleteCustomer_DelegatesToTheDbLayerWithTheGivenGuid()
+    public async Task DeleteCustomer_DelegatesToTheDbLayerWithTheGivenGuid_AndLogsAnAuditEntry()
     {
         const string guid = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
         var dbUtils = new Mock<IDbUtils>();
-        var expected = new ResponseModel<object>(0, "Customer deleted successfully.");
+        var auditLogger = new Mock<ICustomerAuditLogger>();
+        var expected = new ResponseModel<object>(200, "Customer deleted successfully.");
         dbUtils.Setup(d => d.DeleteCustomer(guid)).ReturnsAsync(expected);
-        var deletion = new CustomerDeletion(dbUtils.Object);
+        var deletion = new CustomerDeletion(dbUtils.Object, auditLogger.Object);
 
-        var result = await deletion.DeleteCustomer(guid);
+        var result = await deletion.DeleteCustomer(guid, MerchantId);
 
         Assert.Same(expected, result);
         dbUtils.Verify(d => d.DeleteCustomer(guid), Times.Once);
+        auditLogger.Verify(a => a.Log(guid, MerchantId, "Deleted", null), Times.Once);
     }
 
     [Fact]
@@ -28,13 +32,16 @@ public class CustomerDeletionTests
         // Mirrors the real usp_deleteCustomer rule: an active customer can't be deleted directly.
         const string guid = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
         var dbUtils = new Mock<IDbUtils>();
+        var auditLogger = new Mock<ICustomerAuditLogger>();
         var expected = new ResponseModel<object>(409, "Customer must be deactivated before it can be deleted.");
         dbUtils.Setup(d => d.DeleteCustomer(guid)).ReturnsAsync(expected);
-        var deletion = new CustomerDeletion(dbUtils.Object);
+        var deletion = new CustomerDeletion(dbUtils.Object, auditLogger.Object);
 
-        var result = await deletion.DeleteCustomer(guid);
+        var result = await deletion.DeleteCustomer(guid, MerchantId);
 
         Assert.Equal(409, result.Status);
         Assert.Equal(expected.ResponseMessage, result.ResponseMessage);
+        auditLogger.Verify(a => a.Log(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>()),
+            Times.Never);
     }
 }
