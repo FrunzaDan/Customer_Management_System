@@ -6,7 +6,7 @@
 } @if (exportError(); as error) {
 <div class="alert alert-danger mt-2">{{ error }}</div>
 }
-<div class="container-fluid mb-2 d-flex gap-2 align-items-start">
+<div class="container-fluid mb-2 d-flex flex-wrap gap-2 align-items-start">
   <input
     type="search"
     class="form-control"
@@ -18,11 +18,18 @@
   />
   <button
     type="button"
-    class="btn btn-secondary"
+    class="btn btn-primary shadow-none"
     [disabled]="exportLoading()"
     (click)="exportCsv()"
   >
     {{ exportLoading() ? 'Exporting…' : 'Export CSV' }}
+  </button>
+  <button
+    (click)="addCustomer()"
+    type="button"
+    class="btn btn-primary shadow-none"
+  >
+    Register customer
   </button>
   <button
     type="button"
@@ -147,7 +154,7 @@
             <button
               (click)="reactivateCustomer(customer.guid)"
               type="button"
-              class="btn btn-secondary"
+              class="btn btn-primary shadow-none"
               [disabled]="activationLoading() || deleting() || bulkActionInProgress()"
             >
               Reactivate
@@ -173,7 +180,7 @@
 <nav class="container-fluid d-flex justify-content-center align-items-center gap-2 my-3" aria-label="Customer list pages">
   <button
     type="button"
-    class="btn btn-secondary btn-sm"
+    class="btn btn-primary btn-sm shadow-none"
     [disabled]="currentPage() === 1"
     (click)="goToPage(currentPage() - 1)"
   >
@@ -182,7 +189,7 @@
   <span>Page {{ currentPage() }} of {{ totalPages() }}</span>
   <button
     type="button"
-    class="btn btn-secondary btn-sm"
+    class="btn btn-primary btn-sm shadow-none"
     [disabled]="currentPage() === totalPages()"
     (click)="goToPage(currentPage() + 1)"
   >

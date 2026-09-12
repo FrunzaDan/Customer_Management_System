@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { Router } from '@angular/router';
 import { CustomerListComponent } from '../customer-list/customer-list.component';
 
 @Component({
@@ -9,10 +8,4 @@ import { CustomerListComponent } from '../customer-list/customer-list.component'
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CustomerListComponent],
 })
-export class HomeComponent {
-  constructor(private router: Router) {}
-
-  addCustomer(): void {
-    this.router.navigate(['/addCustomer']);
-  }
-}
+export class HomeComponent {}

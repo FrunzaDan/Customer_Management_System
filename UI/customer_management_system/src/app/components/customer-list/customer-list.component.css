@@ -3,16 +3,6 @@
   background-color: var(--spectrumColor4);
 }
 
-.btn-primary,
-.btn-primary:hover,
-.btn-primary:active,
-.btn-primary:visited {
-  background-color: var(--spectrumColor1) !important;
-  outline: none !important;
-  box-shadow: none;
-  border-color: var(--spectrumColor1);
-}
-
 .plain-Links {
   text-decoration: none;
   color: black;

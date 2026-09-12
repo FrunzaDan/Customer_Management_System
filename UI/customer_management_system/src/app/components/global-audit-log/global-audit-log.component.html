@@ -51,7 +51,7 @@
 >
   <button
     type="button"
-    class="btn btn-secondary btn-sm"
+    class="btn btn-primary btn-sm shadow-none"
     [disabled]="currentPage() === 1"
     (click)="goToPage(currentPage() - 1)"
   >
@@ -60,7 +60,7 @@
   <span>Page {{ currentPage() }} of {{ totalPages() }}</span>
   <button
     type="button"
-    class="btn btn-secondary btn-sm"
+    class="btn btn-primary btn-sm shadow-none"
     [disabled]="currentPage() === totalPages()"
     (click)="goToPage(currentPage() + 1)"
   >

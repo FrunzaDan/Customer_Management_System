@@ -151,6 +151,10 @@ export class CustomerListComponent implements OnInit {
     this.fetchCustomers();
   }
 
+  addCustomer(): void {
+    this.router.navigate(['/addCustomer']);
+  }
+
   exportCsv(): void {
     this.exportCustomerService.exportCustomers({
       searchTerm: this.searchTerm().trim() || undefined,
