@@ -1,3 +1,4 @@
+using System.Text;
 using CustomerManagementSystem.BusinessLogic.Services;
 using CustomerManagementSystem.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -40,6 +41,17 @@ public class CustomerController(ICustomerService customerService) : ControllerBa
     {
         var response = await customerService.GetCustomers(request);
         return StatusCode(response.Status ?? 200, response);
+    }
+
+    [HttpGet("export")]
+    public async Task<IActionResult> ExportCustomers([FromQuery] ExportCustomersRequest request)
+    {
+        var response = await customerService.GetCustomersForExport(request);
+        if (response.Status != 200 || response.Data is not string csv)
+            return StatusCode(response.Status ?? 200, response);
+
+        var bytes = Encoding.UTF8.GetBytes(csv);
+        return File(bytes, "text/csv", $"customers_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv");
     }
 
     [HttpGet("auditLog")]

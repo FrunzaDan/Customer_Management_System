@@ -166,4 +166,82 @@ public class CustomerGettingTests
         Assert.Same(expected, result);
         dbUtils.Verify(d => d.GetCustomers(It.IsAny<GetCustomersRequest>()), Times.Once);
     }
+
+    [Fact]
+    public async Task GetCustomersForExportFunction_RejectsAnInvalidSortColumn_WithoutTouchingTheDb()
+    {
+        var dbUtils = new Mock<IDbUtils>();
+        var getting = new CustomerGetting(dbUtils.Object);
+        var request = new ExportCustomersRequest { SortColumn = "not-a-real-column" };
+
+        var result = await getting.GetCustomersForExportFunction(request);
+
+        Assert.Equal(400, result.Status);
+        dbUtils.Verify(d => d.GetCustomers(It.IsAny<GetCustomersRequest>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetCustomersForExportFunction_RejectsAnInvalidSortDirection_WithoutTouchingTheDb()
+    {
+        var dbUtils = new Mock<IDbUtils>();
+        var getting = new CustomerGetting(dbUtils.Object);
+        var request = new ExportCustomersRequest { SortDirection = "sideways" };
+
+        var result = await getting.GetCustomersForExportFunction(request);
+
+        Assert.Equal(400, result.Status);
+        dbUtils.Verify(d => d.GetCustomers(It.IsAny<GetCustomersRequest>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetCustomersForExportFunction_IgnoresPagingAndRequestsTheFullCappedResultInOneCall()
+    {
+        var dbUtils = new Mock<IDbUtils>();
+        GetCustomersRequest? captured = null;
+        dbUtils.Setup(d => d.GetCustomers(It.IsAny<GetCustomersRequest>()))
+            .Callback<GetCustomersRequest>(r => captured = r)
+            .ReturnsAsync(new ResponseModel<object>(200, "Success!",
+                new PagedResponse<CustomerModel>(new List<CustomerModel>(), 0, 1, 5000)));
+        var getting = new CustomerGetting(dbUtils.Object);
+        var request = new ExportCustomersRequest { SearchTerm = " dan ", SortColumn = " EMAIL ", SortDirection = " DESC " };
+
+        await getting.GetCustomersForExportFunction(request);
+
+        Assert.Equal(1, captured!.PageNumber);
+        Assert.Equal(5000, captured.PageSize);
+        Assert.Equal("dan", captured.SearchTerm);
+        Assert.Equal("email", captured.SortColumn);
+        Assert.Equal("desc", captured.SortDirection);
+    }
+
+    [Fact]
+    public async Task GetCustomersForExportFunction_ReturnsCsvBuiltFromTheDbLayersPagedItems()
+    {
+        var dbUtils = new Mock<IDbUtils>();
+        var customer = new CustomerModel { Guid = "g1", FirstName = "Dan", LastName = "Frunza" };
+        dbUtils.Setup(d => d.GetCustomers(It.IsAny<GetCustomersRequest>()))
+            .ReturnsAsync(new ResponseModel<object>(200, "Success!",
+                new PagedResponse<CustomerModel>([customer], 1, 1, 5000)));
+        var getting = new CustomerGetting(dbUtils.Object);
+
+        var result = await getting.GetCustomersForExportFunction(new ExportCustomersRequest());
+
+        Assert.Equal(200, result.Status);
+        var csv = Assert.IsType<string>(result.Data);
+        Assert.Contains("Dan", csv);
+        Assert.Contains("Frunza", csv);
+    }
+
+    [Fact]
+    public async Task GetCustomersForExportFunction_PassesThroughADbLayerFailureUnchanged()
+    {
+        var dbUtils = new Mock<IDbUtils>();
+        var expected = new ResponseModel<object>(500, "Something went wrong.");
+        dbUtils.Setup(d => d.GetCustomers(It.IsAny<GetCustomersRequest>())).ReturnsAsync(expected);
+        var getting = new CustomerGetting(dbUtils.Object);
+
+        var result = await getting.GetCustomersForExportFunction(new ExportCustomersRequest());
+
+        Assert.Same(expected, result);
+    }
 }

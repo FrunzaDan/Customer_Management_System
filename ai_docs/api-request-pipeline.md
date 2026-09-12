@@ -28,7 +28,8 @@ Layering: `WebAPI` (controllers/host) → `BusinessLogic` (services, validation,
   - `POST /access-token` — body `{ merchantId, merchantPassword }` → JWT if credentials check out. Rate-limited (see above).
   - `GET /verify-token` — `[Authorize]`-gated; if the request gets past the JWT middleware, the token is valid — the endpoint has nothing left to do but return 200.
 - `CustomerController` (`api/Customer`) — class-level `[Authorize]`, every endpoint requires a bearer token:
-  - `POST /register`, `GET /get?searchVariable=...`, `GET /all`, `PATCH /edit`, `PATCH /deactivate?customerGuid=...`, `PATCH /reactivate?customerGuid=...`, `DELETE /delete?customerGuid=...`.
+  - `POST /register`, `GET /get?searchVariable=...`, `GET /all`, `GET /export`, `PATCH /edit`, `PATCH /deactivate?customerGuid=...`, `PATCH /reactivate?customerGuid=...`, `DELETE /delete?customerGuid=...`.
+  - `GET /export` is the one endpoint that doesn't return the uniform `ResponseModel` JSON shape below — on success it returns a raw `text/csv` `File` result instead (see [[customer-data-model-and-lifecycle]]); on failure it still returns `StatusCode(response.Status, response)` like everything else.
 
 **Uniform response shape:** every mutating stored proc returns a `(result INT, message NVARCHAR)` result set (`result = 0` means success; nonzero mirrors an HTTP status). `DbHelper.HandleResponseWithMessage` reads that into a `ResponseModel<object>`, and every controller action passes it straight through via `StatusCode(response.Status ?? 200, response)` — controllers never branch on status themselves.
 

@@ -3,8 +3,10 @@
 <div class="alert alert-danger mt-2">{{ error }}</div>
 } @if (deleteError(); as error) {
 <div class="alert alert-danger mt-2">{{ error }}</div>
+} @if (exportError(); as error) {
+<div class="alert alert-danger mt-2">{{ error }}</div>
 }
-<div class="container-fluid mb-2">
+<div class="container-fluid mb-2 d-flex gap-2 align-items-start">
   <input
     type="search"
     class="form-control"
@@ -14,6 +16,14 @@
     (input)="onSearchInput($any($event.target).value)"
     aria-label="Search customers"
   />
+  <button
+    type="button"
+    class="btn btn-secondary"
+    [disabled]="exportLoading()"
+    (click)="exportCsv()"
+  >
+    {{ exportLoading() ? 'Exporting…' : 'Export CSV' }}
+  </button>
 </div>
 @if (customers().length === 0) {
 <p class="container-fluid">

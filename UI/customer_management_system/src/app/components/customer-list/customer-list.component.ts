@@ -5,6 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { GetCustomerService } from '../../services/get-customer.service';
 import { ActivateCustomerService } from '../../services/activate-customer.service';
 import { DeleteCustomerService } from '../../services/delete-customer.service';
+import { ExportCustomerService } from '../../services/export-customer.service';
 import {
   Customer,
   CustomerActivationStatus,
@@ -21,6 +22,7 @@ export class CustomerListComponent implements OnInit {
   private readonly getCustomerService = inject(GetCustomerService);
   private readonly activateCustomerService = inject(ActivateCustomerService);
   private readonly deleteCustomerService = inject(DeleteCustomerService);
+  private readonly exportCustomerService = inject(ExportCustomerService);
   private readonly router = inject(Router);
 
   // Public signals for template
@@ -34,6 +36,11 @@ export class CustomerListComponent implements OnInit {
   // in-flight/error state rather than being folded into activationLoading/Error.
   readonly deleting = signal(false);
   readonly deleteError = signal<string | null>(null);
+
+  // CSV export exports whatever the list is currently searching/sorted by,
+  // not just the current page — see ExportCustomerService.
+  readonly exportLoading = this.exportCustomerService.loadingSignal;
+  readonly exportError = this.exportCustomerService.errorSignal;
 
   // Add CustomerStatus enum for better type checking
   readonly CustomerStatus = CustomerActivationStatus;
@@ -120,6 +127,14 @@ export class CustomerListComponent implements OnInit {
 
   ngOnInit(): void {
     this.fetchCustomers();
+  }
+
+  exportCsv(): void {
+    this.exportCustomerService.exportCustomers({
+      searchTerm: this.searchTerm().trim() || undefined,
+      sortColumn: this.sortColumn(),
+      sortDirection: this.sortDirection(),
+    });
   }
 
   private fetchCustomers(): void {

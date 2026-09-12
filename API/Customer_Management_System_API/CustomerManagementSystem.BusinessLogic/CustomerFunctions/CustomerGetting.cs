@@ -7,6 +7,12 @@ namespace CustomerManagementSystem.BusinessLogic.CustomerFunctions;
 public class CustomerGetting
 {
     private const int MaxPageSize = 100;
+
+    // CSV export ignores paging (it's not a "current page" export) but still needs
+    // a hard cap so an unfiltered export on a very large table can't balloon the
+    // response — generous enough that no real local/demo dataset will ever hit it.
+    private const int MaxExportRows = 5000;
+
     private static readonly string[] ValidSortColumns = ["name", "email", "msisdn"];
     private static readonly string[] ValidSortDirections = ["asc", "desc"];
 
@@ -39,6 +45,42 @@ public class CustomerGetting
         if (request.PageSize < 1 || request.PageSize > MaxPageSize)
             return new ResponseModel<object>(400, $"Page size must be between 1 and {MaxPageSize}.");
 
+        var validationError = ValidateAndNormalizeSortAndSearch(request);
+        if (validationError != null)
+            return validationError;
+
+        return await _dbUtils.GetCustomers(request);
+    }
+
+    // Exports the full search/sort result (capped at MaxExportRows), not just one
+    // page — it reuses usp_getCustomers via the same _dbUtils.GetCustomers call the
+    // paginated endpoint uses, just with PageNumber/PageSize fixed internally, so the
+    // filtering/sorting SQL stays in exactly one place.
+    public async Task<ResponseModel<object>> GetCustomersForExportFunction(ExportCustomersRequest request)
+    {
+        var pagedRequest = new GetCustomersRequest
+        {
+            PageNumber = 1,
+            PageSize = MaxExportRows,
+            SearchTerm = request.SearchTerm,
+            SortColumn = request.SortColumn,
+            SortDirection = request.SortDirection
+        };
+
+        var validationError = ValidateAndNormalizeSortAndSearch(pagedRequest);
+        if (validationError != null)
+            return validationError;
+
+        var response = await _dbUtils.GetCustomers(pagedRequest);
+        if (response.Status != 200 || response.Data is not PagedResponse<CustomerModel> paged)
+            return response;
+
+        var csv = CustomerCsvExporter.ToCsv(paged.Items);
+        return new ResponseModel<object>(200, $"{paged.Items.Count()} customers exported.", csv);
+    }
+
+    private static ResponseModel<object>? ValidateAndNormalizeSortAndSearch(GetCustomersRequest request)
+    {
         var sortColumn = request.SortColumn.Trim().ToLowerInvariant();
         if (!ValidSortColumns.Contains(sortColumn))
             return new ResponseModel<object>(400,
@@ -53,7 +95,7 @@ public class CustomerGetting
         request.SortDirection = sortDirection;
         request.SearchTerm = string.IsNullOrWhiteSpace(request.SearchTerm) ? null : request.SearchTerm.Trim();
 
-        return await _dbUtils.GetCustomers(request);
+        return null;
     }
 
     public async Task<ResponseModel<object>> GetCustomerAuditLogFunction(string customerGuid)

@@ -32,6 +32,9 @@ public class CustomerService(
     public async Task<ResponseModel<object>> GetCustomers(GetCustomersRequest request) =>
         await customerGetting.GetCustomersFunction(request);
 
+    public async Task<ResponseModel<object>> GetCustomersForExport(ExportCustomersRequest request) =>
+        await customerGetting.GetCustomersForExportFunction(request);
+
     public async Task<ResponseModel<object>> RegisterCustomer(CustomerModel customerRqst, string merchantId) =>
         await customerRegistration.RegisterCustomerFunction(customerRqst, merchantId);
 }

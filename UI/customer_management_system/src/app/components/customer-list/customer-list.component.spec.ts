@@ -3,16 +3,19 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { ActivateCustomerService } from '../../services/activate-customer.service';
 import { DeleteCustomerService } from '../../services/delete-customer.service';
+import { ExportCustomerService } from '../../services/export-customer.service';
 import { GetCustomerService } from '../../services/get-customer.service';
 import { CustomerListComponent } from './customer-list.component';
 
 describe('CustomerListComponent', () => {
   let component: CustomerListComponent;
   let loadCustomers: ReturnType<typeof vi.fn>;
+  let exportCustomers: ReturnType<typeof vi.fn>;
   let totalItems: ReturnType<typeof signal<number>>;
 
   beforeEach(() => {
     loadCustomers = vi.fn();
+    exportCustomers = vi.fn();
     totalItems = signal(0);
 
     const getCustomerServiceStub = {
@@ -41,6 +44,14 @@ describe('CustomerListComponent', () => {
         {
           provide: DeleteCustomerService,
           useValue: { deleteCustomer: vi.fn() },
+        },
+        {
+          provide: ExportCustomerService,
+          useValue: {
+            loadingSignal: signal(false),
+            errorSignal: signal<string | null>(null),
+            exportCustomers,
+          },
         },
         { provide: Router, useValue: { navigate: vi.fn() } },
       ],
@@ -160,6 +171,31 @@ describe('CustomerListComponent', () => {
       vi.advanceTimersByTime(300);
 
       expect(component.currentPage()).toBe(1);
+    });
+  });
+
+  describe('exportCsv', () => {
+    it('exports with the current search term (trimmed) and sort state', () => {
+      component.searchTerm.set('  dan  ');
+      component.setSort('email');
+
+      component.exportCsv();
+
+      expect(exportCustomers).toHaveBeenCalledWith({
+        searchTerm: 'dan',
+        sortColumn: 'email',
+        sortDirection: 'asc',
+      });
+    });
+
+    it('omits searchTerm when the search box is blank', () => {
+      component.exportCsv();
+
+      expect(exportCustomers).toHaveBeenCalledWith({
+        searchTerm: undefined,
+        sortColumn: 'name',
+        sortDirection: 'asc',
+      });
     });
   });
 });

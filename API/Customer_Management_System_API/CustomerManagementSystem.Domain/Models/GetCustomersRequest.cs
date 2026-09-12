@@ -12,3 +12,12 @@ public class GetCustomersRequest
 
     public string SortDirection { get; set; } = "asc";
 }
+
+public class ExportCustomersRequest
+{
+    public string? SearchTerm { get; set; }
+
+    public string SortColumn { get; set; } = "name";
+
+    public string SortDirection { get; set; } = "asc";
+}

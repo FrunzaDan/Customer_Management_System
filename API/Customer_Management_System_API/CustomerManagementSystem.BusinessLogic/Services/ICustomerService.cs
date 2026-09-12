@@ -6,6 +6,8 @@ public interface ICustomerService
 {
     Task<ResponseModel<object>> GetCustomers(GetCustomersRequest request);
 
+    Task<ResponseModel<object>> GetCustomersForExport(ExportCustomersRequest request);
+
     Task<ResponseModel<object>> GetCustomer(GetCustomerRequest request);
 
     Task<ResponseModel<object>> GetCustomerAuditLog(string customerGuid);
