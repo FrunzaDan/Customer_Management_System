@@ -17,8 +17,8 @@ The route/component map, the customer services layer, and two real bugs that wer
 |---|---|---|
 | `user-login` | `/login` | Merchant sign-in form |
 | `home` | `/`, `/customers` | Customer list landing page |
-| `customer-list` | (used by `home`) | Table of all customers, `@for` track-by GUID; client-side search + pagination |
-| `customer-details` | `/customerDetails` | Single customer's full record, with friendly (not raw-numeric) status |
+| `customer-list` | (used by `home`) | Table of customers, `@for` track-by GUID; server-side search, sort, and pagination |
+| `customer-details` | `/customerDetails` | Single customer's full record (friendly status) plus its audit trail |
 | `add-customer` | `/addCustomer` | Create-customer form |
 | `edit-customer` | `/editCustomer` | Edit-customer form |
 | `features` | `/features` | Static feature list page |
@@ -32,14 +32,18 @@ Gender is stored/sent as an **integer**: `0` = Not declared, `1` = Male, `2` = F
 
 **Services** (`src/app/services/`):
 - `user-login.service.ts`, `verify-token.service.ts`, `auth-guard.service.ts`, `session-storage.service.ts`, `http-header-service.ts`, `auth-error.interceptor.ts` — see [[angular-login-flow]] and [[angular-app-config-and-routing]].
-- `get-customer.service.ts`, `add-customer.service.ts`, `edit-customer.service.ts`, `activate-customer.service.ts`, `delete-customer.service.ts` — one per `CustomerController` endpoint group (see [[api-request-pipeline]]).
+- `get-customer.service.ts`, `add-customer.service.ts`, `edit-customer.service.ts`, `activate-customer.service.ts`, `delete-customer.service.ts`, `audit-log.service.ts` — one per `CustomerController` endpoint group (see [[api-request-pipeline]]).
 - `navbar.service.ts`, `footer.service.ts` — simple show/hide state for chrome that shouldn't appear on the login screen.
 
 **Customer lifecycle actions in the UI** (`customer-list.component.ts`, `customer-details.component.ts`): Edit is always available; Deactivate shows only when active; Reactivate and Delete show only when deactivated — mirroring the stored-procedure rules in [[customer-data-model-and-lifecycle]] rather than re-deriving them. Both Deactivate and Delete are guarded by a native `confirm()` prompt before the request fires; Reactivate and Edit are not (both are non-destructive/reversible).
 
 **Search, sorting & pagination** (`customer-list.component.ts`): all three are server-side now — `GET /api/Customer/all` takes `pageNumber`, `pageSize` (capped at 100, see `CustomerGetting.MaxPageSize`), `searchTerm`, `sortColumn` (`name`/`email`/`msisdn`), `sortDirection` (`asc`/`desc`), and `usp_getCustomers` does the filtering/sorting/paging in SQL (`WHERE` + a parameterized `CASE`-based `ORDER BY` + `OFFSET`/`FETCH`, with `COUNT(*) OVER()` for the total). `GetCustomerService.loadCustomers(params)` re-fetches on every change to page, search term, or sort; `customersSignal` holds only the current page, not the whole table. Changing the search term or clicking a column header resets to page 1. The search box is debounced (300ms) since each keystroke is now a network call, not an in-memory filter. Pagination controls only render when there's more than one page — with the two seeded demo customers you'll never see them locally; that's expected, not a bug.
 
+**Audit trail** (`customer-details.component.ts`): `AuditLogService.loadAuditLog(guid)` is called in `ngOnInit` alongside the customer fetch, and rendered as its own card (newest first). Unlike the customer record itself (which updates in place via `updateCustomerLocally`), the audit list has no local-patch path, so it's re-fetched via a constructor `effect()` that watches `activationLoading()` and reloads on the true→false transition (i.e. right after a deactivate/reactivate call resolves) — without this, the trail would look stale until the next full page load even though the status right above it just updated live.
+
 **Birthdate is a native `<input type="date">`** in both `add-customer` and `edit-customer` — replaced three separate year/month/day text boxes. The API still just wants `YYYY-MM-DD` (that's what `usp_createCustomer`/`usp_editCustomer` store as-is in `tbl_customers.birthdate`, an `NVARCHAR`, not a real `DATE` column), and a date input's `.value` is always exactly that format, so no manual concatenation is needed on submit anymore. When *editing* an existing customer, `EditCustomerComponent.toDateInputValue()` zero-pads the stored value before patching the form — a date input silently fails to pre-fill on anything not strictly zero-padded, and the old three-box form could have saved e.g. `"2020-1-5"` for some existing records.
+
+**Frontend unit tests**: the project was scaffolded straight onto Vitest (`@angular/build:unit-test` + `"runner": "vitest"` in `angular.json`, `"types": ["vitest/globals"]` in `tsconfig.spec.json`) — there's no Karma here to migrate away from, despite that being the more commonly-seen setup in older Angular tutorials. `describe`/`it`/`expect`/`vi`/etc. are global (no imports needed). `jsdom` is the DOM-emulation dependency (installed as a devDependency — Vitest requires either that or `happy-dom` and picks whichever is present). Run with `ng test` (or `ng test --watch=false` for a single run). Coverage: `get-customer.service.spec.ts` and `audit-log.service.spec.ts` mock HTTP via `provideHttpClientTesting()`/`HttpTestingController`; `customer-list.component.spec.ts` constructs the component directly via `TestBed.runInInjectionContext(() => new CustomerListComponent())` with hand-rolled service stubs (not `TestBed.createComponent`, since these tests exercise the sort/paging/search-debounce logic, not the template) — that pattern is required because the component uses field-initializer `inject()` calls, which need an active injection context to run.
 
 ## Gotchas / conventions
 

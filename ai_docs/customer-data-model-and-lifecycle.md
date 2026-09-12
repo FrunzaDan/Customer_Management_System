@@ -6,9 +6,9 @@ The `tbl_customers`/`tbl_addresses` schema, the status codes that drive the deac
 
 ## Key files / paths
 
-- `DB/Customer_Management_System_DB/Tables/tbl_customers.sql`, `tbl_addresses.sql`, `tbl_merchants.sql`
-- `DB/Customer_Management_System_DB/Stored_Procedures/usp_createCustomer.sql`, `usp_getCustomer.sql`, `usp_getCustomers.sql`, `usp_editCustomer.sql`, `usp_deactivateCustomer.sql`, `usp_reactivateCustomer.sql`, `usp_deleteCustomer.sql`
-- `API/.../CustomerManagementSystem.BusinessLogic/CustomerFunctions/*.cs` — `CustomerRegistration`, `CustomerEditing`, `CustomerGetting`, `CustomerActivation`, `CustomerDeletion`
+- `DB/Customer_Management_System_DB/Tables/tbl_customers.sql`, `tbl_addresses.sql`, `tbl_merchants.sql`, `tbl_customer_audit_log.sql`
+- `DB/Customer_Management_System_DB/Stored_Procedures/usp_createCustomer.sql`, `usp_getCustomer.sql`, `usp_getCustomers.sql`, `usp_editCustomer.sql`, `usp_deactivateCustomer.sql`, `usp_reactivateCustomer.sql`, `usp_deleteCustomer.sql`, `usp_insertCustomerAuditLog.sql`, `usp_getCustomerAuditLog.sql`
+- `API/.../CustomerManagementSystem.BusinessLogic/CustomerFunctions/*.cs` — `CustomerRegistration`, `CustomerEditing`, `CustomerGetting`, `CustomerActivation`, `CustomerDeletion`, `CustomerAuditLogger`
 
 ## How it works
 
@@ -32,6 +32,8 @@ The `tbl_customers`/`tbl_addresses` schema, the status codes that drive the deac
 **Lookup**: `CustomerGetting.GetCustomerFunction` doesn't take an explicit search type from the caller — it auto-detects one via `DetermineSearchOption`, trying (in order) GUID format → MSISDN format → email format, and passing the matching `SearchOption` (1/2/3) to `usp_getCustomer`'s `@var_SearchOption`. An unrecognized `searchVariable` shape returns `404` without ever hitting the DB.
 
 **GUIDs are always server-generated**: `CustomerRegistration.RegisterCustomerFunction` overwrites `request.Guid` with a fresh `Guid.NewGuid()` before calling the DB — a client can never choose its own customer ID.
+
+**Audit trail** (`tbl_customer_audit_log`): every successful mutation (`Created`/`Edited`/`Deactivated`/`Reactivated`/`Deleted`) writes a row via `CustomerAuditLogger.Log`, called from `CustomerRegistration`/`CustomerEditing`/`CustomerActivation`/`CustomerDeletion` only after the underlying DB call returns `Status == 200`. The merchant ID comes from `CustomerController.MerchantId` (`User.Identity.Name`, set from the JWT's `ClaimTypes.Name` claim — see [[jwt-auth-flow]]), not from the request body. **Deliberately no FK** from `tbl_customer_audit_log.customer_guid` to `tbl_customers` — a deleted customer's audit history must survive `usp_deleteCustomer`, which is the one place this table outlives the row it's about. Logging is **best-effort**: `CustomerAuditLogger.Log` swallows and logs (via `ILogger`) any exception rather than letting it bubble, because it always runs after the customer mutation it's recording has already succeeded — a logging failure must never turn that into a `500`. Read via `GET /api/Customer/auditLog?customerGuid=...` → `usp_getCustomerAuditLog`, newest first; `CustomerGetting.GetCustomerAuditLogFunction` validates the GUID format (`400` if not GUID-shaped) before hitting the DB.
 
 ## Gotchas / conventions
 

@@ -2,13 +2,16 @@ import {
   Component,
   Signal,
   computed,
+  effect,
   signal,
   OnInit,
   ChangeDetectionStrategy,
 } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { GetCustomerService } from '../../../../src/app/services/get-customer.service';
 import { ActivateCustomerService } from '../../services/activate-customer.service';
+import { AuditLogService } from '../../services/audit-log.service';
 import { DeleteCustomerService } from '../../services/delete-customer.service';
 import {
   Customer,
@@ -21,6 +24,7 @@ import { Router, ActivatedRoute } from '@angular/router';
   templateUrl: './customer-details.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./customer-details.component.css'],
+  imports: [DatePipe],
 })
 export class CustomerDetailsComponent implements OnInit {
   genderMap = new Map<Customer['gender'], string>([
@@ -50,10 +54,16 @@ export class CustomerDetailsComponent implements OnInit {
   readonly deleting = signal(false);
   readonly deleteError = signal<string | null>(null);
 
+  readonly auditLog;
+  readonly auditLogLoading;
+  readonly auditLogError;
+  private wasActivationLoading = false;
+
   constructor(
     private getCustomerService: GetCustomerService,
     private activateCustomerService: ActivateCustomerService,
     private deleteCustomerService: DeleteCustomerService,
+    private auditLogService: AuditLogService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
   ) {
@@ -62,6 +72,9 @@ export class CustomerDetailsComponent implements OnInit {
     this.errorMessage = this.getCustomerService.errorSignal;
     this.activationLoading = this.activateCustomerService.loadingSignal;
     this.activationError = this.activateCustomerService.errorSignal;
+    this.auditLog = this.auditLogService.entriesSignal;
+    this.auditLogLoading = this.auditLogService.loadingSignal;
+    this.auditLogError = this.auditLogService.errorSignal;
 
     this.customerGender = computed(() => {
       const c = this.customer();
@@ -76,6 +89,19 @@ export class CustomerDetailsComponent implements OnInit {
         ? this.statusMap.get(c.customerStatus)
         : undefined;
     });
+
+    // The rest of the page (e.g. Account Status) updates live via
+    // updateCustomerLocally() as soon as a deactivate/reactivate call
+    // resolves; the audit trail can only be refreshed by re-fetching, so
+    // this re-loads it whenever activationLoading() flips back to false.
+    effect(() => {
+      const isLoading = this.activationLoading();
+      if (this.wasActivationLoading && !isLoading) {
+        const guid = this.customer()?.guid;
+        if (guid) this.auditLogService.loadAuditLog(guid);
+      }
+      this.wasActivationLoading = isLoading;
+    });
   }
 
   ngOnInit(): void {
@@ -83,6 +109,7 @@ export class CustomerDetailsComponent implements OnInit {
       const paramID = params.get('id');
       if (paramID) {
         this.getCustomerService.getCustomer(paramID);
+        this.auditLogService.loadAuditLog(paramID);
       } else {
         this.router.navigate(['']);
       }

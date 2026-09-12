@@ -70,6 +70,30 @@
       </div>
       <div class="card my-5">
         <div class="card-body">
+          <h5 class="card-title">Audit Trail:</h5>
+          @if (auditLogLoading()) {
+          <p class="card-text">Loading audit trail…</p>
+          } @else if (auditLogError()) {
+          <p class="card-text text-danger">{{ auditLogError() }}</p>
+          } @else if (auditLog().length === 0) {
+          <p class="card-text">No recorded actions yet.</p>
+          } @else {
+          <ul class="list-group list-group-flush">
+            @for (entry of auditLog(); track entry.auditId) {
+            <li class="list-group-item">
+              <strong>{{ entry.action }}</strong> by {{ entry.merchantId }} on
+              {{ entry.actionDate | date: 'medium' }}
+              @if (entry.details) {
+              <div class="text-muted small">{{ entry.details }}</div>
+              }
+            </li>
+            }
+          </ul>
+          }
+        </div>
+      </div>
+      <div class="card my-5">
+        <div class="card-body">
           <h5 class="card-title">Actions:</h5>
           <div class="btn-group" role="group">
             <button
