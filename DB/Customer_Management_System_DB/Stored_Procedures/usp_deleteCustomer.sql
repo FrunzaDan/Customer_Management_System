@@ -17,9 +17,12 @@ BEGIN
         SET @message = 'Customer not found.';
     END
     ELSE IF NOT EXISTS (
+        -- 1903 (deactivated): the normal deactivate-then-delete lifecycle.
+        -- 1904 (test): fictitious demo data, exempt from that guardrail so it
+        -- can be deleted directly.
         SELECT 1
         FROM tbl_customers
-        WHERE PK_customer_guid = @var_Guid AND customer_Status = 1903
+        WHERE PK_customer_guid = @var_Guid AND customer_Status IN (1903, 1904)
     )
     BEGIN
         SET @result = 409;

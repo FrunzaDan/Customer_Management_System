@@ -10,6 +10,7 @@ import { GenericResponse } from '../interfaces/generic-response';
 import { GetCustomerService } from './get-customer.service';
 import { HttpHeaderService } from './http-header-service';
 import { CustomerActivationStatus } from '../interfaces/customer-response';
+import { Observable, tap } from 'rxjs';
 import { retry } from 'rxjs/internal/operators/retry';
 import { catchError } from 'rxjs/internal/operators/catchError';
 import { NotificationService } from './notification.service';
@@ -137,6 +138,39 @@ export class ActivateCustomerService {
         },
         error: (error: HttpErrorResponse) => this.handleError(error),
       });
+  }
+
+  /**
+   * Same endpoint as {@link deactivateCustomer}, without the shared loading/error
+   * signal or the per-call success toast — for bulk-action callers that show one
+   * summary notification and track their own in-flight state instead.
+   */
+  deactivateCustomerSilently(
+    customerGUID: string,
+  ): Observable<GenericResponse<object>> {
+    const headers: HttpHeaders =
+      this.httpHeaderService.getHeadersWithTokenSet();
+    const params = new HttpParams().set('customerGUID', customerGUID);
+
+    return this.http
+      .patch<GenericResponse<object>>(this.APIURL_DEACTIVATE, null, {
+        headers,
+        params,
+      })
+      .pipe(
+        tap(() => {
+          const existingCustomer = this.getCustomerService
+            .customersSignal()
+            .find((c) => c.guid === customerGUID);
+
+          if (existingCustomer) {
+            this.getCustomerService.updateCustomerLocally({
+              ...existingCustomer,
+              customerStatus: CustomerActivationStatus.Deactivated,
+            });
+          }
+        }),
+      );
   }
 
   private setLoading(loading: boolean): void {

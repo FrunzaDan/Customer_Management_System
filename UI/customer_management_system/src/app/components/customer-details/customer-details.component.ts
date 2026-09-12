@@ -44,6 +44,7 @@ export class CustomerDetailsComponent implements OnInit {
   readonly errorMessage;
   customerGender: Signal<string | undefined>;
   customerStatusLabel: Signal<string | undefined>;
+  canDelete: Signal<boolean>;
 
   readonly CustomerStatus = CustomerActivationStatus;
 
@@ -89,6 +90,17 @@ export class CustomerDetailsComponent implements OnInit {
       return c && c.customerStatus !== undefined
         ? this.statusMap.get(c.customerStatus)
         : undefined;
+    });
+
+    // Deactivated customers follow the normal deactivate-then-delete lifecycle;
+    // Test customers are fictitious data and are exempt from that guardrail
+    // (see usp_deleteCustomer), so they can be deleted straight away too.
+    this.canDelete = computed(() => {
+      const status = this.customer()?.customerStatus;
+      return (
+        status === CustomerActivationStatus.Deactivated ||
+        status === CustomerActivationStatus.Test
+      );
     });
 
     // The rest of the page (e.g. Account Status) updates live via

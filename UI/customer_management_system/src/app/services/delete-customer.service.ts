@@ -35,4 +35,21 @@ export class DeleteCustomerService {
         }),
       );
   }
+
+  /**
+   * Same endpoint as {@link deleteCustomer}, without the per-call success toast —
+   * for bulk-delete callers that show one summary notification instead of one per
+   * customer.
+   */
+  deleteCustomerSilently(
+    customerGUID: string,
+  ): Observable<GenericResponse<object>> {
+    const headers: HttpHeaders =
+      this.httpHeaderService.getHeadersWithTokenSet();
+    const params = new HttpParams().set('customerGUID', customerGUID);
+
+    return this.http
+      .delete<GenericResponse<object>>(this.APIURL, { headers, params })
+      .pipe(tap(() => this.getCustomerService.removeCustomerLocally(customerGUID)));
+  }
 }

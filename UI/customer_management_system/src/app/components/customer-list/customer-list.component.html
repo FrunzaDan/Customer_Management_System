@@ -24,6 +24,14 @@
   >
     {{ exportLoading() ? 'Exporting…' : 'Export CSV' }}
   </button>
+  <button
+    type="button"
+    class="btn btn-danger"
+    [disabled]="selectedGuids().size === 0 || bulkActionInProgress() || activationLoading() || deleting()"
+    (click)="bulkDeleteSelected()"
+  >
+    {{ bulkActionInProgress() ? 'Processing…' : 'Bulk delete selected (' + selectedGuids().size + ')' }}
+  </button>
 </div>
 @if (customers().length === 0) {
 <p class="container-fluid">
@@ -38,6 +46,14 @@
     </caption>
     <thead class="table-dark">
       <tr>
+        <th scope="col" class="text-center">
+          <input
+            type="checkbox"
+            aria-label="Select all customers on this page"
+            [checked]="allOnPageSelected()"
+            (change)="toggleSelectAllOnPage($any($event.target).checked)"
+          />
+        </th>
         <th
           scope="col"
           class="text-center sortable-header"
@@ -71,12 +87,21 @@
           <span>{{ sortDirection() === 'asc' ? '▲' : '▼' }}</span>
           }
         </th>
+        <th scope="col" class="text-center">Status</th>
         <th scope="col" class="w-25 text-center">Action</th>
       </tr>
     </thead>
     <tbody>
       @for (customer of customers(); track trackByCustomerId($index, customer)) {
       <tr>
+        <td class="align-middle text-center">
+          <input
+            type="checkbox"
+            [attr.aria-label]="'Select ' + customer.firstName + ' ' + customer.lastName"
+            [checked]="isSelected(customer.guid)"
+            (change)="toggleSelection(customer.guid, $any($event.target).checked)"
+          />
+        </td>
         <td class="align-middle text-center">
           <a
             (click)="navigateToCustomer(customer.guid)"
@@ -88,12 +113,23 @@
         <td class="align-middle text-center">{{ customer.email }}</td>
         <td class="align-middle text-center">{{ customer.msisdn }}</td>
         <td class="align-middle text-center">
+          <span
+            class="badge"
+            [class.bg-success]="customer.customerStatus === CustomerStatus.Active"
+            [class.bg-secondary]="customer.customerStatus === CustomerStatus.Deactivated"
+            [class.bg-warning]="customer.customerStatus === CustomerStatus.Test"
+            [class.text-dark]="customer.customerStatus === CustomerStatus.Test"
+          >
+            {{ statusLabels.get(customer.customerStatus) }}
+          </span>
+        </td>
+        <td class="align-middle text-center">
           <div class="btn-group" role="group">
             <button
               (click)="navigateToEdit(customer.guid)"
               type="button"
               class="btn btn-primary shadow-none"
-              [disabled]="activationLoading() || deleting()"
+              [disabled]="activationLoading() || deleting() || bulkActionInProgress()"
             >
               Edit
             </button>
@@ -103,7 +139,7 @@
               (click)="deactivateCustomer(customer.guid)"
               type="button"
               class="btn btn-danger"
-              [disabled]="activationLoading() || deleting()"
+              [disabled]="activationLoading() || deleting() || bulkActionInProgress()"
             >
               Deactivate
             </button>
@@ -112,15 +148,16 @@
               (click)="reactivateCustomer(customer.guid)"
               type="button"
               class="btn btn-secondary"
-              [disabled]="activationLoading() || deleting()"
+              [disabled]="activationLoading() || deleting() || bulkActionInProgress()"
             >
               Reactivate
             </button>
+            } @if (customer.customerStatus === CustomerStatus.Deactivated || customer.customerStatus === CustomerStatus.Test) {
             <button
               (click)="deleteCustomer(customer.guid)"
               type="button"
               class="btn btn-danger shadow-none"
-              [disabled]="activationLoading() || deleting()"
+              [disabled]="activationLoading() || deleting() || bulkActionInProgress()"
             >
               Delete
             </button>

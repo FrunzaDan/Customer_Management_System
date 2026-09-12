@@ -129,13 +129,9 @@
               (click)="deleteCustomer()"
               type="button"
               class="btn btn-danger shadow-none"
-              [disabled]="
-                customer()?.customerStatus !== CustomerStatus.Deactivated ||
-                activationLoading() ||
-                deleting()
-              "
+              [disabled]="!canDelete() || activationLoading() || deleting()"
               [title]="
-                customer()?.customerStatus !== CustomerStatus.Deactivated
+                !canDelete()
                   ? 'Deactivate this customer before deleting it'
                   : ''
               "

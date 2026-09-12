@@ -2,10 +2,12 @@
 import { Component, OnInit, computed, effect, signal, Signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { catchError, concatMap, from, map, of, toArray } from 'rxjs';
 import { GetCustomerService } from '../../services/get-customer.service';
 import { ActivateCustomerService } from '../../services/activate-customer.service';
 import { DeleteCustomerService } from '../../services/delete-customer.service';
 import { ExportCustomerService } from '../../services/export-customer.service';
+import { NotificationService } from '../../services/notification.service';
 import {
   Customer,
   CustomerActivationStatus,
@@ -23,6 +25,7 @@ export class CustomerListComponent implements OnInit {
   private readonly activateCustomerService = inject(ActivateCustomerService);
   private readonly deleteCustomerService = inject(DeleteCustomerService);
   private readonly exportCustomerService = inject(ExportCustomerService);
+  private readonly notificationService = inject(NotificationService);
   private readonly router = inject(Router);
 
   // Public signals for template
@@ -37,6 +40,19 @@ export class CustomerListComponent implements OnInit {
   readonly deleting = signal(false);
   readonly deleteError = signal<string | null>(null);
 
+  // Bulk-delete selection is scoped to the current page only — the checkboxes
+  // reference rows that actually exist in the browser, and selection is reset
+  // on every fetchCustomers() (page/search/sort change, or after the bulk
+  // action itself refreshes the page).
+  readonly selectedGuids = signal<ReadonlySet<string>>(new Set());
+  readonly bulkActionInProgress = signal(false);
+
+  readonly allOnPageSelected = computed(
+    () =>
+      this.customers().length > 0 &&
+      this.customers().every((c) => this.selectedGuids().has(c.guid)),
+  );
+
   // CSV export exports whatever the list is currently searching/sorted by,
   // not just the current page — see ExportCustomerService.
   readonly exportLoading = this.exportCustomerService.loadingSignal;
@@ -44,6 +60,12 @@ export class CustomerListComponent implements OnInit {
 
   // Add CustomerStatus enum for better type checking
   readonly CustomerStatus = CustomerActivationStatus;
+
+  readonly statusLabels = new Map<Customer['customerStatus'], string>([
+    [CustomerActivationStatus.Active, 'Active'],
+    [CustomerActivationStatus.Deactivated, 'Deactivated'],
+    [CustomerActivationStatus.Test, 'Test'],
+  ]);
 
   // Search, sorting, and pagination are all server-side now: every change to
   // any of these re-fetches just the relevant page from the API rather than
@@ -53,7 +75,7 @@ export class CustomerListComponent implements OnInit {
   readonly sortColumn = signal<'name' | 'email' | 'msisdn'>('name');
   readonly sortDirection = signal<'asc' | 'desc'>('asc');
 
-  readonly pageSize = 10;
+  readonly pageSize = 20;
   readonly currentPage = signal(1);
 
   readonly totalItems = this.getCustomerService.totalItemsSignal;
@@ -138,6 +160,7 @@ export class CustomerListComponent implements OnInit {
   }
 
   private fetchCustomers(): void {
+    this.selectedGuids.set(new Set());
     this.getCustomerService.loadCustomers({
       pageNumber: this.currentPage(),
       pageSize: this.pageSize,
@@ -202,6 +225,99 @@ export class CustomerListComponent implements OnInit {
         this.deleteError.set(this.extractErrorMessage(error));
       },
     });
+  }
+
+  isSelected(guid: string): boolean {
+    return this.selectedGuids().has(guid);
+  }
+
+  toggleSelection(guid: string, checked: boolean): void {
+    const next = new Set(this.selectedGuids());
+    if (checked) {
+      next.add(guid);
+    } else {
+      next.delete(guid);
+    }
+    this.selectedGuids.set(next);
+  }
+
+  toggleSelectAllOnPage(checked: boolean): void {
+    const next = new Set(this.selectedGuids());
+    for (const customer of this.customers()) {
+      if (checked) {
+        next.add(customer.guid);
+      } else {
+        next.delete(customer.guid);
+      }
+    }
+    this.selectedGuids.set(next);
+  }
+
+  // A customer must be Deactivated (or Test, which is exempt from that rule —
+  // see usp_deleteCustomer) to be deleted directly; an Active one is only
+  // deactivated as part of this action, not deleted, same as the single-row
+  // buttons would require.
+  bulkDeleteSelected(): void {
+    const guids = this.selectedGuids();
+    const selected = this.customers().filter((c) => guids.has(c.guid));
+    if (selected.length === 0) return;
+
+    const toDeactivate = selected.filter(
+      (c) => c.customerStatus === CustomerActivationStatus.Active,
+    );
+    const toDelete = selected.filter(
+      (c) => c.customerStatus !== CustomerActivationStatus.Active,
+    );
+
+    const lines = [`Of the ${selected.length} selected customers:`];
+    if (toDeactivate.length > 0) {
+      lines.push(
+        `- ${toDeactivate.length} ${toDeactivate.length === 1 ? 'is' : 'are'} active and will only be deactivated (a customer must be deactivated before it can be deleted).`,
+      );
+    }
+    if (toDelete.length > 0) {
+      lines.push(
+        `- ${toDelete.length} ${toDelete.length === 1 ? 'is' : 'are'} already deactivated or test customers and will be permanently deleted.`,
+      );
+    }
+    lines.push('Continue?');
+
+    if (!confirm(lines.join('\n'))) return;
+
+    this.bulkActionInProgress.set(true);
+
+    const operations = [
+      ...toDeactivate.map((c) =>
+        this.activateCustomerService.deactivateCustomerSilently(c.guid).pipe(
+          map(() => true),
+          catchError(() => of(false)),
+        ),
+      ),
+      ...toDelete.map((c) =>
+        this.deleteCustomerService.deleteCustomerSilently(c.guid).pipe(
+          map(() => true),
+          catchError(() => of(false)),
+        ),
+      ),
+    ];
+
+    from(operations)
+      .pipe(
+        concatMap((operation) => operation),
+        toArray(),
+      )
+      .subscribe((results) => {
+        this.bulkActionInProgress.set(false);
+        const succeeded = results.filter(Boolean).length;
+        const failed = results.length - succeeded;
+        this.notificationService.show(
+          failed === 0
+            ? `Bulk action completed: ${toDeactivate.length} deactivated, ${toDelete.length} deleted.`
+            : `Bulk action completed with ${failed} failure(s) (${succeeded} succeeded).`,
+          failed === 0 ? 'success' : 'error',
+        );
+        this.fetchCustomers();
+      });
   }
 
   private extractErrorMessage(error: HttpErrorResponse): string {

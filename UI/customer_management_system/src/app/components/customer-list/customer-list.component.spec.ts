@@ -78,7 +78,7 @@ describe('CustomerListComponent', () => {
       expect(loadCustomers).toHaveBeenCalledTimes(1);
       expect(loadCustomers).toHaveBeenCalledWith({
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         searchTerm: undefined,
         sortColumn: 'name',
         sortDirection: 'desc',
@@ -92,7 +92,7 @@ describe('CustomerListComponent', () => {
       expect(component.sortDirection()).toBe('asc');
       expect(loadCustomers).toHaveBeenLastCalledWith({
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         searchTerm: undefined,
         sortColumn: 'email',
         sortDirection: 'asc',
@@ -102,7 +102,7 @@ describe('CustomerListComponent', () => {
 
   describe('goToPage', () => {
     it('clamps above the last page down to totalPages', () => {
-      totalItems.set(25); // 25 items / 10 per page = 3 pages
+      totalItems.set(45); // 45 items / 20 per page = 3 pages
       loadCustomers.mockClear();
 
       component.goToPage(10);
@@ -154,7 +154,7 @@ describe('CustomerListComponent', () => {
       expect(loadCustomers).toHaveBeenCalledTimes(1);
       expect(loadCustomers).toHaveBeenCalledWith({
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         searchTerm: 'dan',
         sortColumn: 'name',
         sortDirection: 'asc',
