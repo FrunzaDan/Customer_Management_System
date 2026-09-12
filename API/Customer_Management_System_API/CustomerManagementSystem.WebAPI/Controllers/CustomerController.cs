@@ -32,9 +32,9 @@ public class CustomerController(ICustomerService customerService) : ControllerBa
     }
 
     [HttpGet("all")]
-    public async Task<IActionResult> GetCustomers()
+    public async Task<IActionResult> GetCustomers([FromQuery] GetCustomersRequest request)
     {
-        var response = await customerService.GetCustomers();
+        var response = await customerService.GetCustomers(request);
         return StatusCode(response.Status ?? 200, response);
     }
 

@@ -15,7 +15,7 @@
     aria-label="Search customers"
   />
 </div>
-@if (filteredCustomers().length === 0) {
+@if (customers().length === 0) {
 <p class="container-fluid">
   @if (searchTerm()) { No customers match "{{ searchTerm() }}". } @else { No
   customers yet. }
@@ -65,7 +65,7 @@
       </tr>
     </thead>
     <tbody>
-      @for (customer of pagedCustomers(); track trackByCustomerId($index, customer)) {
+      @for (customer of customers(); track trackByCustomerId($index, customer)) {
       <tr>
         <td class="align-middle text-center">
           <a

@@ -32,12 +32,19 @@ public class DbUtils(IAppSettingsConfig configuration) : IDbUtils
         );
     }
 
-    public async Task<ResponseModel<object>> GetCustomers()
+    public async Task<ResponseModel<object>> GetCustomers(GetCustomersRequest request)
     {
         return await ExecuteStoredProcedureAsync(
             "dbo.usp_getCustomers",
-            null,
-            reader => DbHelper.HandleResponseWithList(reader, "customers")
+            command =>
+            {
+                command.Parameters.AddWithValue("@PageNumber", request.PageNumber);
+                command.Parameters.AddWithValue("@PageSize", request.PageSize);
+                command.Parameters.AddWithValue("@SearchTerm", (object?)request.SearchTerm ?? DBNull.Value);
+                command.Parameters.AddWithValue("@SortColumn", request.SortColumn);
+                command.Parameters.AddWithValue("@SortDirection", request.SortDirection);
+            },
+            reader => DbHelper.HandleResponseWithPagedList(reader, request.PageNumber, request.PageSize, "customers")
         );
     }
 

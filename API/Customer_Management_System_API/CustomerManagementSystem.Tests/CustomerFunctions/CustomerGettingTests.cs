@@ -55,17 +55,115 @@ public class CustomerGettingTests
         Assert.Equal(expectedSearchOption, capturedRequest!.SearchOption);
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public async Task GetCustomersFunction_RejectsAnInvalidPageNumber_WithoutTouchingTheDb(int pageNumber)
+    {
+        var dbUtils = new Mock<IDbUtils>();
+        var getting = new CustomerGetting(dbUtils.Object);
+        var request = new GetCustomersRequest { PageNumber = pageNumber, PageSize = 10 };
+
+        var result = await getting.GetCustomersFunction(request);
+
+        Assert.Equal(400, result.Status);
+        dbUtils.Verify(d => d.GetCustomers(It.IsAny<GetCustomersRequest>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(101)]
+    public async Task GetCustomersFunction_RejectsAnInvalidPageSize_WithoutTouchingTheDb(int pageSize)
+    {
+        var dbUtils = new Mock<IDbUtils>();
+        var getting = new CustomerGetting(dbUtils.Object);
+        var request = new GetCustomersRequest { PageNumber = 1, PageSize = pageSize };
+
+        var result = await getting.GetCustomersFunction(request);
+
+        Assert.Equal(400, result.Status);
+        dbUtils.Verify(d => d.GetCustomers(It.IsAny<GetCustomersRequest>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetCustomersFunction_RejectsAnInvalidSortColumn_WithoutTouchingTheDb()
+    {
+        var dbUtils = new Mock<IDbUtils>();
+        var getting = new CustomerGetting(dbUtils.Object);
+        var request = new GetCustomersRequest { SortColumn = "not-a-real-column" };
+
+        var result = await getting.GetCustomersFunction(request);
+
+        Assert.Equal(400, result.Status);
+        dbUtils.Verify(d => d.GetCustomers(It.IsAny<GetCustomersRequest>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetCustomersFunction_RejectsAnInvalidSortDirection_WithoutTouchingTheDb()
+    {
+        var dbUtils = new Mock<IDbUtils>();
+        var getting = new CustomerGetting(dbUtils.Object);
+        var request = new GetCustomersRequest { SortDirection = "sideways" };
+
+        var result = await getting.GetCustomersFunction(request);
+
+        Assert.Equal(400, result.Status);
+        dbUtils.Verify(d => d.GetCustomers(It.IsAny<GetCustomersRequest>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData("NAME", "DESC", "name", "desc")]
+    [InlineData(" Email ", " Asc ", "email", "asc")]
+    public async Task GetCustomersFunction_NormalizesSortColumnAndDirectionToLowercase(
+        string sortColumn, string sortDirection, string expectedColumn, string expectedDirection)
+    {
+        var dbUtils = new Mock<IDbUtils>();
+        GetCustomersRequest? captured = null;
+        dbUtils.Setup(d => d.GetCustomers(It.IsAny<GetCustomersRequest>()))
+            .Callback<GetCustomersRequest>(r => captured = r)
+            .ReturnsAsync(new ResponseModel<object>(200, "Success!"));
+        var getting = new CustomerGetting(dbUtils.Object);
+        var request = new GetCustomersRequest { SortColumn = sortColumn, SortDirection = sortDirection };
+
+        await getting.GetCustomersFunction(request);
+
+        Assert.Equal(expectedColumn, captured!.SortColumn);
+        Assert.Equal(expectedDirection, captured.SortDirection);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task GetCustomersFunction_TreatsABlankSearchTermAsNoSearch(string? searchTerm)
+    {
+        var dbUtils = new Mock<IDbUtils>();
+        GetCustomersRequest? captured = null;
+        dbUtils.Setup(d => d.GetCustomers(It.IsAny<GetCustomersRequest>()))
+            .Callback<GetCustomersRequest>(r => captured = r)
+            .ReturnsAsync(new ResponseModel<object>(200, "Success!"));
+        var getting = new CustomerGetting(dbUtils.Object);
+        var request = new GetCustomersRequest { SearchTerm = searchTerm };
+
+        await getting.GetCustomersFunction(request);
+
+        Assert.Null(captured!.SearchTerm);
+    }
+
     [Fact]
     public async Task GetCustomersFunction_ReturnsWhateverTheDbLayerReturns()
     {
         var dbUtils = new Mock<IDbUtils>();
-        var expected = new ResponseModel<object>(200, "Success!", new List<CustomerModel>());
-        dbUtils.Setup(d => d.GetCustomers()).ReturnsAsync(expected);
+        var expected = new ResponseModel<object>(200, "Success!",
+            new PagedResponse<CustomerModel>(new List<CustomerModel>(), 0, 1, 10));
+        var request = new GetCustomersRequest { PageNumber = 1, PageSize = 10 };
+        dbUtils.Setup(d => d.GetCustomers(It.IsAny<GetCustomersRequest>())).ReturnsAsync(expected);
         var getting = new CustomerGetting(dbUtils.Object);
 
-        var result = await getting.GetCustomersFunction();
+        var result = await getting.GetCustomersFunction(request);
 
         Assert.Same(expected, result);
-        dbUtils.Verify(d => d.GetCustomers(), Times.Once);
+        dbUtils.Verify(d => d.GetCustomers(It.IsAny<GetCustomersRequest>()), Times.Once);
     }
 }

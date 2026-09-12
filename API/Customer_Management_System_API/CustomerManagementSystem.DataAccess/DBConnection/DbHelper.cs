@@ -38,6 +38,25 @@ public static class DbHelper
         return new ResponseModel<object>(200, $"{items.Count} {entityName} found.", items);
     }
 
+    public static async Task<ResponseModel<object>> HandleResponseWithPagedList(SqlDataReader reader,
+        int pageNumber, int pageSize, string entityName)
+    {
+        var items = new List<CustomerModel>();
+        var totalItems = 0;
+
+        while (await reader.ReadAsync().ConfigureAwait(false))
+        {
+            if (items.Count == 0)
+                totalItems = Convert.ToInt32(reader["total_count"]);
+
+            items.Add(MapCustomerFromReader(reader));
+        }
+
+        var pagedResponse = new PagedResponse<CustomerModel>(items, totalItems, pageNumber, pageSize);
+        return new ResponseModel<object>(200, $"{items.Count} {entityName} found (page {pageNumber}).",
+            pagedResponse);
+    }
+
     public static async Task<ResponseModel<object>> HandleResponseWithMessage(SqlDataReader reader)
     {
         if (!await reader.ReadAsync().ConfigureAwait(false))

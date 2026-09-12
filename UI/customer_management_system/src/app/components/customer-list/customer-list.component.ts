@@ -38,58 +38,26 @@ export class CustomerListComponent implements OnInit {
   // Add CustomerStatus enum for better type checking
   readonly CustomerStatus = CustomerActivationStatus;
 
-  // Search is client-side: the whole list is already loaded (no server-side
-  // pagination/search endpoint for "list customers"), so filtering in memory
-  // is simpler and faster than round-tripping to the API per keystroke.
+  // Search, sorting, and pagination are all server-side now: every change to
+  // any of these re-fetches just the relevant page from the API rather than
+  // filtering/sorting an already-loaded full list in memory (see
+  // GetCustomerService.loadCustomers and usp_getCustomers).
   readonly searchTerm = signal('');
-
-  readonly filteredCustomers = computed(() => {
-    const term = this.searchTerm().trim().toLowerCase();
-    if (!term) return this.customers();
-
-    return this.customers().filter((customer) =>
-      [
-        customer.firstName,
-        customer.lastName,
-        customer.email,
-        customer.msisdn,
-      ].some((field) => field?.toLowerCase().includes(term)),
-    );
-  });
-
-  // Column sorting is client-side too, over the already-filtered list, for
-  // the same reason search is: everything is already loaded in memory.
-  readonly sortColumn = signal<'name' | 'email' | 'msisdn' | null>(null);
+  readonly sortColumn = signal<'name' | 'email' | 'msisdn'>('name');
   readonly sortDirection = signal<'asc' | 'desc'>('asc');
-
-  readonly sortedCustomers = computed(() => {
-    const column = this.sortColumn();
-    const customers = this.filteredCustomers();
-    if (!column) return customers;
-
-    const direction = this.sortDirection() === 'asc' ? 1 : -1;
-    const sortKey = (customer: Customer): string =>
-      column === 'name'
-        ? `${customer.firstName} ${customer.lastName}`
-        : customer[column];
-
-    return [...customers].sort(
-      (a, b) => sortKey(a).localeCompare(sortKey(b)) * direction,
-    );
-  });
 
   readonly pageSize = 10;
   readonly currentPage = signal(1);
 
+  readonly totalItems = this.getCustomerService.totalItemsSignal;
   readonly totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.sortedCustomers().length / this.pageSize)),
+    Math.max(1, Math.ceil(this.totalItems() / this.pageSize)),
   );
 
-  readonly pagedCustomers = computed(() => {
-    const page = this.currentPage();
-    const start = (page - 1) * this.pageSize;
-    return this.sortedCustomers().slice(start, start + this.pageSize);
-  });
+  // Debounced so typing doesn't fire an API call per keystroke — the search
+  // used to be a synchronous in-memory filter, but now it's a network call.
+  private searchDebounceTimer: ReturnType<typeof setTimeout> | undefined;
+  private static readonly SEARCH_DEBOUNCE_MS = 300;
 
   // Computed signal for duplicate GUIDs
   readonly duplicateGuids = computed(() => {
@@ -121,14 +89,22 @@ export class CustomerListComponent implements OnInit {
 
   onSearchInput(value: string): void {
     this.searchTerm.set(value);
-    // Filtering can make the current page go out of range (e.g. you're on
-    // page 3, then a search narrows results down to one page) — snap back
-    // to page 1 on every new search term.
-    this.currentPage.set(1);
+
+    clearTimeout(this.searchDebounceTimer);
+    this.searchDebounceTimer = setTimeout(() => {
+      // A narrower search can make the current page go out of range (e.g.
+      // you're on page 3, then a search narrows results to one page) —
+      // snap back to page 1 on every new search term.
+      this.currentPage.set(1);
+      this.fetchCustomers();
+    }, CustomerListComponent.SEARCH_DEBOUNCE_MS);
   }
 
   goToPage(page: number): void {
-    this.currentPage.set(Math.min(Math.max(page, 1), this.totalPages()));
+    const target = Math.min(Math.max(page, 1), this.totalPages());
+    if (target === this.currentPage()) return;
+    this.currentPage.set(target);
+    this.fetchCustomers();
   }
 
   setSort(column: 'name' | 'email' | 'msisdn'): void {
@@ -139,10 +115,21 @@ export class CustomerListComponent implements OnInit {
       this.sortDirection.set('asc');
     }
     this.currentPage.set(1);
+    this.fetchCustomers();
   }
 
   ngOnInit(): void {
-    this.getCustomerService.loadCustomers();
+    this.fetchCustomers();
+  }
+
+  private fetchCustomers(): void {
+    this.getCustomerService.loadCustomers({
+      pageNumber: this.currentPage(),
+      pageSize: this.pageSize,
+      searchTerm: this.searchTerm().trim() || undefined,
+      sortColumn: this.sortColumn(),
+      sortDirection: this.sortDirection(),
+    });
   }
 
   // Add return type and improve type safety
@@ -188,7 +175,13 @@ export class CustomerListComponent implements OnInit {
     this.deleteError.set(null);
 
     this.deleteCustomerService.deleteCustomer(guid).subscribe({
-      next: () => this.deleting.set(false),
+      next: () => {
+        this.deleting.set(false);
+        // removeCustomerLocally() (called by DeleteCustomerService) only
+        // drops the row from the in-memory page — totalItems/page count
+        // would go stale without a real re-fetch of the current page.
+        this.fetchCustomers();
+      },
       error: (error: HttpErrorResponse) => {
         this.deleting.set(false);
         this.deleteError.set(this.extractErrorMessage(error));

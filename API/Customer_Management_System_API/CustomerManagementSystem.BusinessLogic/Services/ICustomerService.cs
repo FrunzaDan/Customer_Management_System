@@ -4,7 +4,7 @@ namespace CustomerManagementSystem.BusinessLogic.Services;
 
 public interface ICustomerService
 {
-    Task<ResponseModel<object>> GetCustomers();
+    Task<ResponseModel<object>> GetCustomers(GetCustomersRequest request);
 
     Task<ResponseModel<object>> GetCustomer(GetCustomerRequest request);
 

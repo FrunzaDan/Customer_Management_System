@@ -6,6 +6,10 @@ namespace CustomerManagementSystem.BusinessLogic.CustomerFunctions;
 
 public class CustomerGetting
 {
+    private const int MaxPageSize = 100;
+    private static readonly string[] ValidSortColumns = ["name", "email", "msisdn"];
+    private static readonly string[] ValidSortDirections = ["asc", "desc"];
+
     private readonly IDbUtils _dbUtils;
 
     public CustomerGetting(IDbUtils dbUtils)
@@ -27,9 +31,29 @@ public class CustomerGetting
         return await _dbUtils.GetCustomer(request);
     }
 
-    public async Task<ResponseModel<object>> GetCustomersFunction()
+    public async Task<ResponseModel<object>> GetCustomersFunction(GetCustomersRequest request)
     {
-        return await _dbUtils.GetCustomers();
+        if (request.PageNumber < 1)
+            return new ResponseModel<object>(400, "Page number must be 1 or greater.");
+
+        if (request.PageSize < 1 || request.PageSize > MaxPageSize)
+            return new ResponseModel<object>(400, $"Page size must be between 1 and {MaxPageSize}.");
+
+        var sortColumn = request.SortColumn.Trim().ToLowerInvariant();
+        if (!ValidSortColumns.Contains(sortColumn))
+            return new ResponseModel<object>(400,
+                $"Sort column must be one of: {string.Join(", ", ValidSortColumns)}.");
+
+        var sortDirection = request.SortDirection.Trim().ToLowerInvariant();
+        if (!ValidSortDirections.Contains(sortDirection))
+            return new ResponseModel<object>(400,
+                $"Sort direction must be one of: {string.Join(", ", ValidSortDirections)}.");
+
+        request.SortColumn = sortColumn;
+        request.SortDirection = sortDirection;
+        request.SearchTerm = string.IsNullOrWhiteSpace(request.SearchTerm) ? null : request.SearchTerm.Trim();
+
+        return await _dbUtils.GetCustomers(request);
     }
 
     private static int DetermineSearchOption(string searchVariable)

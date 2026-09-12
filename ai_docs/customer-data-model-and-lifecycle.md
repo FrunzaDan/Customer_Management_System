@@ -16,6 +16,8 @@ The `tbl_customers`/`tbl_addresses` schema, the status codes that drive the deac
 
 **`tbl_addresses`**: 1:1 with a customer via `FK_customer_guid` (`ON UPDATE CASCADE`) — country/county/town/zip/street/number. `usp_createCustomer` inserts both rows in **one transaction** — `usp_getCustomer`/`usp_getCustomers` `INNER JOIN` the two tables, so a customer row without a matching address row would silently disappear from every read despite existing in `tbl_customers`.
 
+**`usp_getCustomers` is paginated**, not a full-table dump: it takes `@PageNumber`, `@PageSize`, an optional `@SearchTerm` (`LIKE '%...%'` against first/last name, email, MSISDN), and `@SortColumn`/`@SortDirection` (`name`/`email`/`msisdn`, `asc`/`desc`). Sorting is done via a parameterized `CASE`-based `ORDER BY` (no dynamic SQL — see the proc for why exactly one `CASE` pair is non-NULL per call) over `OFFSET`/`FETCH`, and each returned row carries a `total_count` column from `COUNT(*) OVER()` so the API can report `TotalItems` without a second query. `CustomerGetting.GetCustomersFunction` validates `PageNumber >= 1`, `1 <= PageSize <= 100`, and that `SortColumn`/`SortDirection` are in their allow-lists — `400` otherwise. The API wraps the page in `PagedResponse<CustomerModel>` (`Domain/Models/PagedResponse.cs`): `PageNumber`, `PageSize`, `TotalItems`, `Items`.
+
 **Status codes** (`tbl_customers.customer_Status`):
 - `1901` = active
 - `1903` = deactivated

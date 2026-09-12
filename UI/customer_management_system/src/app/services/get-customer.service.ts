@@ -8,7 +8,18 @@ import { computed, Injectable, Signal, signal } from '@angular/core';
 import { Customer } from '../interfaces/customer-response';
 import { environment } from '../../environments/environment';
 import { GenericResponse } from '../interfaces/generic-response';
+import { PagedResponse } from '../interfaces/paged-response';
 import { HttpHeaderService } from './http-header-service';
+
+export interface LoadCustomersParams {
+  pageNumber: number;
+  pageSize: number;
+  searchTerm?: string;
+  sortColumn?: 'name' | 'email' | 'msisdn';
+  sortDirection?: 'asc' | 'desc';
+}
+
+const DEFAULT_PAGE_SIZE = 10;
 
 @Injectable({
   providedIn: 'root',
@@ -22,6 +33,9 @@ export class GetCustomerService {
     selectedCustomer: null as Customer | null,
     loading: false,
     error: null as string | null,
+    pageNumber: 1,
+    pageSize: DEFAULT_PAGE_SIZE,
+    totalItems: 0,
   });
 
   // Computed signals
@@ -31,24 +45,46 @@ export class GetCustomerService {
   );
   public readonly loadingSignal = computed(() => this.state().loading);
   public readonly errorSignal = computed(() => this.state().error);
+  public readonly pageNumberSignal = computed(() => this.state().pageNumber);
+  public readonly pageSizeSignal = computed(() => this.state().pageSize);
+  public readonly totalItemsSignal = computed(() => this.state().totalItems);
 
   constructor(
     private http: HttpClient,
     private httpHeaderService: HttpHeaderService,
   ) {}
 
-  public loadCustomers(): void {
+  // Pagination, search, and sorting are all server-side: each call re-fetches
+  // just the requested page from the API rather than filtering/sorting an
+  // already-loaded full list in memory.
+  public loadCustomers(params: LoadCustomersParams): void {
     this.setLoading(true);
 
     const headers = this.httpHeaderService.getHeadersWithTokenSet();
+    let httpParams = new HttpParams()
+      .set('pageNumber', params.pageNumber)
+      .set('pageSize', params.pageSize)
+      .set('sortColumn', params.sortColumn ?? 'name')
+      .set('sortDirection', params.sortDirection ?? 'asc');
+
+    if (params.searchTerm) {
+      httpParams = httpParams.set('searchTerm', params.searchTerm);
+    }
 
     this.http
-      .get<GenericResponse<Customer[]>>(this.API_URL_GET_ALL, { headers })
+      .get<GenericResponse<PagedResponse<Customer>>>(this.API_URL_GET_ALL, {
+        headers,
+        params: httpParams,
+      })
       .subscribe({
         next: (response) => {
+          const paged = response?.data;
           this.state.update((state) => ({
             ...state,
-            customers: response?.data ?? [],
+            customers: paged?.items ?? [],
+            pageNumber: paged?.pageNumber ?? params.pageNumber,
+            pageSize: paged?.pageSize ?? params.pageSize,
+            totalItems: paged?.totalItems ?? 0,
             loading: false,
             error: null,
           }));

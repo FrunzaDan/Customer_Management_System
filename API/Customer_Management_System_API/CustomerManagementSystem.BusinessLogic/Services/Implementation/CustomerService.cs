@@ -26,8 +26,8 @@ public class CustomerService(
     public async Task<ResponseModel<object>> GetCustomer(GetCustomerRequest getCustomerRqst) =>
         await customerGetting.GetCustomerFunction(getCustomerRqst);
 
-    public async Task<ResponseModel<object>> GetCustomers() =>
-        await customerGetting.GetCustomersFunction();
+    public async Task<ResponseModel<object>> GetCustomers(GetCustomersRequest request) =>
+        await customerGetting.GetCustomersFunction(request);
 
     public async Task<ResponseModel<object>> RegisterCustomer(CustomerModel customerRqst) =>
         await customerRegistration.RegisterCustomerFunction(customerRqst);
