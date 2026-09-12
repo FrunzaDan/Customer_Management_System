@@ -63,6 +63,76 @@ public class CustomerRegistrationTests
     }
 
     [Fact]
+    public async Task RegisterCustomerFunction_DefaultsCustomerStatusToActive_WhenNoneIsSupplied()
+    {
+        var dbUtils = new Mock<IDbUtils>();
+        var auditLogger = new Mock<ICustomerAuditLogger>();
+        CustomerModel? capturedRequest = null;
+        dbUtils.Setup(d => d.RegisterCustomer(It.IsAny<CustomerModel>()))
+            .Callback<CustomerModel>(c => capturedRequest = c)
+            .ReturnsAsync(new ResponseModel<object>(200, "Customer created successfully."));
+        var registration = new CustomerRegistration(dbUtils.Object, auditLogger.Object);
+        var request = new CustomerModel
+        {
+            Email = "dan@example.com",
+            Msisdn = "123456789",
+            Address = new AddressModel { Country = "Romania" },
+        };
+
+        var result = await registration.RegisterCustomerFunction(request, MerchantId);
+
+        Assert.Equal(200, result.Status);
+        Assert.Equal(CustomerStatusCodes.Active, capturedRequest!.CustomerStatus);
+    }
+
+    [Fact]
+    public async Task RegisterCustomerFunction_AllowsExplicitlyRequestingTheTestStatus()
+    {
+        // Used by the About page's "add 50 test customers" bulk generator.
+        var dbUtils = new Mock<IDbUtils>();
+        var auditLogger = new Mock<ICustomerAuditLogger>();
+        CustomerModel? capturedRequest = null;
+        dbUtils.Setup(d => d.RegisterCustomer(It.IsAny<CustomerModel>()))
+            .Callback<CustomerModel>(c => capturedRequest = c)
+            .ReturnsAsync(new ResponseModel<object>(200, "Customer created successfully."));
+        var registration = new CustomerRegistration(dbUtils.Object, auditLogger.Object);
+        var request = new CustomerModel
+        {
+            Email = "dan@example.com",
+            Msisdn = "123456789",
+            Address = new AddressModel { Country = "Romania" },
+            CustomerStatus = CustomerStatusCodes.Test,
+        };
+
+        var result = await registration.RegisterCustomerFunction(request, MerchantId);
+
+        Assert.Equal(200, result.Status);
+        Assert.Equal(CustomerStatusCodes.Test, capturedRequest!.CustomerStatus);
+    }
+
+    [Theory]
+    [InlineData(1903)]
+    [InlineData(1)]
+    public async Task RegisterCustomerFunction_RejectsAnyOtherStatus_WithoutTouchingTheDb(int status)
+    {
+        var dbUtils = new Mock<IDbUtils>();
+        var auditLogger = new Mock<ICustomerAuditLogger>();
+        var registration = new CustomerRegistration(dbUtils.Object, auditLogger.Object);
+        var request = new CustomerModel
+        {
+            Email = "dan@example.com",
+            Msisdn = "123456789",
+            Address = new AddressModel { Country = "Romania" },
+            CustomerStatus = status,
+        };
+
+        var result = await registration.RegisterCustomerFunction(request, MerchantId);
+
+        Assert.Equal(400, result.Status);
+        dbUtils.Verify(d => d.RegisterCustomer(It.IsAny<CustomerModel>()), Times.Never);
+    }
+
+    [Fact]
     public async Task RegisterCustomerFunction_AlwaysGeneratesAFreshServerSideGuid_IgnoringAnyClientSuppliedValue()
     {
         var dbUtils = new Mock<IDbUtils>();

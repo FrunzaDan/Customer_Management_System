@@ -31,4 +31,16 @@ export class AddCustomerService {
         ),
       );
   }
+
+  /**
+   * Same endpoint as {@link addCustomer}, without the per-call success toast —
+   * for callers (e.g. bulk test-data generation) that show one summary
+   * notification instead of one per request.
+   */
+  addCustomerSilently(customer: Customer): Observable<GenericResponse<object>> {
+    const headers = this.httpHeaderService.getHeadersWithTokenSet();
+    return this.http.post<GenericResponse<object>>(this.APIURL, customer, {
+      headers: headers,
+    });
+  }
 }

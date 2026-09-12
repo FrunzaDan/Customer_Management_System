@@ -4,7 +4,7 @@ Domain terms and magic numbers used across this codebase — check here before a
 
 - **Merchant** — the API's authenticated principal; the user who logs in and manages customers. Stored in `tbl_merchants`. Not the same as a "customer."
 - **Customer** — the record being managed (name, contact info, address). Stored in `tbl_customers` + `tbl_addresses`.
-- **`customer_Status` codes** — `1901` = active, `1903` = deactivated. See [[customer-data-model-and-lifecycle]].
+- **`customer_Status` codes** — `1901` = active, `1903` = deactivated, `1904` = test (fictitious customers created via the About page's bulk generator). See [[customer-data-model-and-lifecycle]].
 - **`merchant_role` codes** — `1801` = the only role currently in use. See [[known-gaps]].
 - **GUID** — customer primary key, always server-generated (`Guid.NewGuid()`), never client-supplied. See [[customer-data-model-and-lifecycle]].
 - **ADO.NET** — .NET's low-level data access API (`SqlConnection`/`SqlCommand`/`SqlDataReader`); this project uses it directly against stored procedures, with no ORM (no Entity Framework) in between.

@@ -55,6 +55,14 @@ public class CustomerCsvExporterTests
         Assert.Contains(",Deactivated,", csv);
     }
 
+    [Fact]
+    public void ToCsv_MapsTheTestStatusCodeToItsLabel()
+    {
+        var csv = CustomerCsvExporter.ToCsv([MakeCustomer(c => c.CustomerStatus = 1904)]);
+
+        Assert.Contains(",Test,", csv);
+    }
+
     [Theory]
     [InlineData(3)]
     [InlineData(null)]

@@ -11,7 +11,8 @@ CREATE PROCEDURE [dbo].[usp_createCustomer]
     @var_Town NVARCHAR(50),
     @var_ZIP NVARCHAR(50),
     @var_Street NVARCHAR(100),
-    @var_Number NVARCHAR(50)
+    @var_Number NVARCHAR(50),
+    @var_CustomerStatus INT = 1901
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -46,7 +47,7 @@ BEGIN
             VALUES
             (
                 @var_Guid, @var_FirstName, @var_LastName, @var_Email, @var_MSISDN,
-                @var_Gender, @var_Birthdate, 1901, @currentDateTime, @currentDateTime
+                @var_Gender, @var_Birthdate, @var_CustomerStatus, @currentDateTime, @currentDateTime
             );
 
             INSERT INTO dbo.tbl_addresses

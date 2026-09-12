@@ -28,4 +28,5 @@ export interface CustomerResponse extends GenericResponse<CustomerResponse> {}
 export enum CustomerActivationStatus {
   Active = 1901,
   Deactivated = 1903,
+  Test = 1904,
 }

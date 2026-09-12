@@ -4,10 +4,10 @@
       <h2>About This Application</h2>
       <p class="lead">
         Customer Management System is a full-stack demo application built to
-        showcase a realistic, end-to-end CRUD workflow: an Angular
-        single-page frontend talking to an ASP.NET Core Web API, which
-        persists data in SQL Server through raw ADO.NET calls to stored
-        procedures — no ORM in between.
+        showcase a realistic, end-to-end CRUD workflow: an Angular single-page
+        frontend talking to an ASP.NET Core Web API, which persists data in SQL
+        Server through raw ADO.NET calls to stored procedures — no ORM in
+        between.
       </p>
     </div>
   </div>
@@ -21,31 +21,32 @@
             The database is a containerized SQL Server (Azure SQL Edge, which
             also runs natively on Apple Silicon). Started by hand, that's:
           </p>
-          <pre class="bg-dark text-light p-3 rounded"><code>docker pull mcr.microsoft.com/azure-sql-edge
+          <pre
+            class="bg-dark text-light p-3 rounded"
+          ><code>docker pull mcr.microsoft.com/azure-sql-edge
 
 docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1433 --name sqlserver --platform linux/arm64 -d mcr.microsoft.com/azure-sql-edge</code></pre>
           <p class="card-text">
             Once the container is up and the schema is deployed (see
-            <em>Database</em> below), the two remaining pieces both need to
-            be started:
+            <em>Database</em> below), the two remaining pieces both need to be
+            started:
           </p>
           <ul>
             <li>
-              <strong>API</strong> — the ASP.NET Core Web API project, run
-              with <code>dotnet run</code> (or from your IDE). It serves the
-              REST endpoints and talks to SQL Server over ADO.NET.
+              <strong>API</strong> — the ASP.NET Core Web API project, run with
+              <code>dotnet run</code> (or from your IDE). It serves the REST
+              endpoints and talks to SQL Server over ADO.NET.
             </li>
             <li>
               <strong>Angular frontend</strong> — the SPA, run with
-              <code>ng serve</code> / <code>npm start</code>. It calls the
-              API over HTTPS for authentication and every customer
-              operation.
+              <code>ng serve</code> / <code>npm start</code>. It calls the API
+              over HTTPS for authentication and every customer operation.
             </li>
           </ul>
           <p class="card-text mb-0">
-            Both must be running at the same time — the UI has no data or
-            logic of its own beyond forms and validation; everything it
-            shows comes live from the API.
+            Both must be running at the same time — the UI has no data or logic
+            of its own beyond forms and validation; everything it shows comes
+            live from the API.
           </p>
         </div>
       </div>
@@ -54,34 +55,33 @@ docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1
         <div class="card-header">Build &amp; Run Scripts</div>
         <div class="card-body">
           <p class="card-text">
-            Two scripts at the repository root wrap all of the above so
-            nothing needs to be pieced together by hand:
+            Two scripts at the repository root wrap all of the above so nothing
+            needs to be pieced together by hand:
           </p>
           <ul>
             <li>
-              <code>./build.sh</code> — a CI-style, one-shot build: restores
-              and builds the .NET solution, runs its test suite, builds the
-              SQL database project, then installs and builds the Angular
-              app. It doesn't start anything; it just proves everything
-              compiles and the tests pass.
+              <code>./build.sh</code> — a CI-style, one-shot build: restores and
+              builds the .NET solution, runs its test suite, builds the SQL
+              database project, then installs and builds the Angular app. It
+              doesn't start anything; it just proves everything compiles and the
+              tests pass.
             </li>
             <li>
-              <code>./run.sh</code> — the actual local dev environment. It
-              makes sure Docker is running (starting Docker Desktop on macOS
-              if needed), starts the Azure SQL Edge container if it isn't
-              already up (pulling and creating it on first run), builds the
-              database project and publishes its schema straight into that
-              container, then launches the API in the background and the
-              Angular dev server in the foreground. <kbd>Ctrl+C</kbd> stops
-              both.
+              <code>./run.sh</code> — the actual local dev environment. It makes
+              sure Docker is running (starting Docker Desktop on macOS if
+              needed), starts the Azure SQL Edge container if it isn't already
+              up (pulling and creating it on first run), builds the database
+              project and publishes its schema straight into that container,
+              then launches the API in the background and the Angular dev server
+              in the foreground. <kbd>Ctrl+C</kbd> stops both.
             </li>
           </ul>
           <p class="card-text mb-0">
             <code>run.sh</code> is safe to re-run any time: an existing,
-            already-initialized database is simply left alone (schema
-            deploys are a diff, not a wipe-and-recreate — so any customers
-            you've registered through the UI survive a re-run), and a
-            stopped container is restarted rather than recreated.
+            already-initialized database is simply left alone (schema deploys
+            are a diff, not a wipe-and-recreate — so any customers you've
+            registered through the UI survive a re-run), and a stopped container
+            is restarted rather than recreated.
           </p>
         </div>
       </div>
@@ -91,60 +91,84 @@ docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1
         <div class="card-body">
           <p class="card-text">
             The schema lives in its own SQL Server Database Project (a
-            <code>.sqlproj</code>), not in migration scripts run by the
-            API. <code>run.sh</code> builds that project into a
+            <code>.sqlproj</code>), not in migration scripts run by the API.
+            <code>run.sh</code> builds that project into a
             <code>.dacpac</code> and deploys it with <code>sqlpackage</code>,
-            retrying automatically until the freshly-started container
-            starts accepting connections. This deploy is a diff against the
-            container's current state, so it's idempotent — running it
-            again against an already-initialized database changes nothing —
-            and it's allowed to rebuild already-populated tables when a
-            schema change requires it (e.g. adding a constraint), since this
-            is disposable local dev data, not a production database that
-            needs that guardrail.
+            retrying automatically until the freshly-started container starts
+            accepting connections. This deploy is a diff against the container's
+            current state, so it's idempotent — running it again against an
+            already-initialized database changes nothing — and it's allowed to
+            rebuild already-populated tables when a schema change requires it
+            (e.g. adding a constraint), since this is disposable local dev data,
+            not a production database that needs that guardrail.
           </p>
           <p class="card-text">The schema has three tables:</p>
           <ul>
             <li>
-              <code>tbl_customers</code> — one row per customer: name,
-              email, MSISDN, gender, birthdate, a numeric
+              <code>tbl_customers</code> — one row per customer: name, email,
+              MSISDN, gender, birthdate, a numeric
               <code>customer_Status</code> (active / deactivated), and
-              creation/last-interaction timestamps, keyed by a GUID
-              primary key. Email and MSISDN each carry a unique constraint,
-              so duplicates are rejected by the database itself, not just
-              application logic.
+              creation/last-interaction timestamps, keyed by a GUID primary key.
+              Email and MSISDN each carry a unique constraint, so duplicates are
+              rejected by the database itself, not just application logic.
             </li>
             <li>
               <code>tbl_addresses</code> — one row per customer's address,
-              linked back to <code>tbl_customers</code> by a foreign key on
-              that same GUID.
+              linked back to <code>tbl_customers</code> by a foreign key on that
+              same GUID.
             </li>
             <li>
-              <code>tbl_merchants</code> — login accounts for the API,
-              keyed by merchant ID (primary key): a PBKDF2 password hash
-              and its salt (never the plaintext password), a role, and a
-              last-interaction timestamp.
+              <code>tbl_merchants</code> — login accounts for the API, keyed by
+              merchant ID (primary key): a PBKDF2 password hash and its salt
+              (never the plaintext password), a role, and a last-interaction
+              timestamp.
             </li>
           </ul>
           <p class="card-text">
-            All customer/merchant reads and writes go through stored
-            procedures rather than ad-hoc SQL from the API:
+            All customer/merchant reads and writes go through stored procedures
+            rather than ad-hoc SQL from the API:
           </p>
           <ul>
-            <li><code>usp_createCustomer</code> — inserts the customer and address rows in one transaction, rejecting duplicate email/MSISDN first.</li>
-            <li><code>usp_getCustomer</code> — looks up a single customer by GUID, MSISDN, or email.</li>
-            <li><code>usp_getCustomers</code> — returns one page of customers joined with their addresses, filtered by an optional search term and sorted by name/email/MSISDN, plus a total count for pagination.</li>
-            <li><code>usp_editCustomer</code> — updates only the fields that were actually supplied, leaving the rest untouched.</li>
-            <li><code>usp_deactivateCustomer</code> / <code>usp_reactivateCustomer</code> — flip <code>customer_Status</code>, refusing to "change" it to the state it's already in.</li>
-            <li><code>usp_deleteCustomer</code> — hard-deletes a customer and its address, but only once it's already deactivated.</li>
-            <li><code>usp_getMerchantAuthData</code> — returns a merchant's password hash, salt, and role for the login flow, and stamps their last-interaction time.</li>
+            <li>
+              <code>usp_createCustomer</code> — inserts the customer and address
+              rows in one transaction, rejecting duplicate email/MSISDN first.
+            </li>
+            <li>
+              <code>usp_getCustomer</code> — looks up a single customer by GUID,
+              MSISDN, or email.
+            </li>
+            <li>
+              <code>usp_getCustomers</code> — returns one page of customers
+              joined with their addresses, filtered by an optional search term
+              and sorted by name/email/MSISDN, plus a total count for
+              pagination.
+            </li>
+            <li>
+              <code>usp_editCustomer</code> — updates only the fields that were
+              actually supplied, leaving the rest untouched.
+            </li>
+            <li>
+              <code>usp_deactivateCustomer</code> /
+              <code>usp_reactivateCustomer</code> — flip
+              <code>customer_Status</code>, refusing to "change" it to the state
+              it's already in.
+            </li>
+            <li>
+              <code>usp_deleteCustomer</code> — hard-deletes a customer and its
+              address, but only once it's already deactivated.
+            </li>
+            <li>
+              <code>usp_getMerchantAuthData</code> — returns a merchant's
+              password hash, salt, and role for the login flow, and stamps their
+              last-interaction time.
+            </li>
           </ul>
           <p class="card-text mb-0">
             A post-deployment script seeds one demo login the first time the
-            schema is deployed (it's skipped if that merchant already
-            exists), so there's something to sign in with immediately after
-            initialization: merchant ID <code>TestMerchantID</code>,
-            password <code>Merchant123</code>.
+            schema is deployed (it's skipped if that merchant already exists),
+            so there's something to sign in with immediately after
+            initialization: merchant ID <code>TestMerchantID</code>, password
+            <code>Merchant123</code>.
           </p>
         </div>
       </div>
@@ -160,57 +184,58 @@ docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1
             <li>
               The login form submits a merchant ID and password to
               <code>POST /api/Authentication/access-token</code> over HTTPS.
-              That endpoint is rate-limited (5 attempts per minute per
-              caller IP) — beyond that it responds with <code>429</code>
+              That endpoint is rate-limited (5 attempts per minute per caller
+              IP) — beyond that it responds with <code>429</code>
               immediately, without touching the database, to blunt scripted
               brute-force/credential-stuffing attempts.
             </li>
             <li>
-              The API fetches only that merchant's stored password hash and
-              salt via a stored procedure (<code>dbo.usp_getMerchantAuthData</code>),
+              The API fetches only that merchant's stored password hash and salt
+              via a stored procedure (<code>dbo.usp_getMerchantAuthData</code>),
               executed through a parameterized ADO.NET
               <code>SqlCommand</code> — the merchant ID is always bound as a
-              command parameter, never concatenated into SQL, so this path
-              is not vulnerable to SQL injection.
+              command parameter, never concatenated into SQL, so this path is
+              not vulnerable to SQL injection.
             </li>
             <li>
-              The submitted password is re-hashed with PBKDF2-SHA256
-              (100,000 iterations, per-user salt) and compared to the
-              stored hash using a constant-time comparison — the plaintext
-              password is never stored anywhere.
+              The submitted password is re-hashed with PBKDF2-SHA256 (100,000
+              iterations, per-user salt) and compared to the stored hash using a
+              constant-time comparison — the plaintext password is never stored
+              anywhere.
             </li>
             <li>
-              On success, the API mints a JWT signed with HMAC-SHA256 (the
-              same signing-key logic is shared by issuing and validating, so
-              they can never quietly drift apart). It carries the merchant
-              ID (as several standard claim types), the merchant's role, a
-              marker for how they authenticated, a unique token ID, and
-              issued time, with a configured expiry.
+              On success, the API mints a JWT signed with HMAC-SHA256 (the same
+              signing-key logic is shared by issuing and validating, so they can
+              never quietly drift apart). It carries the merchant ID (as several
+              standard claim types), the merchant's role, a marker for how they
+              authenticated, a unique token ID, and issued time, with a
+              configured expiry.
             </li>
             <li>
-              The Angular app stores that token in <code>sessionStorage</code>
-              (cleared automatically when the tab closes) and attaches it as
-              an <code>Authorization: Bearer</code> header on every
-              subsequent API call.
+              The Angular app stores that token in
+              <code>sessionStorage</code> (cleared automatically when the tab
+              closes) and attaches it as an
+              <code>Authorization: Bearer</code> header on every subsequent API
+              call.
             </li>
             <li>
               Every protected endpoint is decorated with
-              <code>[Authorize]</code>; ASP.NET's JWT bearer middleware
-              verifies the signature, issuer, audience, and expiry on each
-              request — independent of anything the browser claims.
+              <code>[Authorize]</code>; ASP.NET's JWT bearer middleware verifies
+              the signature, issuer, audience, and expiry on each request —
+              independent of anything the browser claims.
             </li>
             <li>
               On navigation, an Angular route guard double-checks the token
-              against a dedicated <code>verify-token</code> endpoint; if a
-              token is missing, expired, or rejected (or any API call comes
-              back with 401), the app clears the stored token and redirects
-              to the login page.
+              against a dedicated <code>verify-token</code> endpoint; if a token
+              is missing, expired, or rejected (or any API call comes back with
+              401), the app clears the stored token and redirects to the login
+              page.
             </li>
           </ol>
           <p class="card-text mb-0">
-            Because the token travels in a header rather than a cookie, the
-            app is not exposed to CSRF; the main residual risk of this
-            pattern is XSS (any injected script could read the token from
+            Because the token travels in a header rather than a cookie, the app
+            is not exposed to CSRF; the main residual risk of this pattern is
+            XSS (any injected script could read the token from
             <code>sessionStorage</code>), which is why the frontend avoids
             unsanitized HTML rendering.
           </p>
@@ -222,13 +247,13 @@ docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1
         <div class="card-body">
           <p class="card-text mb-0">
             All customer data access goes through ADO.NET
-            <code>SqlCommand</code> objects calling the stored procedures
-            listed under <em>Database</em> above, with every input passed
-            as a bound parameter — nothing is built by string-concatenating
-            SQL. That gives the API the standard CRUD set (create, read one
-            or all, update) plus the deactivate/reactivate/delete lifecycle
-            described below, all exposed through the
-            <code>[Authorize]</code>-protected <code>CustomerController</code>
+            <code>SqlCommand</code> objects calling the stored procedures listed
+            under <em>Database</em> above, with every input passed as a bound
+            parameter — nothing is built by string-concatenating SQL. That gives
+            the API the standard CRUD set (create, read one or all, update) plus
+            the deactivate/reactivate/delete lifecycle described below, all
+            exposed through the <code>[Authorize]</code>-protected
+            <code>CustomerController</code>
             endpoints the Angular app calls.
           </p>
         </div>
@@ -238,9 +263,9 @@ docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1
         <div class="card-header">Console-Logged API Calls</div>
         <div class="card-body">
           <p class="card-text">
-            Since this is a showcase app, every HTTP call the Angular
-            frontend makes to the API is mirrored to the browser's devtools
-            console via <code>apiLoggerInterceptor</code>, a functional
+            Since this is a showcase app, every HTTP call the Angular frontend
+            makes to the API is mirrored to the browser's devtools console via
+            <code>apiLoggerInterceptor</code>, a functional
             <code>HttpInterceptorFn</code> registered in
             <code>app.config.ts</code>. Open devtools (<kbd>F12</kbd> or
             <kbd>Cmd/Ctrl+Shift+I</kbd>) and watch the Console tab while using
@@ -252,9 +277,9 @@ docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1
               goes out, with its request body attached.
             </li>
             <li>
-              A green <code>← METHOD url status (Nms)</code> line is logged
-              when the response comes back successfully, with the response
-              body and how long it took.
+              A green <code>← METHOD url status (Nms)</code> line is logged when
+              the response comes back successfully, with the response body and
+              how long it took.
             </li>
             <li>
               A red <code>✖ METHOD url status (Nms)</code> line is logged
@@ -282,17 +307,72 @@ docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1
       </div>
 
       <div class="card mb-4">
+        <div class="card-header">Generate Test Customers</div>
+        <div class="card-body">
+          <p class="card-text">
+            <strong>This is test data.</strong> The button below registers 50
+            fictitious customers through the same
+            <code>POST /api/Customer/register</code> endpoint the
+            <em>Add Customer</em> form uses — each with a randomly generated
+            name, email, a Romanian mobile number (<code>07xxxxxxxx</code>), and
+            a home address. Every one of them is created with the
+            <code>Test</code> status (<code>1904</code>) rather than
+            <code>Active</code>, so they're clearly distinguishable from real
+            customers everywhere the status is shown. It exists purely so
+            there's enough data to try out search, sorting, and pagination
+            locally; like an active customer, a test customer can still be
+            deactivated and deleted afterwards.
+          </p>
+          <button
+            type="button"
+            class="btn"
+            [disabled]="addingTestCustomers()"
+            (click)="addTestCustomers()"
+          >
+            @if (addingTestCustomers()) {
+              Adding test customers…
+            } @else {
+              Add 50 test customers
+            }
+          </button>
+        </div>
+      </div>
+
+      <div class="card mb-4">
         <div class="card-header">What You Can Do In The UI</div>
         <div class="card-body">
           <ul class="mb-0">
-            <li>Log in with merchant credentials to start a session, and log out explicitly from the top nav when you're done.</li>
-            <li>Browse the customer table, paged and sorted by the API itself: search (by name, email, or phone), column sorting, and Previous/Next all re-query the server for just the requested page rather than filtering an already-loaded list.</li>
-            <li>Register a new customer through a validated form (name, contact details, address, birthdate via a native date picker, etc.).</li>
-            <li>Open a customer's details page for a full read-only view, with a plain-language account status instead of a raw code.</li>
+            <li>
+              Log in with merchant credentials to start a session, and log out
+              explicitly from the top nav when you're done.
+            </li>
+            <li>
+              Browse the customer table, paged and sorted by the API itself:
+              search (by name, email, or phone), column sorting, and
+              Previous/Next all re-query the server for just the requested page
+              rather than filtering an already-loaded list.
+            </li>
+            <li>
+              Register a new customer through a validated form (name, contact
+              details, address, birthdate via a native date picker, etc.).
+            </li>
+            <li>
+              Open a customer's details page for a full read-only view, with a
+              plain-language account status instead of a raw code.
+            </li>
             <li>Edit an existing customer's information.</li>
-            <li>Deactivate an active customer (with a confirmation prompt), or reactivate one that was deactivated.</li>
-            <li>Permanently delete a customer once it has been deactivated (also confirmation-guarded).</li>
-            <li>Get redirected to login automatically if your session expires or is rejected by the API.</li>
+            <li>
+              Deactivate an active customer (with a confirmation prompt), or
+              reactivate one that was deactivated.
+            </li>
+            <li>
+              Permanently delete a customer once it has been deactivated (also
+              confirmation-guarded).
+            </li>
+            <li>
+              Get redirected to login automatically if your session expires or
+              is rejected by the API.
+            </li>
           </ul>
         </div>
       </div>

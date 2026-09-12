@@ -31,6 +31,17 @@ public class CustomerRegistration
         // A new customer's identifier is always generated server-side; a client-supplied GUID is never trusted.
         request.Guid = Guid.NewGuid().ToString();
 
+        // A new customer is active by default. The only other status a caller may request at
+        // creation time is Test (used by the About page's bulk test-data generator) — anything
+        // else (e.g. Deactivated) would bypass the deactivate/reactivate/delete lifecycle rules
+        // that are otherwise enforced by the stored procedures.
+        if (request.CustomerStatus is not null
+            && request.CustomerStatus != CustomerStatusCodes.Active
+            && request.CustomerStatus != CustomerStatusCodes.Test)
+            return new ResponseModel<object>(400, "Invalid customer status.");
+
+        request.CustomerStatus ??= CustomerStatusCodes.Active;
+
         var response = await _dbUtils.RegisterCustomer(request);
 
         if (response.Status == 200)

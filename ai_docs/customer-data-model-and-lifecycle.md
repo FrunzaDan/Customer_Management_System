@@ -18,14 +18,15 @@ The `tbl_customers`/`tbl_addresses` schema, the status codes that drive the deac
 
 **`usp_getCustomers` is paginated**, not a full-table dump: it takes `@PageNumber`, `@PageSize`, an optional `@SearchTerm` (`LIKE '%...%'` against first/last name, email, MSISDN), and `@SortColumn`/`@SortDirection` (`name`/`email`/`msisdn`, `asc`/`desc`). Sorting is done via a parameterized `CASE`-based `ORDER BY` (no dynamic SQL — see the proc for why exactly one `CASE` pair is non-NULL per call) over `OFFSET`/`FETCH`, and each returned row carries a `total_count` column from `COUNT(*) OVER()` so the API can report `TotalItems` without a second query. `CustomerGetting.GetCustomersFunction` validates `PageNumber >= 1`, `1 <= PageSize <= 100`, and that `SortColumn`/`SortDirection` are in their allow-lists — `400` otherwise. The API wraps the page in `PagedResponse<CustomerModel>` (`Domain/Models/PagedResponse.cs`): `PageNumber`, `PageSize`, `TotalItems`, `Items`.
 
-**Status codes** (`tbl_customers.customer_Status`):
+**Status codes** (`tbl_customers.customer_Status`, `CustomerStatusCodes` in `Domain/Models`):
 - `1901` = active
 - `1903` = deactivated
+- `1904` = test — assigned only at creation time, by the About page's "add 50 test customers" bulk generator (see [[angular-components-and-services]]); marks a customer as fictitious/demo data everywhere the status is shown (UI status labels, CSV export), with no other behavioral difference from an active customer.
 
 **Lifecycle rules, enforced in the stored procedures themselves** (not just the API layer):
-- New customers are created **active** (`usp_createCustomer`).
-- `usp_deactivateCustomer` only updates rows where status `<> 1903` → `409` if already deactivated.
-- `usp_reactivateCustomer` only updates rows where status `<> 1901` → `409` if already active.
+- New customers are created **active** by default (`usp_createCustomer`'s `@var_CustomerStatus` parameter defaults to `1901`); `CustomerRegistration.RegisterCustomerFunction` additionally accepts an explicit `1904` (test) in the request body, but rejects any other value with `400` — a client can never register a customer as already deactivated.
+- `usp_deactivateCustomer` only updates rows where status `<> 1903` → `409` if already deactivated. A test customer (`1904`) can be deactivated the same as an active one; doing so moves it to the normal `1903` deactivated state, losing the test marker.
+- `usp_reactivateCustomer` only updates rows where status `<> 1901` → `409` if already active. Reactivating a former test customer sets it to `1901` (active), not back to `1904` — the test marker doesn't survive a deactivate/reactivate round trip. This is a deliberate simplification, not a bug to fix.
 - **`usp_deleteCustomer` requires status `= 1903`** — a customer must be deactivated first; deleting an active customer returns `409` with `'Customer must be deactivated before it can be deleted.'`. Only `deactivate → delete` or `deactivate → reactivate` are valid paths; `deactivate → delete → reactivate` is not (the customer no longer exists after delete).
 - `usp_createCustomer` also rejects duplicate `email` or `msisdn` up front with a friendly `400`, before attempting the insert. `UQ_tbl_customers_email`/`UQ_tbl_customers_msisdn` unique constraints on the table back this up as a DB-level safety net for the race window between that check and the insert (two concurrent registrations with the same email/MSISDN); a request that loses that race gets a `500` from the constraint violation instead of the friendlier `400`, via the proc's existing `TRY/CATCH`.
 

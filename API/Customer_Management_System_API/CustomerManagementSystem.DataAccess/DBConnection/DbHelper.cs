@@ -16,6 +16,7 @@ public static class DbHelper
         command.Parameters.AddWithValue("@var_MSISDN", customer.Msisdn);
         command.Parameters.AddWithValue("@var_Gender", customer.Gender);
         command.Parameters.AddWithValue("@var_Birthdate", customer.Birthdate);
+        command.Parameters.AddWithValue("@var_CustomerStatus", customer.CustomerStatus ?? CustomerStatusCodes.Active);
         AddAddressParameters(command, customer.Address);
     }
 

@@ -64,6 +64,7 @@ public static class CustomerCsvExporter
     {
         1901 => "Active",
         1903 => "Deactivated",
+        1904 => "Test",
         _ => string.Empty
     };
 

@@ -36,6 +36,7 @@ export class CustomerDetailsComponent implements OnInit {
   statusMap = new Map<Customer['customerStatus'], string>([
     [CustomerActivationStatus.Active, 'Active'],
     [CustomerActivationStatus.Deactivated, 'Deactivated'],
+    [CustomerActivationStatus.Test, 'Test'],
   ]);
 
   readonly customer;
