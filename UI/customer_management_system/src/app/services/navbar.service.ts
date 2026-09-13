@@ -1,21 +1,17 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NavbarService {
-  showNavbar: BehaviorSubject<boolean>;
-
-  constructor() {
-    this.showNavbar = new BehaviorSubject(true);
-  }
+  private readonly showNavbarSignal = signal(true);
+  readonly showNavbar = this.showNavbarSignal.asReadonly();
 
   hideNavbar() {
-    this.showNavbar.next(false);
+    this.showNavbarSignal.set(false);
   }
 
   displayNavbar() {
-    this.showNavbar.next(true);
+    this.showNavbarSignal.set(true);
   }
 }

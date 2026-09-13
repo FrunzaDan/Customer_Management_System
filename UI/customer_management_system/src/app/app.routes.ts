@@ -6,7 +6,6 @@ import { UserLoginComponent } from './components/user-login/user-login.component
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
 import { HomeComponent } from './components/home/home.component';
 import { AboutComponent } from './components/about/about.component';
-import { FeaturesComponent } from './components/features/features.component';
 import { AddCustomerComponent } from './components/add-customer/add-customer.component';
 import { EditCustomerComponent } from './components/edit-customer/edit-customer.component';
 import { CustomerDetailsComponent } from './components/customer-details/customer-details.component';
@@ -47,12 +46,6 @@ export const routes: Routes = [
     component: EditCustomerComponent,
     canActivate: [authGuardFn],
     title: 'Edit Customer',
-  },
-  {
-    path: 'features',
-    component: FeaturesComponent,
-    canActivate: [authGuardFn],
-    title: 'Features',
   },
   {
     path: 'about',

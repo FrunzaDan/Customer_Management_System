@@ -1,4 +1,14 @@
 <app-navigation-bar></app-navigation-bar>
-<router-outlet></router-outlet>
+@if (apiAvailable()) {
+<router-outlet />
+} @else {
+<div class="api-down-card">
+  <h2>⚠️ API is not running</h2>
+  <p>
+    Please start the backend server at
+    <code>{{ environment.CustomerManagementSystemAPI }}</code>
+  </p>
+</div>
+}
 <app-footer></app-footer>
 <app-notification></app-notification>

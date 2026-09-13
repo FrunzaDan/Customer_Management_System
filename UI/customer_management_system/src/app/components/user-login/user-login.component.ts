@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -12,22 +12,20 @@ import { FooterService } from '../../../../src/app/services/footer.service';
 import { UserLoginRequest } from '../../../../src/app/interfaces/user-login-request';
 import { environment } from '../../../environments/environment';
 import { SessionStorageService } from '../../../../src/app/services/session-storage.service';
-import { CommonModule } from '@angular/common';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-user-login',
   templateUrl: './user-login.component.html',
   styleUrls: ['./user-login.component.css'],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [NgClass, ReactiveFormsModule],
 })
 export class UserLoginComponent implements OnInit, OnDestroy {
   loginForm: FormGroup<{
     username: FormControl<string>;
     password: FormControl<string>;
   }>;
-  errorMessage: string | null = null;
-  isEmailValid: boolean = true;
+  readonly errorMessage = signal<string | null>(null);
 
   constructor(
     private formBuilder: FormBuilder,
@@ -50,7 +48,7 @@ export class UserLoginComponent implements OnInit, OnDestroy {
     this.sessionStorageService.removeSessionStorage();
     this.navbarService.hideNavbar();
     this.footerService.hideFooter();
-    this.errorMessage = null;
+    this.errorMessage.set(null);
   }
 
   get usernameControl() {
@@ -59,10 +57,6 @@ export class UserLoginComponent implements OnInit, OnDestroy {
 
   get passwordControl() {
     return this.loginForm.get('password');
-  }
-
-  validateEmail(): void {
-    this.isEmailValid = this.usernameControl?.valid || false;
   }
 
   onSubmit(): void {
@@ -76,9 +70,9 @@ export class UserLoginComponent implements OnInit, OnDestroy {
         next: (response) => {
           let test = this.userLoginService.checkCredentials(response);
           if (test == 'Success!') {
-            this.errorMessage = null;
+            this.errorMessage.set(null);
           } else {
-            this.errorMessage = test;
+            this.errorMessage.set(test);
           }
         },
         error: (error) => {
@@ -91,28 +85,30 @@ export class UserLoginComponent implements OnInit, OnDestroy {
   private handleLoginError(statusCode: number): void {
     switch (statusCode) {
       case 403:
-        this.errorMessage = 'Merchant credentials are incorrect!';
+        this.errorMessage.set('Merchant credentials are incorrect!');
         break;
       case 404:
-        this.errorMessage = 'Endpoint is down!';
+        this.errorMessage.set('Endpoint is down!');
         break;
       case 429:
-        this.errorMessage =
-          'Too many login attempts. Please wait a moment and try again.';
+        this.errorMessage.set(
+          'Too many login attempts. Please wait a moment and try again.',
+        );
         break;
       case 0:
-        this.errorMessage =
-          'Could not reach the server. It may be offline, or your browser does not trust its security certificate.';
+        this.errorMessage.set(
+          'Could not reach the server. It may be offline, or your browser does not trust its security certificate.',
+        );
         break;
       default:
-        this.errorMessage = `Server error (${statusCode}). Please try again later.`;
+        this.errorMessage.set(`Server error (${statusCode}). Please try again later.`);
     }
-    this.userLoginService.errorSubject.next(this.errorMessage);
+    this.userLoginService.errorSubject.next(this.errorMessage());
   }
 
   ngOnDestroy(): void {
     this.navbarService.displayNavbar();
     this.footerService.displayFooter();
-    this.errorMessage = null;
+    this.errorMessage.set(null);
   }
 }

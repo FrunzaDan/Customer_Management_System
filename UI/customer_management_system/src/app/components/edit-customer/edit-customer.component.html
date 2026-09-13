@@ -19,9 +19,9 @@
                 type="text"
                 formControlName="firstName"
                 class="form-control"
-                [ngClass]="{ 'is-invalid': submitted && f['firstName'].errors }"
+                [ngClass]="{ 'is-invalid': submitted() && f['firstName'].errors }"
               />
-              @if (submitted && f['firstName'].errors) {
+              @if (submitted() && f['firstName'].errors) {
               <div class="invalid-feedback">
                 @if (f['firstName'].errors['required']) {
                 <div>First Name is required</div>
@@ -36,9 +36,9 @@
                 type="text"
                 formControlName="lastName"
                 class="form-control"
-                [ngClass]="{ 'is-invalid': submitted && f['lastName'].errors }"
+                [ngClass]="{ 'is-invalid': submitted() && f['lastName'].errors }"
               />
-              @if (submitted && f['lastName'].errors) {
+              @if (submitted() && f['lastName'].errors) {
               <div class="invalid-feedback">
                 @if (f['lastName'].errors['required']) {
                 <div>Last Name is required</div>
@@ -53,9 +53,9 @@
                 type="text"
                 formControlName="email"
                 class="form-control"
-                [ngClass]="{ 'is-invalid': submitted && f['email'].errors }"
+                [ngClass]="{ 'is-invalid': submitted() && f['email'].errors }"
               />
-              @if (submitted && f['email'].errors) {
+              @if (submitted() && f['email'].errors) {
               <div class="invalid-feedback">
                 @if (f['email'].errors['required']) {
                 <div>Email is required</div>
@@ -72,9 +72,9 @@
                 type="text"
                 formControlName="msisdn"
                 class="form-control"
-                [ngClass]="{ 'is-invalid': submitted && f['msisdn'].errors }"
+                [ngClass]="{ 'is-invalid': submitted() && f['msisdn'].errors }"
               />
-              @if (submitted && f['msisdn'].errors) {
+              @if (submitted() && f['msisdn'].errors) {
               <div class="invalid-feedback">
                 @if (f['msisdn'].errors['required']) {
                 <div>Phone Number is required</div>
@@ -90,14 +90,14 @@
               <select
                 formControlName="gender"
                 class="form-select"
-                [ngClass]="{ 'is-invalid': submitted && f['gender'].errors }"
+                [ngClass]="{ 'is-invalid': submitted() && f['gender'].errors }"
               >
                 <option value="">Select a gender</option>
                 <option value="0">Not declared</option>
                 <option value="1">Male</option>
                 <option value="2">Female</option>
               </select>
-              @if (submitted && f['gender'].errors) {
+              @if (submitted() && f['gender'].errors) {
               <div class="invalid-feedback">
                 @if (f['gender'].errors['required']) {
                 <div>Gender is required</div>
@@ -112,9 +112,9 @@
                 type="date"
                 formControlName="birthdate"
                 class="form-control"
-                [ngClass]="{ 'is-invalid': submitted && f['birthdate'].errors }"
+                [ngClass]="{ 'is-invalid': submitted() && f['birthdate'].errors }"
               />
-              @if (submitted && f['birthdate'].errors) {
+              @if (submitted() && f['birthdate'].errors) {
               <div class="invalid-feedback">
                 @if (f['birthdate'].errors['required']) {
                 <div>Birthdate is required</div>

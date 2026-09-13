@@ -1,5 +1,5 @@
 // customer-list.component.ts
-import { Component, OnInit, computed, effect, signal, Signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, computed, effect, signal, Signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, concatMap, from, map, of, toArray } from 'rxjs';
@@ -16,7 +16,6 @@ import {
 @Component({
   selector: 'app-customer-list',
   templateUrl: './customer-list.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./customer-list.component.css'],
 })
 export class CustomerListComponent implements OnInit {

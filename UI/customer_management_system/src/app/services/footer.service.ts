@@ -1,21 +1,17 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FooterService {
-  showFooter: BehaviorSubject<boolean>;
-
-  constructor() {
-    this.showFooter = new BehaviorSubject(true);
-  }
+  private readonly showFooterSignal = signal(true);
+  readonly showFooter = this.showFooterSignal.asReadonly();
 
   hideFooter() {
-    this.showFooter.next(false);
+    this.showFooterSignal.set(false);
   }
 
   displayFooter() {
-    this.showFooter.next(true);
+    this.showFooterSignal.set(true);
   }
 }

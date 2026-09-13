@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   OnInit,
   computed,
@@ -15,7 +14,6 @@ import { GlobalAuditLogEntry } from '../../interfaces/global-audit-log-entry';
   selector: 'app-global-audit-log',
   templateUrl: './global-audit-log.component.html',
   styleUrls: ['./global-audit-log.component.css'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [DatePipe],
 })
 export class GlobalAuditLogComponent implements OnInit {

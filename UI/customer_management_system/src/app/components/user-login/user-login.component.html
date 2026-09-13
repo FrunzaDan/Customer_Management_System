@@ -78,12 +78,12 @@
                         Sign in
                       </button>
                     </div>
-                    @if (errorMessage) {
+                    @if (errorMessage()) {
                     <div
                       class="d-flex align-items-center justify-content-center alert alert-danger"
                       role="alert"
                     >
-                      {{ errorMessage }}
+                      {{ errorMessage() }}
                     </div>
                     }
                   </div>
@@ -98,7 +98,7 @@
                     class="d-flex align-items-center justify-content-center pb-4"
                   >
                     <p class="mb-0 me-2">Can't sign in?</p>
-                    <button type="button" class="btn btn-outline-danger">
+                    <button type="button" class="btn btn-primary">
                       Contact us!
                     </button>
                   </div>

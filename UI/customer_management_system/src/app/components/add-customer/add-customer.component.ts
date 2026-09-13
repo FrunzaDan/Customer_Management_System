@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import {
   FormBuilder,
@@ -11,21 +11,19 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AddCustomerService } from '../../../../src/app/services/add-customer.service';
 import { Address, Customer } from '../../interfaces/customer-response';
 import { environment } from '../../../environments/environment';
-import { CommonModule } from '@angular/common';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-add-customer',
   templateUrl: './add-customer.component.html',
   styleUrls: ['./add-customer.component.css'],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [NgClass, ReactiveFormsModule, RouterLink],
 })
 export class AddCustomerComponent implements OnInit {
   form!: FormGroup;
-  loading: boolean = false;
-  loadCompleted: boolean = false;
-  submitted: boolean = false;
-  errorMessage: string | null = null;
+  readonly loading = signal(false);
+  readonly submitted = signal(false);
+  readonly errorMessage = signal<string | null>(null);
   customer = {} as Customer;
   customerAddress: Address = {} as Address;
 
@@ -64,15 +62,15 @@ export class AddCustomerComponent implements OnInit {
   }
 
   onSubmit() {
-    this.submitted = true;
+    this.submitted.set(true);
 
     // stop here if form is invalid
     if (this.form.invalid) {
       return;
     }
 
-    this.loading = true;
-    this.errorMessage = null;
+    this.loading.set(true);
+    this.errorMessage.set(null);
 
     this.customer.firstName = this.form.value.firstName;
     this.customer.lastName = this.form.value.lastName;
@@ -98,10 +96,10 @@ export class AddCustomerComponent implements OnInit {
           this.router.navigate(['../customers'], { relativeTo: this.route });
         },
         error: (error: HttpErrorResponse) => {
-          this.loading = false;
+          this.loading.set(false);
           // A 401 here (session expired while filling out this form) is handled
           // globally by authErrorInterceptor, which redirects to login.
-          this.errorMessage = this.extractErrorMessage(error);
+          this.errorMessage.set(this.extractErrorMessage(error));
         },
       });
   }

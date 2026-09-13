@@ -5,7 +5,6 @@ import {
   effect,
   signal,
   OnInit,
-  ChangeDetectionStrategy,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -22,7 +21,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-customer-details',
   templateUrl: './customer-details.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./customer-details.component.css'],
   imports: [DatePipe],
 })

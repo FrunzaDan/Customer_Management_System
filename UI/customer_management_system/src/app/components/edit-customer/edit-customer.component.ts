@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { NgClass } from '@angular/common';
 import {
   Component,
   effect,
@@ -6,7 +6,6 @@ import {
   Injector,
   OnInit,
   runInInjectionContext,
-  ChangeDetectionStrategy,
   signal,
 } from '@angular/core';
 import {
@@ -26,14 +25,12 @@ import { EditCustomerService } from '../../services/edit-customer.service';
   selector: 'app-edit-customer',
   templateUrl: './edit-customer.component.html',
   styleUrls: ['./edit-customer.component.css'],
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [NgClass, ReactiveFormsModule, RouterLink],
 })
 export class EditCustomerComponent implements OnInit {
   form: FormGroup;
   paramId: string = '';
-  submitted: boolean = false;
+  readonly submitted = signal(false);
 
   readonly customer;
   readonly isLoading;
@@ -131,7 +128,7 @@ export class EditCustomerComponent implements OnInit {
   }
 
   onSubmit() {
-    this.submitted = true;
+    this.submitted.set(true);
 
     if (this.form.invalid || !this.customer()) {
       return;

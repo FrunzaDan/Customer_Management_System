@@ -159,6 +159,9 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Unauthenticated liveness check for the Angular UI's API-availability banner.
+app.MapGet("/health", () => Results.Ok());
+
 app.MapControllers();
 
 app.Run();
