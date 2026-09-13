@@ -16,7 +16,9 @@ How an HTTP request moves through the ASP.NET Core API: middleware order, CORS, 
 Layering: `WebAPI` (controllers/host) → `BusinessLogic` (services, validation, JWT — see [[api-validation]], [[jwt-auth-flow]]) → `DataAccess` (ADO.NET + stored procs) → `Domain` (models/config). All customer/merchant DB access goes through **stored procedures** — no inline SQL, no ORM.
 
 **Middleware order in `Program.cs`** (order matters):
-`UseExceptionHandler` → `UseCors` → `UseHttpsRedirection` → `UseRateLimiter` → `UseAuthentication` → `UseAuthorization` → `MapControllers`. In non-Development environments, `UseHsts()` runs alongside `UseHttpsRedirection`.
+`UseExceptionHandler` → `UseCors` → `UseHttpsRedirection` → `UseRateLimiter` → `UseAuthentication` → `UseAuthorization` → `MapGet("/health", ...)` → `MapControllers`. In non-Development environments, `UseHsts()` runs alongside `UseHttpsRedirection`.
+
+- `GET /health` is a bare minimal-API endpoint (not on `CustomerController`, no `[Authorize]`, doesn't return the `ResponseModel` shape — just a 200) added purely so the Angular UI can poll for API liveness and show an "API is not running" banner instead of the app looking broken (see [[angular-components-and-services]]). Being unauthenticated is intentional: it needs to answer even when nobody has a token yet.
 
 - A global exception handler middleware catches any unhandled exception, logs it, and returns a generic `{ Message, Details }` JSON 500 (`Details` only populated in Development) — controllers themselves don't have try/catch blocks.
 - CORS is locked to `Cors:AllowedOrigins` in `appsettings.json` (`http://localhost:4200`, `https://localhost:4200`), methods limited to `GET/POST/PATCH/DELETE`, headers limited to `Content-Type`/`Authorization`. No `AllowCredentials()` — consistent with bearer-token (not cookie) auth.

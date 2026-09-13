@@ -26,7 +26,7 @@ export const environment = {
 ```
 Every service builds its request URL off `CustomerManagementSystemAPI`.
 
-**`app.config.ts`** wires up: Router (component input binding, view transitions, scroll restoration), **SSR client hydration** (`provideClientHydration(withEventReplay(), withNoIncrementalHydration())`), and `HttpClient` on the **fetch-based backend** (`provideHttpClient(withFetch(), withInterceptorsFromDi(), withInterceptors([authErrorInterceptor]))`) — the fetch-based backend matters for SSR: during server-side rendering, HTTP calls run through Node's native `fetch()`, not a browser's (see [[local-dev-setup]] for the TLS implication of that).
+**`app.config.ts`** wires up: Router (component input binding, view transitions, scroll restoration), **SSR client hydration** (`provideClientHydration(withEventReplay(), withNoIncrementalHydration())`), `HttpClient` on the **fetch-based backend** (`provideHttpClient(withFetch(), withInterceptorsFromDi(), withInterceptors([apiLoggerInterceptor, authErrorInterceptor]))` — the fetch-based backend matters for SSR: during server-side rendering, HTTP calls run through Node's native `fetch()`, not a browser's, see [[local-dev-setup]] for the TLS implication of that), and **`provideZonelessChangeDetection()`** — there's no `zone.js` in this app at all; see [[angular-components-and-services]] for what that means for component state.
 
 **Routing & the auth guard** (`app.routes.ts`, `auth-guard.service.ts`): all routes except `/login` and the catch-all 404 carry `canActivate: [authGuardFn]`. The guard:
 1. Calls `VerifyTokenService.isTokenValid()`, which hits `GET /api/Authentication/verify-token` with whatever token is in session storage.

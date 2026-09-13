@@ -46,7 +46,11 @@ docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1
           <p class="card-text mb-0">
             Both must be running at the same time — the UI has no data or logic
             of its own beyond forms and validation; everything it shows comes
-            live from the API.
+            live from the API. If the API isn't reachable, the UI notices
+            within a few seconds (it polls a lightweight
+            <code>/health</code> endpoint) and shows a plain "API is not
+            running" message in place of the page, instead of failing
+            silently or showing stale data.
           </p>
         </div>
       </div>
@@ -368,6 +372,22 @@ docker run -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=MyStrongPassw0rd?" -p 1433:1
             <li>
               Permanently delete a customer once it has been deactivated (also
               confirmation-guarded).
+            </li>
+            <li>
+              Select several customers at once with row checkboxes and run a
+              bulk action: active customers in the selection are deactivated,
+              already-deactivated (or test) customers are permanently
+              deleted — a confirmation prompt spells out how many of each
+              before anything happens.
+            </li>
+            <li>
+              Export the currently filtered/sorted customer list to a CSV
+              file.
+            </li>
+            <li>
+              Browse a global, paginated audit trail of every customer change
+              (create/edit/deactivate/reactivate/delete) across the whole
+              system, newest first.
             </li>
             <li>
               Get redirected to login automatically if your session expires or
